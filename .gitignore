@@ -1,0 +1,13 @@
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.vtc
+/lipics/lipics-v2019-authors-guidelines.pdf
+/lipics/lipics-v2019-sample-article.bib
+/lipics/lipics-v2019-sample-article.pdf
+/lipics/lipics-v2019-sample-article.tex
+/lipics/CHANGELOG.md
+/lipics/LICENSE.md
+/medium.bib

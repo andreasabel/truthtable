@@ -1,0 +1,493 @@
+
+\documentclass[a4paper,USenglish,cleveref, autoref, thm-restate]{lipics-v2019}
+%This is a template for producing LIPIcs articles.
+%See lipics-manual.pdf for further information.
+%for A4 paper format use option "a4paper", for US-letter use option "letterpaper"
+%for british hyphenation rules use option "UKenglish", for american hyphenation rules use option "USenglish"
+%for section-numbered lemmas etc., use "numberwithinsect"
+%for enabling cleveref support, use "cleveref"
+%for enabling autoref support, use "autoref"
+%for anonymousing the authors (e.g. for double-blind review), add "anonymous"
+%for enabling thm-restate support, use "thm-restate"
+
+%\graphicspath{{./graphics/}}%helpful if your graphic files are in another directory
+
+\bibliographystyle{plainurl}% the mandatory bibstyle
+
+\title{Reducibility Candidates for Truth-Table Natural Deduction}
+%\titlerunning{} %TODO optional, please use if title is longer than one line
+
+\author{Andreas Abel
+  }{Department of Computer Science,
+    Gothenburg University,
+    Sweden
+    % \and \url{http://www.myhomepage.edu}
+  }{andreas.abel@gu.se
+  }{https://orcid.org/0000-0003-0420-4492
+  }{(Optional) author-specific funding acknowledgements}
+%TODO mandatory, please use full name; only 1 author per \author macro; first two parameters are mandatory, other parameters can be empty. Please provide at least the name of the affiliation and the country. The full address is optional
+
+% \author{Joan R. Public\footnote{Optional footnote, e.g. to mark corresponding author}}{Department of Informatics, Dummy College, [optional: Address], Country}{joanrpublic@dummycollege.org}{[orcid]}{[funding]}
+
+\authorrunning{A. Abel} %TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
+
+\Copyright{Andreas Abel} %TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+
+\ccsdesc[100]{\textcolor{red}{Replace ccsdesc macro with valid one}} %TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm
+
+\keywords{Strong normalization} %TODO mandatory; please add comma-separated list of keywords
+
+\category{} %optional, e.g. invited paper
+
+\relatedversion{} %optional, e.g. full version hosted on arXiv, HAL, or other respository/website
+%\relatedversion{A full version of the paper is available at \url{...}.}
+
+\supplement{}%optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
+
+%\funding{(Optional) general funding statement \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
+
+\acknowledgements{I want to thank \dots}%optional
+
+%\nolinenumbers %uncomment to disable line numbering
+
+%\hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
+
+%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\EventEditors{John Q. Open and Joan R. Access}
+\EventNoEds{2}
+\EventLongTitle{42nd Conference on Very Important Topics (CVIT 2016)}
+\EventShortTitle{CVIT 2016}
+\EventAcronym{CVIT}
+\EventYear{2016}
+\EventDate{December 24--27, 2016}
+\EventLocation{Little Whinging, United Kingdom}
+\EventLogo{}
+\SeriesVolume{42}
+\ArticleNo{23}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{xspace}
+
+\newcommand{\bla}{\ensuremath{\mbox{$$}}}
+\newcommand{\ie}{\emph{i.e.}\xspace}
+\newcommand{\eg}{\emph{e.g.}\xspace}
+\newcommand{\Eg}{\emph{E.g.}\xspace}
+\newcommand{\loccit}{\emph{loc.\,cit.}\xspace}
+\newcommand{\cf}{cf.\ }
+\newcommand{\den}[2][]{\llbracket#2\rrbracket^{#1}}
+\newcommand{\dent}[1]{\llparenthesis#1\rrparenthesis}
+\newcommand{\To}{\ensuremath{\Rightarrow}}
+%\newcommand{\todot}{\stackrel\cdot\to}
+\newcommand{\todot}{\mathbin{\dot{\to}}}
+\newcommand{\bN}{\ensuremath{\mathbb{N}}}
+\newcommand{\dom}{\mathop{\mathrm{dom}}\nolimits}
+\newcommand{\Pot}[1]{\mathcal{P}\,#1}
+%\newcommand{\defiff}{:\iff}
+\newcommand{\defiff}{\mathrel{{{:}{\Longleftrightarrow}}}}
+\newcommand{\subst}[3]{#3[#1/#2]}
+
+\newcommand{\ru}{\dfrac}
+\newcommand{\nru}[3]{#1\;\dfrac{#2}{#3}}
+\newcommand{\rux}[3]{\dfrac{#1}{#2}\;#3}
+\newcommand{\nrux}[4]{#1\;\dfrac{#2}{#3}\;#4}
+
+\newcommand{\rulename}[1]{\ensuremath{\mbox{\textsc{#1}}}\xspace}
+\newcommand{\rbeta}[1]{\ensuremath{\beta\mbox{-}\mathord{#1}}\xspace}
+\newcommand{\reta}[1]{\ensuremath{\eta\mbox{-}\mathord{#1}}\xspace}
+\newcommand{\rintro}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{intro}}}\xspace}
+\newcommand{\relim}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{elim}}}\xspace}
+
+\newcommand{\Den}[2]{\den{#1}_{#2}}
+\newcommand{\Denpar}[2]{\Den{#1}{(#2)}}
+
+\newcommand{\bu}{\ensuremath{\bullet}}
+\newcommand{\Ge}{\ensuremath{\varepsilon}}
+\newcommand{\Ga}{\ensuremath{\alpha}}
+\newcommand{\Gd}{\ensuremath{\delta}}
+\newcommand{\Gg}{\ensuremath{\gamma}}
+\newcommand{\Gl}{\ensuremath{\lambda}}
+\newcommand{\Gr}{\ensuremath{\rho}}
+\newcommand{\GG}{\ensuremath{\Gamma}}
+\newcommand{\GS}{\ensuremath{\Sigma}}
+
+\newcommand{\tin}{\ensuremath{\mathsf{in}}}
+\newcommand{\inn}[2]{\tin_{#1}^{#2}}
+\newcommand{\tel}{\mathsf{el}}
+\newcommand{\el}[2]{\tel_{#1}^{#2}}
+
+\newcommand{\contract}[1][]{\mapsto_{#1}}
+\newcommand{\whd}[1][]{\rhd_{#1}}
+\newcommand{\red}[1][]{\longrightarrow_{#1}}
+\newcommand{\inner}[1][]{\rightharpoonup_{#1}}
+
+\newcommand{\cl}[1]{\overline{#1}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\B}{\mathcal{B}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\SN}{\mathsf{SN}}
+\newcommand{\Intro}{\mathsf{Intro}}
+
+
+\begin{document}
+
+\maketitle
+
+%TODO mandatory: add short abstract of the document
+\begin{abstract}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+\section{Intuitionistic Truth Table Natural Deduction}
+\label{sec:nd}
+
+Geuvers et al. \cite{todo} introduced a method to derive natural
+deduction proof rules from truth tables of logical connectives.
+For instance, consider the truth table for implication:
+\[
+\begin{array}{cc|c}
+  A & B & A \to B \\
+\hline
+  0 & 0 & 1 \\
+  0 & 1 & 1 \\
+  1 & 0 & 0 \\
+  1 & 1 & 1 \\
+\end{array}
+\]
+For each line where $A \to B$ holds, \eg, the second line,
+an introduction rule is created
+where $0$-valued (or \emph{negative})
+operands $A$ become premises $\Gamma.A \vdash A \to B$
+and $1$-valued (or \emph{positive}) operands $B$ become premises $\Gamma \vdash B$.
+Lines like the third where $A \to B$ is false become elimination
+rules with a conclusion $\Gamma \vdash C$ for an arbitrary formula
+$C$.  Besides the principal premise $\Gamma \vdash A \to B$, the
+$1$-valued operands $A$ become premises $\Gamma \vdash A$, and the
+$0$-valued operands $B$ premises $\Gamma.B \vdash D$.
+This yields the following four rules:
+\begin{gather*}
+  \ru{t : \Gamma.A \vdash A \to B \qquad
+      u : \Gamma.B \vdash A \to B
+    }{\inn\to{00}(t,u) : \Gamma \vdash A \to B
+    }
+\\[2ex]
+  \ru{t : \Gamma.A \vdash A \to B \qquad
+      b : \Gamma \vdash B
+    }{\inn\to{01}(t,b) : \Gamma \vdash A \to B
+    }
+\qquad
+  \ru{a : \Gamma \vdash A \qquad
+      b : \Gamma \vdash B
+    }{\inn\to{11}(a,b) : \Gamma \vdash A \to B
+    }
+\\[2ex]
+  \ru{f : \Gamma \vdash A \to B \qquad
+      a : \Gamma \vdash a \qquad
+      t : \Gamma.B \vdash C
+    }{f \cdot \el\to{10}(a,t) : \Gamma \vdash C
+    }
+\end{gather*}
+We preferably use letters $t,u,v$ for terms with a distinguished
+hypothesis (the 0th de Bruijn index)
+and letters $a,b,c,d,e,f$ for terms without such.
+Replacing the distinguished hypothesis in $t$ by a derivation/term $a$
+is written $t[a]$.  We use letter $I$ for introduction terms, \ie,
+with $\tin$ at the root, and letter $E$ for an elimination in term $f
+\cdot E$, \ie, the $\tel$ part.  Heads $h$ are either variables $x$ or
+introductions $I$, an each term can be written in spine form $h \cdot
+E_1 \cdot \dots \cdot E_n$.  This may be written $h \cdot \vec E$.
+
+\emph{Detour} or $\beta$ reductions can fire when an introduction is
+immediately eliminated, \ie, on well-typed subterms of the form $I
+\cdot E$.  For the case of implication, there are three
+introduction rule that can be paired with the only elimination rule.
+There are two ways in which a $\beta$ redex can fire:  Either, a
+positive premise (1) of the introduction matches a negative premise
+(0) of the elimination.  For the case of implication, the second
+premise of the elimination $\el\to{10}$
+is negative, and it can react with the
+positive second premise of $\inn\to{01}$ and $\inn\to{11}$:
+\[
+\begin{array}{lll}
+  \inn\to{\_1}(\_,b) \cdot \el\to{10}(\_,t)
+    & \contract[\beta] &
+  t[b]
+\end{array}
+\]
+The other reaction is between a negative premise of the introduction
+and a matching positive premise of the elimination.  In this case, the
+elimination persists, but the introduction is replaced with an
+instantiation of its respective negative premise.  In the case of
+implication, the first premise of $\inn\to{00}$ and $\inn\to{01}$ can
+be instantiated with the first premise of $\el\to{10}$:
+\[
+\begin{array}{lll}
+  \inn\to{0\_}(u,\_) \cdot \el\to{10}(a,t)
+    & \contract[\beta] &
+  u[a] \cdot \el\to{10}(a,t)
+\\
+\end{array}
+\]
+
+The case of implication already demonstrates the inherent
+non-confluence of $\beta$-reduction: the reducts of
+$\inn\to{01}(u,b) \cdot \el\to{10}(a,t)$ form the critical pair
+$(t[b],\ u[a] \cdot \el\to{10}(a,t))$ which can in general not be
+joined.  Non-confluence excludes some techniques to show strong
+normalization, \eg, those that rely on deterministic weak head
+reduction.  However, Girard's reducibility candidates accommodate
+non-confluent reduction, thus, his technique may be adapted to the
+present situation.
+
+\section{Reducibility Candidates}
+\label{sec:cr}
+
+We work with sets $\Gamma \vdash A$ of nameless well-typed terms and
+weakening under order-preserving embeddings
+$\tau : \Delta \leq \Gamma$.  Here, $\tau$ witnesses that and how
+$\Gamma$ is a subsequence of $\Delta$.  If $a : \Gamma \vdash A$ then
+weakening $a\tau : \Delta \vdash A$ is defined in the usual way.
+Substitution $\sigma : \Delta \vdash \Gamma$ are defined as lists of
+terms typed by list $\Gamma$ under context $\Delta$.  Parallel
+substitution $a\sigma : \Delta \vdash A$ for $a : \Gamma \vdash A$ be
+defined as usual.  Substitutions compose with weakenings and
+substitutions in the usual way, and singleton substitution $t[b]$ be
+an instance for parallel substitution $t\sigma$ for a suitable
+$\sigma : \Gamma \vdash \Gamma.B$ obtained from $b : \Gamma \vdash B$.
+
+Reduction $a \red a'$ acts on same-typed terms
+$a,a' : \Gamma \vdash A$ by definition.  It is closed under weakening
+and substitution.  It is even closed under \emph{anti-weakening}, \ie,
+if $a\tau \red a'\tau$ then also $a \red a'$.  (Not so for
+substitution, of course.)
+
+The ``set'' of strongly normalizing terms $\SN$
+\[
+  \ru{(a \red \_) \subseteq \SN
+    }{a \in \SN}
+\]
+is formally a family of inductive predicates on well-typed terms
+$a : \Gamma \vdash A$, but we mostly write $a \in \SN$ instead of
+$a \in \SN(\Gamma \vdash A)$ for simplicity.  The set $\SN$ is closed
+under weakening, \ie, if $\tau : \Delta \leq \Gamma$ then
+$a\tau \in \SN$ as well.  This follows easily from anti-weakening for
+reduction.
+
+A \emph{reducibility candidate} $\A$ for a type $A$ is a context-indexed
+family of predicates on terms of type $A$, written as sets, with the following
+properties:
+\begin{itemize}
+\item[CR0]  If $a \in \A_\Gamma$ and $\tau : \Delta \leq \Gamma$ then
+  $a\tau \in \A_\Delta$.
+\item[CR1]  $\A_\Gamma \subseteq \SN$.
+\item[CR2]  If $a \in \A_\Gamma$ and $a \red a'$ then $a' \in
+  \A_\Gamma$.
+\item[CR3]  For $a : \Gamma \vdash A$, if $a \in \SN \setminus \Intro$
+  and $(a \red \_) \subseteq \A_\Gamma$, then $a \in \A_\Gamma$.
+\end{itemize}
+
+Property CR3 can be forced by the following closure operation $\cl\A$
+on a term set $\A \subseteq \Gamma \vdash A$.
+\begin{gather*}
+  \ru{a \in \A
+    }{a \in \cl\A}
+\qquad
+  \ru{a : \Gamma \vdash A \qquad
+      a \in \SN \setminus \Intro \qquad
+      (a \red \_) \subseteq \cl\A
+    }{a \in \cl\A}
+\end{gather*}
+The closure operation lifts pointwise to context-indexed families
+$\A_\Gamma \subseteq \Gamma \vdash A$ of term sets.
+
+\begin{lemma}[Saturation]
+  If $\A$ satisfies CR0-2, then $\cl\A$ is a reducibility candidate.
+\end{lemma}
+\begin{proof}
+  CR3 is forced by the closure operation, and preservation of CR1 and
+  CR2 is immediate.
+  CR0 follows again from anti-weakening of reduction, and that being
+  an introduction is not affected by weakening or anti-weakening.
+\end{proof}
+
+Note that the union $\A \cup \B$ preserves CR0-2, but not CR3; thus,
+to obtain a reducibility candidate from the union of two such
+candidates we need to apply the closure operation in general.
+
+Given two term set families $\A$ and $\X$ for types $A \not= X$,
+resp., let $\X[\A]$ be the term set family defined by
+\[
+  \X[\A]_\Gamma =
+  \{ t \in \SN(\Gamma.A \vdash X) \mid t(\tau.a) \in \X_\Delta
+     \mbox{ for all } \tau : \Delta \leq \Gamma
+     \mbox{ and } a \in \A_\Delta
+  \}
+  .
+\]
+Herein, $\tau.a : \Delta \vdash \Gamma.A$ is obtained by turning
+$\tau$ into a substitution and extending it by $a$.
+Clearly, $\X[\A]$ is monotone in $\X$ (and antitone in $\A$, but we
+shall not utilize that).
+\begin{lemma}[Abstraction]
+  If $\A$ and $\X$ are reducibility candidates, so is $\X[\A]$.
+\end{lemma}
+\begin{proof}
+  CR0 is guaranteed by the \emph{Kripke}-style definition of $\X[\A]$.
+  CR1 holds by definition, and CR2 relies on the closure of reduction
+  under substitution.
+
+  For CR3, let $t \in \SN(\Gamma.A \vdash X) \setminus \Intro$ and
+  $(t \red \_) \subseteq \X[\A]_\Gamma$.
+  % We need to show that $t \in \X[\A]_\Gamma$.  In case that $t$ is de
+  % Bruijn index 0 (and thus X = A)
+  Further, to show that $t \in \X[\A]_\Gamma$, assume
+  $\tau : \Delta \leq \Gamma$ and $a \in \A_\Delta$ and show
+  $t(\tau.a) \in \X_\Delta$.
+  By CR3 for $\X$, we first need to show that $t(\tau.a) \not\in
+  \Intro$.  Since $t \not\in\Intro$, the only possibility for
+  $t(\tau.a) \in \Intro$ is that $t : \Gamma.A \vdash X$ is the 0th de Bruijn index.
+  However, this is excluded by the precondition $A \not=X$.
+  Then, we show $t(\tau.a) \in \SN$
+\end{proof}
+
+We may now define a notion of function space on reducibility
+candidates based on the introduction rules for implication.  Since
+introduction rules are ``recursive'' in general, \ie, may mention the
+principal formula in the subsequent of a premise, we need to employ
+the least fixed-point operation $\mu$ for monotone operators on the
+lattice of reducibility candidates.
+We define $\A \to \B = \mu\F$ where
+\[
+  \F(\X)_\Gamma =
+  \cl{\{
+    \inn\to{00}(t,u),
+    \inn\to{01}(t,b),
+    \inn\to{11}(a,b) \mid
+      a \in \A_\Gamma,
+      b \in \B_\Gamma,
+      t \in \X[\A]_\Gamma,
+      u \in \X[\B]_\Gamma
+  \}}
+\]
+This operation acts on reducibility candidates:
+\begin{lemma}[Function space]
+  If $\A$ and $\B$ are reducibility candidates, so is $\A \to \B$.
+\end{lemma}
+\begin{proof}
+  It is sufficient to show that $\F$ acts on reducibility candidates.
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\clearpage
+
+\appendix
+
+\section{Trash}
+
+Recall that weak head reduction $\whd[\beta]$ is the closure of
+$\beta$ contraction $\contract[\beta]$ under elimination contexts.
+Formally, weak head reduction is inductively defined by the rule
+\[
+  \ru{a \contract[\beta] a'
+    }{a \cdot \vec E \whd[\beta] a' \cdot \vec E}
+\]
+for any possibly empty vector $\vec E$ of eliminations.
+Full $\beta$ reduction $\red[\beta]$ is the closure of $\beta$ under
+arbitrary contexts.  As usual, the reflexive-transitive closure of a
+relation $R$ is denoted by $R^*$.
+
+A typical property of weak head reduction is \emph{weak standardization}
+\cite{alti:PhD}, namely if $a_0 \whd a_1$ and $a_0 \red a_2$ then
+either $a_1 = a_2$ or there is $a_3$ such that $a_2 \whd a_3$ and $a_1 \red^* a_3$.
+Informally, this property states that weak head redexes do not get
+``lost'' when performing full reduction; in particular, an inner
+reduction $a_0 \red a_2$ does not destroy the redex at the root, and
+it can be contracted with $a_2 \whd a_3$.
+Weak standardization allows us to restrict to weak head expansion, as opposed
+to full expansion, when saturating term sets in normalization proofs.
+
+In the above formulation, the property fails immediately for
+non-confluent weak head reduction, however, it can be refined as
+follows.  Let \emph{inner reduction} $\inner$ be the complement of weak head
+reduction relative to full reduction, in our case,
+${\inner[\beta]} = {\red[\beta]} \setminus {\whd[\beta]}$.
+Then weak standardization can be formulated as the following square:
+% if $a_0 \whd a_1$ and $a_0 \inner a_2$ then
+% there is $a_3$ such that $a_2 \whd a_3$ and $a_1 \inner^* a_3$.
+
+\begin{lemma}[Weak head standardization for $\beta_{\to}$]
+If $a_0 \whd[\beta] a_1$ and $a_0 \inner[\beta] a_2$ then
+there is $a_3$ such that $a_2 \whd[\beta] a_3$ and $a_1 \inner[\beta]^* a_3$.
+\end{lemma}
+\begin{proof}
+  Let $a_0 := I \cdot E_0 \cdot \vec E \contract[\beta] c \cdot \vec E
+  =: a_1$ where
+  $c$ may be of the form $t[b]$ with $t$ from $E_0$ and $b$ from $I$
+  or of the form $u[a] \cdot E_0$ with $a$ from $E_0$ and $u$ from
+  $I$.
+  The inner reduction may occur either in $\vec E$ or in $I$ or in
+  $E_0$.  In the first case is trivial, in the other two cases the
+  inner reduction may occur either in context $t$ or $u$ or in the
+  substituted terms $b$ or $a$ or in a term that is lost by the
+  reduction.  In the latter cases, zero or more inner reductions may
+  be necessary to close the square.
+\end{proof}
+
+In normalization proofs by reducibility candidates there is a closure
+operation $\cl\A$ on term sets $\A$ that we adapt to our setting as
+the following inductive definition:
+\begin{gather*}
+  \ru{a \in \A
+    }{a \in \cl\A}
+\qquad
+  \ru{a \in \SN \setminus \Intro \qquad
+      (a \whd \_) \subseteq \cl\A
+    }{a \in \cl\A}
+\end{gather*}
+Herein, $\Intro$ denotes the set of introductions $I$ and $\SN$
+denotes the set of strongly normalizing terms for the reduction
+relation $\red$ under consideration.  The second rule allows us to add
+new strongly normalizing non-introductions $a$ into a set as long as
+all weak-head reducts are already present.  In Girard's original
+formulation, \emph{all} reducts wrt.\ $\red$ need to be inspected.
+This stronger requirement makes it trivial to prove that the closure
+operation preserves the property \emph{closed under full reduction} of
+term sets $\A$.  In our case, this closure property is salvaged by
+weak standardization:
+\begin{lemma}
+  If $\A$ is closed under reduction, so is $\cl\A$.
+\end{lemma}
+\begin{proof}
+  Given $a \red a'$, we show $a' \in \cl\A$ by induction on $a \in
+  \cl\A$.  The base case is handled by $\A$ being closed under $\red$,
+  so let us assume $(a \whd \_) \subseteq \cl\A$.  This handles the
+  case of $a \whd a'$, so we may assume that $a'$ is an inner reduct
+  of $a$, formally, $a \inner a'$.
+  DOESN'T WORK.
+\end{proof}
+
+%%
+%% Bibliography
+%%
+
+%% Please use bibtex,
+
+\bibliography{medium}
+
+% \appendix
+
+\end{document}
