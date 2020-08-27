@@ -85,11 +85,32 @@
 %\newcommand{\defiff}{:\iff}
 \newcommand{\defiff}{\mathrel{{{:}{\Longleftrightarrow}}}}
 \newcommand{\subst}[3]{#3[#1/#2]}
+\newcommand{\tid}{\mathsf{id}}
 
 \newcommand{\ru}{\dfrac}
 \newcommand{\nru}[3]{#1\;\dfrac{#2}{#3}}
 \newcommand{\rux}[3]{\dfrac{#1}{#2}\;#3}
 \newcommand{\nrux}[4]{#1\;\dfrac{#2}{#3}\;#4}
+
+% proof by cases
+\newenvironment{caselist}{%
+  \begin{list}{{\it Case}}{%
+    %\setlength{\topsep}{2ex}% DOES NOT SEEM TO WORK
+    %\setlength{\itemsep}{2ex}%
+    %\setlength{\itemindent}{-2ex}%
+  }%
+}{\end{list}%
+}
+\newenvironment{subcaselist}{%
+  \begin{list}{{\it Subcase}}{}%
+}{\end{list}%
+}
+\newenvironment{subsubcaselist}{%
+  \begin{list}{{\it Subsubcase}}{}%
+}{\end{list}%
+}
+
+\newcommand{\nextcase}{\item~}
 
 \newcommand{\rulename}[1]{\ensuremath{\mbox{\textsc{#1}}}\xspace}
 \newcommand{\rbeta}[1]{\ensuremath{\beta\mbox{-}\mathord{#1}}\xspace}
@@ -123,11 +144,14 @@
 \newcommand{\cl}[1]{\overline{#1}}
 \newcommand{\A}{\mathcal{A}}
 \newcommand{\B}{\mathcal{B}}
+\newcommand{\C}{\mathcal{C}}
 \newcommand{\F}{\mathcal{F}}
+\newcommand{\T}{\mathcal{T}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\SN}{\mathsf{SN}}
 \newcommand{\Intro}{\mathsf{Intro}}
-
+\newcommand{\Up}{\mathop{\Uparrow}}
+\newcommand{\up}{\mathord{\uparrow}}
 
 \begin{document}
 
@@ -245,9 +269,11 @@ present situation.
 \label{sec:cr}
 
 We work with sets $\Gamma \vdash A$ of nameless well-typed terms and
-weakening under order-preserving embeddings
+weakening under order-preserving embeddings (OPE)
 $\tau : \Delta \leq \Gamma$.  Here, $\tau$ witnesses that and how
-$\Gamma$ is a subsequence of $\Delta$.  If $a : \Gamma \vdash A$ then
+$\Gamma$ is a subsequence of $\Delta$.
+Then, $\Up\tau : \Delta.B \leq \Gamma.B$ be the lifted OPE.
+If $a : \Gamma \vdash A$ then
 weakening $a\tau : \Delta \vdash A$ is defined in the usual way.
 Substitution $\sigma : \Delta \vdash \Gamma$ are defined as lists of
 terms typed by list $\Gamma$ under context $\Delta$.  Parallel
@@ -287,6 +313,7 @@ properties:
 \item[CR3]  For $a : \Gamma \vdash A$, if $a \in \SN \setminus \Intro$
   and $(a \red \_) \subseteq \A_\Gamma$, then $a \in \A_\Gamma$.
 \end{itemize}
+If $\A$ satisfies only CR0-2, it shall be called a \emph{precandidate}.
 
 Property CR3 can be forced by the following closure operation $\cl\A$
 on a term set $\A \subseteq \Gamma \vdash A$.
@@ -303,7 +330,8 @@ The closure operation lifts pointwise to context-indexed families
 $\A_\Gamma \subseteq \Gamma \vdash A$ of term sets.
 
 \begin{lemma}[Saturation]
-  If $\A$ satisfies CR0-2, then $\cl\A$ is a reducibility candidate.
+  % If $\A$ satisfies CR0-2, then $\cl\A$ is a reducibility candidate.
+  $\cl\A$ is a reducibility candidate for any precandidate $\A$.
 \end{lemma}
 \begin{proof}
   CR3 is forced by the closure operation, and preservation of CR1 and
@@ -316,11 +344,13 @@ Note that the union $\A \cup \B$ preserves CR0-2, but not CR3; thus,
 to obtain a reducibility candidate from the union of two such
 candidates we need to apply the closure operation in general.
 
-Given two term set families $\A$ and $\X$ for types $A \not= X$,
+Given two term set families $\A$ and $\X$ for types $A$ and $X$,
 resp., let $\X[\A]$ be the term set family defined by
 \[
   \X[\A]_\Gamma =
-  \{ t \in \SN(\Gamma.A \vdash X) \mid t(\tau.a) \in \X_\Delta
+  \{ t \in \Gamma.A \vdash X
+     % t \in \SN(\Gamma.A \vdash X)
+     \mid t(\tau.a) \in \X_\Delta
      \mbox{ for all } \tau : \Delta \leq \Gamma
      \mbox{ and } a \in \A_\Delta
   \}
@@ -330,26 +360,57 @@ Herein, $\tau.a : \Delta \vdash \Gamma.A$ is obtained by turning
 $\tau$ into a substitution and extending it by $a$.
 Clearly, $\X[\A]$ is monotone in $\X$ (and antitone in $\A$, but we
 shall not utilize that).
+% \begin{lemma}[Abstraction]
+%   If $\A$ and $\X$ are reducibility candidates, so is $\X[\A]$.
+% \end{lemma}
+% \begin{proof}
+%   CR0 is guaranteed by the \emph{Kripke}-style definition of $\X[\A]$.
+%   CR1 holds by definition, and CR2 relies on the closure of reduction
+%   under substitution.
+
+%   For CR3, let $t \in \SN(\Gamma.A \vdash X) \setminus \Intro$ and
+%   $(t \red \_) \subseteq \X[\A]_\Gamma$.
+%   % We need to show that $t \in \X[\A]_\Gamma$.  In case that $t$ is de
+%   % Bruijn index 0 (and thus X = A)
+%   Further, to show that $t \in \X[\A]_\Gamma$, assume
+%   $\tau : \Delta \leq \Gamma$ and $a \in \A_\Delta$ and show
+%   $t(\tau.a) \in \X_\Delta$.
+%   By CR3 for $\X$, we first need to show that $t(\tau.a) \not\in
+%   \Intro$.  Since $t \not\in\Intro$, the only possibility for
+%   $t(\tau.a) \in \Intro$ is that $t : \Gamma.A \vdash X$ is the 0th de Bruijn index.
+%   However, this is excluded by the precondition $A \not=X$.
+%   Then, we show $t(\tau.a) \in \SN$
+% \end{proof}
 \begin{lemma}[Abstraction]
-  If $\A$ and $\X$ are reducibility candidates, so is $\X[\A]$.
+\label{lem:abs}
+  Let $\A_\Gamma$ be inhabited for any $\Gamma$.
+  If $\X$ is a precandidate, then $\X[\A]$ satisfies CR1/2 and is
+  closed under lifted weakening (almost CR0).
 \end{lemma}
 \begin{proof}
-  CR0 is guaranteed by the \emph{Kripke}-style definition of $\X[\A]$.
-  CR1 holds by definition, and CR2 relies on the closure of reduction
-  under substitution.
+  CR1 holds by non-emptiness of $\A$.  Given $t \in \X[\A]_\Gamma$ and
+  arbitrary $a \in \A_\Gamma$ we have $t[a] \in \X_\Gamma$.  In
+  particular, $t[a] \in \SN$, and thus, $t \in \SN$.
 
-  For CR3, let $t \in \SN(\Gamma.A \vdash X) \setminus \Intro$ and
-  $(t \red \_) \subseteq \X[\A]_\Gamma$.
-  % We need to show that $t \in \X[\A]_\Gamma$.  In case that $t$ is de
-  % Bruijn index 0 (and thus X = A)
-  Further, to show that $t \in \X[\A]_\Gamma$, assume
-  $\tau : \Delta \leq \Gamma$ and $a \in \A_\Delta$ and show
-  $t(\tau.a) \in \X_\Delta$.
-  By CR3 for $\X$, we first need to show that $t(\tau.a) \not\in
-  \Intro$.  Since $t \not\in\Intro$, the only possibility for
-  $t(\tau.a) \in \Intro$ is that $t : \Gamma.A \vdash X$ is the 0th de Bruijn index.
-  However, this is excluded by the precondition $A \not=X$.
-  Then, we show $t(\tau.a) \in \SN$
+  CR2 relies on the closure of reduction
+  under substitution:  Assume $\X[\A]_\Gamma \ni t \red t'$ and $\tau
+  : \Delta \leq \Gamma$ and $a \in \A_\Delta$.  To show $t'(\tau.a)
+  \in \X_\Delta$ observe that $t(\tau.a) \in \X_\Delta$ and that CR2
+  holds for $\X$.
+
+  For closure under lifted weakening, assume $t \in \X[\A]_\Gamma$ and
+  $\tau' : \Gamma' \leq \Gamma$ and show $t(\Up\tau') \in \X[\A]_{\Gamma'}$.
+  (Note that $t : \Gamma.A \vdash X$ and $\Up\tau : \Gamma'.A \leq
+  \Gamma.A$.)
+  Assume $\Delta \leq \Gamma'$ and $a \in \A_\Delta$ and show
+  $t(\Up\tau')(\tau.a) \in \X_\Delta$.  Since $t(\Up\tau')(\tau.a) =
+  t(\tau'\tau.a)$ and $\tau'\tau : \Delta \leq \Gamma$ we conclude by
+  $t \in \X[\A]_\Gamma$.
+
+  % CR0 is guaranteed by the \emph{Kripke}-style definition of $\X[\A]$:
+  % Let $t \in \X[\A]_\Gamma$ and $\tau' : \Gamma' \leq \Gamma$ to show
+  % $t\tau' \in \X[\A]_{\Gamma'}$, assume $\tau : \Delta \leq \Gamma'$
+  % and $a \in \A_\Delta$ and show $t\tau'(\tau,a) \in \X_\Delta$.
 \end{proof}
 
 We may now define a notion of function space on reducibility
@@ -373,20 +434,441 @@ We define $\A \to \B = \mu\F$ where
 \]
 This operation acts on reducibility candidates:
 \begin{lemma}[Function space]
+  \label{lem:fun}
   If $\A$ and $\B$ are reducibility candidates, so is $\A \to \B$.
 \end{lemma}
 \begin{proof}
   It is sufficient to show that $\F$ acts on reducibility candidates.
+  Since CR3 is forced, it is sufficient that $\F(\X)$ is a
+  precandidate for any candidate $\X$, and this follows mostly from
+  \Cref{lem:abs} and the candidateship of $\A$ and $\B$.
+  CR0 is immediate, CR1 follows since any reduction of an introduction
+  needs to happen in one of the arguments of $\tin$, which are SN.
+  CR2 follows by the same observation.
 \end{proof}
 
+By definition, $\A \to \B$ models the introduction rules for
+implication.  For the elimination rule, we have to do a bit of work.
+\begin{lemma}[Function elimination]
+  \label{lem:app}
+  Let $\A,\B,\C$ be candidates.
+  If $f \in (\A \to \B)_\Gamma$ and $a \in \A_\Gamma$ and
+  $u \in \C[\B]_\Gamma$ then $f \cdot E \in \C$
+  where $E = \el\to{10}(a,u)$.
+\end{lemma}
+\begin{proof}
+  By main induction on $f \in (\A \to \B)_\Gamma$.
+  \begin{caselist}
 
+    \nextcase $f \not\in \Intro$ and $f \red f'$ implies
+    $f \in (\A \to \B)_\Gamma$:
+    We show $f \cdot E \in \C$ by side induction on $E \in \SN$ via CR3.
+    First, $f \cdot E \not\in\Intro$.
+    Assume $f \cdot E \red c$.  Since $f$ is not a introduction, we
+    have either $f \red f'$ or $E \red E'$.  In the first case, by
+    main induction hypothesis, $f' \cdot E \in \C$.
+    In the second case, $f \cdot E' \in \C$ by side induction hypothesis.
+    In any case, $c \in \C$.  Since $c$ was arbitrary, $f \cdot E \in
+    \C$ by CR3.
 
+    \nextcase $f = \inn\to{00}(t_1,t_2)$ where
+    $t_1 \in (\A \to \B)[\A]_\Gamma$ and
+    $t_2 \in (\A \to \B)[\B]_\Gamma$.
+    We show $f \cdot E \in \C$ by side induction on $t_1,t_2,E \in
+    \SN$ via CR3.
+    Given $f \cdot E \red c$, there are three cases.  Either $c = f' \cdot
+    E$ with $f \red f'$ or $c = f \cdot E'$ with $E \red E'$ or $c =
+    t_1[a] \cdot E$.  The first two cases are handled by the side
+    induction hypotheses, the last case by main induction hypothesis
+    on $t_1[a] \in (\A \to \B)_\Gamma$.
 
+    \nextcase $f = \inn\to{01}(t_1,b)$ where
+    $t \in (\A \to \B)[\A]_\Gamma$ and
+    $b \in \B_\Gamma$.
+    We show $f \cdot E \in \C$ by side induction on $t,b,E \in
+    \SN$ via CR3.
+    Given $f \cdot E \red c$, there are four cases.  Either $c = f' \cdot
+    E$ with $f \red f'$ or $c = f \cdot E'$ with $E \red E'$ or $c =
+    t[a] \cdot E$ or $c = u[b]$.  The first two cases are handled by the side
+    induction hypotheses, the butlast case by main induction hypothesis
+    on $t[a] \in (\A \to \B)_\Gamma$, and the last case by assumption
+    $u \in \C[\B]_\Gamma$.
 
+    \nextcase $f = \inn\to{11}(a',b)$ where
+    $a' \in \A_\Gamma$ and
+    $b \in \B_\Gamma$.
+    We show $f \cdot E \in \C$ by side induction on $a',b,E \in
+    \SN$ via CR3.
 
+    Given $f \cdot E \red c$, there are three cases.  Either
+    $c = f' \cdot E$ with $f \red f'$ or $c = f \cdot E'$ with
+    $E \red E'$ or $c = u[b]$.  The first two cases are handled by the
+    side induction hypotheses and the last case by
+    assumption $u \in \C[\B]_\Gamma$.
 
+  \end{caselist}
+\end{proof}
 
+The rest, interpretation of types and contexts and the fundamental
+theorem is standard, showing the strong normalization.
 
+The pattern outlined here for implication generalizes to arbitrary
+connectives given by truth tables.  Each connective is interpreted as
+an operation on candidates, using the least fixed-point of the closure
+of the term set generated by the introductions.  Each elimination then
+has to be proven sound in a lemma similar to \Cref{lem:app}.
+
+Geuvers et al.\ also present permutation reductions.  In the next
+section, we study the extension of the normalization argument to
+permutations.
+
+\section{Permutation Reductions}
+\label{sec:perm}
+
+Outer eliminations can be shifted into the negative branches of inner
+eliminations.  We write
+$h \cdot E \cdot E' \contract[\pi] h \cdot E\{E'\}$ for a permutation
+contraction.  The composition $E{E'}$ of eliminations moves a weakened
+version of $E'$ to the negative branches of $E$.  In the case of
+implication, we have
+\[
+  \el\to{10}(a,u) \{ E' \} = \el\to{10}(a,u \cdot E' \up)
+\]
+where $\up : \Gamma.B \leq \Gamma$ and
+$E' \up$ shall denote the weakening of elimination $E'$ by $\up$.
+In particular, $\el\to{10}(a',u') \up = \el\to{10}(a' \up, u' (\Up\up))$.
+
+Just throwing permutation reductions into the mix and replaying the SN
+proof for $\beta$ does not work.  The proof of \Cref{lem:app} relies
+on the fact that if $f \cdot E \red c$ and $f \not\in \Intro$ then
+either $f \red f'$ or $E \red E'$, but the structure of the
+elimination $f \cdot E$ is preserved.  However, with permutations, in
+case $f = f_0 \cdot E_0$ it could be that $c = f_0 \cdot E_0\{E\}$.
+This reduction is not covered by any induction hypothesis.
+
+We cannot arbitrarily tighten the restriction $\_ \not\in \Intro$ in
+the formulation of CR3, since CR3 is used in \Cref{lem:app} to
+introduce terms of the shape $f \cdot E$
+into a reducibility candidate $\C$.  Such terms need to satisfy the
+restriction, therefore we cannot exclude $\pi$-redexes in general: a
+priori, $f \cdot E$ could be a $\pi$-redex.
+
+TODO: move definition of elimination typing here (or even further up) and
+prove (recall) strong normalization (and confluence) of $\pi$ spine
+reduction $\whd[\pi]$ where
+\[
+  \vec E \cdot E_1 \cdot E_2 \cdot \vec E'
+  \whd[\pi]
+ \vec E \cdot E_1{E_2} \cdot \vec E'
+\]
+
+\section{Biorthogonals}
+\label{sec:biortho}
+
+Since the reducibility candidate method does not immediately extend to
+permutations, we turn to a more powerful technique: biorthogonals.
+Lindley and Stark \cite{lindleyStark:redComput} have observed that
+biorthogonals (``$\top\top$-lifting) deal well with the permutation
+reduction for the monadic bind in a strong normalization proof for the
+monadic meta-language.  We shall thus adapt this technique, although
+it is more demanding on our meta-language, requiring greatest
+fixed-points of non-strictly positive operators.  This is covered by
+Knaster and Tarski's fixed-point theorem \cite{tarski:fixpoint}, but
+not readily available in type-theoretic proof assistants like Coq and
+Agda.
+
+In the following, when we speak of context-indexed families, we
+implicitly assume that the family is closed under weakening in analogy
+to CR0.
+
+Semantic types $\A$ shall now be context-indexed families of sets of
+evaluation contexts $\vec E$, and we write $a \perp \A_\Gamma$ to
+characterize a term $a : \Gamma \vdash A$ as classified by semantic
+type $\A$.  The orthogonality relation $\perp$ is defined as
+\[
+  a \perp \A_\Gamma \defiff
+  a \in \A_\Gamma^\perp \defiff
+  a \cdot \vec E \in \SN \mbox{ for all } \vec E \in \A_\Gamma
+  % \forall \vec E \in \A_\Gamma, a \cdot \vec E \in \SN
+  .
+\]
+
+To formally talk about evaluation contexts, we introduce a judgement
+$E : \Gamma \mid A \vdash C$ to characterize eliminations $E$ from type $A$
+into $C$, and extend it to vectors $\vec E : \Gamma \mid A \vdash C$
+in the usual way:
+\[
+  \ru{}{\tid : \Gamma \mid A \vdash A}
+\qquad
+  \ru{E : \Gamma \mid A \vdash B \qquad
+      \vec E : \Gamma \mid B \vdash C
+    }{E \cdot \vec E : \Gamma \mid A \vdash C}
+\]
+Weakening $\vec E \tau$ and substitution $\vec E \sigma$ are defined
+in the obvious way.
+
+We demand of semantic types that they contain the identity evaluation
+context and only contain strongly normalizing evaluation contexts.
+Reductions in contexts can either be in the subterms or can be
+$\pi$-contractions along the spine.
+
+More formally, a semantic type $\A_\Gamma$ for syntactic type $A$ at
+context $\Gamma$ is a set of \emph{pairs}
+$(C, \vec E : \Gamma \mid A \vdash C)$.
+Then $a \perp \A_\Gamma$ is defined as
+$a \cdot \vec E \in \SN(\Gamma \vdash C)$
+for all $(C, \vec E : \Gamma \mid A \vdash C) \in \A_\Gamma$.
+However, we typically
+suppress the type component $C$ which is implicitly determined by $E$.
+\begin{lemma}[Semantic types]
+  Let $\A$ be a semantic type for $A$.
+  \begin{enumerate}
+  \item If $x : \Gamma \vdash A$ is a variable, then $x \perp
+    \A_\Gamma$.
+  \item $\A^\perp \subseteq \SN$.
+  \item $\A^\perp$ is closed under reduction.
+  \end{enumerate}
+\end{lemma}
+\begin{proof} \bla
+  \begin{enumerate}
+  \item Given $(C, \vec E) \in \A_\Gamma$ show $x \cdot \vec E \in
+    \SN$.  This holds since the only reductions are in $\vec E$, which
+    is required to be SN by definition of semantic types.
+
+  \item Given $t \perp \A_\Gamma$ show $t \in \SN$.
+   Since $\tid \in \A_\Gamma$, we have $t \cdot \tid = t \in \SN$.
+
+  \item Given $\A_\Gamma \perp t \red t'$ and $\vec E \in \A_\Gamma$ we
+    have $t' \cdot \vec E \in \SN$ since $t \cdot \vec E \in \SN$ and
+    $t \cdot \vec E \red t' \cdot \vec E$.
+  \end{enumerate}
+\end{proof}
+
+\noindent
+Symmetrically to $\A^\perp$, given a set of terms $\T_\Gamma \subseteq
+(\Gamma \vdash A)$ we define
+\[
+  \T_\Gamma^\perp =
+  \{ (C, \vec E : \Gamma \mid A \vdash C) \mid
+  a \cdot \vec E \in \SN(\Gamma \vdash C)
+  \mbox{ for all } a \in \T_\Gamma \}
+  .
+\]
+Taking the orthogonal of a non-empty SN term set is one way to
+construct a semantic type:
+\begin{lemma}[Orthogonals are semantic types]
+  \label{lem:orthsem}
+  If $\T$ is a family of non-empty sets of strongly normalizing terms
+  of type $A$, then
+  $\T^\perp$ is a semantic type for type $A$.
+\end{lemma}
+\begin{proof}
+  First, $\tid \in \T^\perp$ since $\T \subseteq \SN$.
+  Then $\T^\perp \subseteq \SN$ since $\T$ is non-empty.
+\end{proof}
+
+It is well-known that orthogonality gives rised to the Galois
+connection
+\[
+  \T^\perp \supseteq \A \iff \T \subseteq \A^\perp
+\]
+and biorthogonality is a closure operator both on sets of terms $\T
+\subseteq \T^{\perp\perp}$ and evaluation contexts
+$\A \subseteq \A^{\perp\perp}$.
+
+The abstraction type $\X[\A]$ is now defined by
+\[
+  \X[\A]_\Gamma =
+  \{ (C, \vec E : \Gamma.A \mid X \vdash C)
+     \mid \vec E (\tau.a) \in \X_\Delta
+     \mbox{ for all } \tau : \Delta \leq \Gamma
+     \mbox{ and } a \perp \A_\Delta
+  \}
+  .
+\]
+Abstraction operates on semantic types:
+\begin{lemma}[Abstraction, revisited]
+  \label{lem:absrev}
+  If $\A$ and $\X$ are semantic types for $A$ and $X$, then $\X[\A]$
+  is a semantic type for $X$.
+\end{lemma}
+\begin{proof}
+  We first show that
+  $(X,\tid : \Gamma.A \mid X \vdash X) \in \X[\A]_\Gamma$.
+  To this end, assume $\tau : \Delta \leq \Gamma$ and $a \in
+  \A_\Delta$ and show $\tid(\tau.a) \in \X_\Delta$.  This is trivial,
+  since $\tid(\tau.a) = \tid$ and $\X$ is a semantic type.
+
+  Then, assume $(C, \vec E : \Gamma.A \mid X \vdash C) \in
+  \X[\A]_\Gamma$ and show $\vec E \in \SN$.
+  Choose $\tau = \up : \Gamma.A \leq \Gamma$ and $a = x_0 \in
+  \A_{\Gamma.A}$ the 0th de Bruijn index, then $\vec E (\up,x_0) =
+  \vec E \in \X_{\Gamma.A}$ and hence SN.
+\end{proof}
+Given two semantic types $\A$ and $\B$, the function space $\A \to \B$
+is defined as the \emph{greatest fixpoint} $\nu \F^\perp$ of the
+pointwise orthogonal $\F^\perp$ of the operator
+\[
+  \F(\X)_\Gamma =
+  \{
+    \inn\to{00}(t,u),
+    \inn\to{01}(t,b),
+    \inn\to{11}(a,b) \mid
+      a \perp \A_\Gamma,
+      b \perp \B_\Gamma,
+      t \perp \X[\A]_\Gamma,
+      u \perp \X[\B]_\Gamma
+  \}
+  .
+\]
+In comparison with the reducibility candidate version in
+\Cref{sec:cr}, the closure operation has been replaced by
+biorthogonality, and we converted $\mu(\F^{\perp\perp})$
+to $(\nu(\F^\perp)^\perp)$.  We dropped the outer orthogonalization since
+we now compute sets of evaluation contexts, but now $\F$ applies
+orthogonalization on $\X$.
+
+\begin{lemma}[Function space, revisited]
+  \label{lem:funrev}
+  If $\A$ is a semantic type for $A$ and $\B$ one for $B$, then $\A
+  \to \B$ is a semantic type for $A \to B$.
+\end{lemma}
+\begin{proof}
+  Applying \Cref{lem:orthsem},
+  it is sufficient to show that $\F(\X)$ is a family of non-empty sets
+  of SN terms for semantic types $\X$.
+  This is the case by assumptions on $\A$, $\B$, and $\X$.
+\end{proof}
+
+\begin{lemma}[Function introduction]
+  \label{lem:funintro}
+  Given
+  $a \perp \A_\Gamma$ and
+  $b \perp \B_\Gamma$ and
+  $t \perp (\A \to \B)[\A]_\Gamma$ and
+  $u \perp (\A \to \B)[\B]_\Gamma$,
+  we have
+    $\inn\to{00}(t,u),
+     \inn\to{01}(t,b),
+     \inn\to{11}(a,b) \perp (\A \to \B)_\Gamma$.
+\end{lemma}
+\begin{proof}
+  For any of the mentioned introductions $I$ we have
+  $I \in \F(\A \to \B)_\Gamma$ by definition of $\F$.
+  Since biorthogonalization is a closure operator, we have
+  $I \in \F(\A \to \B)^{\perp\perp}_\Gamma$ and thus
+  $I \perp \F(\A \to \B)^{\perp}_\Gamma = (\A \to \B)_\Gamma$,
+  since $\A \to \B$ is a fixed point of $\F^\perp$.
+\end{proof}
+
+\begin{lemma}[Function elimination, preliminary]
+  \label{lem:appprelim}
+  Let $\A,\B,\C$ be semantic types for $A,B,C$, resp.  If
+  $a \perp \A_\Gamma$ and $u \perp \C[\B]_\Gamma$ then
+  $E = \el\to{10}(a,u) \in (\A \to \B)_\Gamma$.
+  % Let $\A,\B,\C$ be semantic types for $A,B,C$, resp.
+  % If $f \perp (\A \to \B)_\Gamma$ and $a \perp \A_\Gamma$ and
+  % $u \perp \C[\B]_\Gamma$ then $f \cdot E \perp \C$
+  % where $E = \el\to{10}(a,u)$.
+\end{lemma}
+\begin{proof}
+  By coinduction, which means that we can use the coinductive
+  hypothesis $E \in (\A \to \B)_\Gamma$ after one step towards the
+  goal.
+  Note that $E \in \SN$ since $a,u \in \SN$.
+  By unfolding of the fixed point, it is sufficient to show $E \in
+  \F(\A \to \B)^\perp_\Gamma$.  This means to show $I \cdot E \in \SN$
+  for any $I \in \F(\A \to \B)_\Gamma$.
+  \begin{caselist}
+
+    \nextcase $I = \inn\to{00}(t,u')$ with
+    $t \perp (\A \to \B)[\A]_\Gamma$ and
+    $u' \perp (\A \to \B)[\B]_\Gamma$.  We proceed by side induction on
+    $t,u',E \in \SN$ and show that all possible reducts of $I \cdot E$
+    are SN.
+    If reduction occurs in $I$ or $E$, we use the side induction
+    hypothesis.
+    Otherwise $I \cdot E \contract[\beta] t[a] \cdot E$.  We have
+    $t[a] \perp (\A \to \B)_\Gamma$ by assumption on $t$ and
+    $E \in (\A \to \B)_\Gamma$ by the coinduction hypothesis.
+    Thus, $t[a] \cdot E \in \SN$.
+
+    \nextcase $I = \inn\to{11}(a,b)$ with $a \perp \A_\Gamma$ and
+    $b \perp \B_\Gamma$.  Again, we proceed by side induction on
+    $a,b,E \in \SN$ and show that all possible reducts of $I \cdot E$
+    are SN.
+    The only interesting reduction is
+    $I \cdot E \contract[\beta] u[b] \perp \C_\Gamma$, thus $u[b] \in
+    \SN$.
+    Coinduction is not needed in this case.
+
+    \nextcase $I = \inn\to{01}(t,b)$.  In this case we have two
+      $\beta$-contractions of $I \cdot E$ which we handle as in the
+      previous cases.
+  \end{caselist}
+\end{proof}
+
+The previous lemma is not strong enough to justify the implication
+elimination rule, as from $f \perp (\A \to \B)_\Gamma$ and $E \in (\A
+\to \B)_\Gamma$ we only get $f \cdot E \in \SN$, but we need the
+stronger $f \cdot E \in \C_\Gamma$.
+We need the following stronger lemma.
+
+\begin{lemma}[Function elimination, revisited]
+  \label{lem:appprev}
+  Let $\A,\B,\C$ be semantic types for $A,B,C$, resp.  If
+  $a \perp \A_\Gamma$ and $u \perp \C[\B]_\Gamma$ and
+  $E = \el\to{10}(a,u)$ and $\vec E \in \C_\Gamma$ then
+  $E \cdot \vec E \in (\A \to \B)_\Gamma$.
+  % Let $\A,\B,\C$ be semantic types for $A,B,C$, resp.
+  % If $f \perp (\A \to \B)_\Gamma$ and $a \perp \A_\Gamma$ and
+  % $u \perp \C[\B]_\Gamma$ then $f \cdot E \perp \C$
+  % where $E = \el\to{10}(a,u)$.
+\end{lemma}
+\begin{proof}
+  By coinduction, which means that we can use the coinductive
+  hypothesis $E \in (\A \to \B)_\Gamma$ after one step towards the
+  goal.  Note that $E \in \SN$ since $a,u \in \SN$.  By unfolding of
+  the fixed point, it is sufficient to show
+  $E \cdot \vec E \in \F(\A \to \B)^\perp_\Gamma$.  This means to show
+  $I \cdot E \cdot \vec E \in \SN$ for any
+  $I \in \F(\A \to \B)_\Gamma$.
+  We know that $\pi$ spine reduction $\whd[\pi]$ is strongly
+  normalizing, thus we side induct on $E \cdot \vec E \in \SN(\whd[\pi])$.
+  \begin{caselist}
+
+    \nextcase $I = \inn\to{00}(t,u')$ with
+    $t \perp (\A \to \B)[\A]_\Gamma$ and
+    $u' \perp (\A \to \B)[\B]_\Gamma$.  We proceed by a second side induction on
+    $t,u',E, \vec E \in \SN$ and show that all possible reducts of $I
+    \cdot E \cdot \vec E$
+    are SN.
+    If reduction occurs in $I$ or $E$, we use the second side induction
+    hypothesis.
+
+    If $E \cdot \vec E \whd[\pi] \vec E'$ we use the first side
+    induction hypothesis.
+
+    Otherwise $I \cdot E \contract[\beta] t[a] \cdot E$.  We have
+    $t[a] \perp (\A \to \B)_\Gamma$ by assumption on $t$ and
+    $E \cdot \vec E \in (\A \to \B)_\Gamma$ by the coinduction hypothesis.
+    Thus, $t[a] \cdot E \cdot \vec E \in \SN$.
+
+    \nextcase $I = \inn\to{11}(a,b)$ with $a \perp \A_\Gamma$ and
+    $b \perp \B_\Gamma$.  Again, we proceed by side induction on
+    $a,b,E, \vec E \in \SN$ and show that all possible reducts of $I
+    \cdot E \cdot \vec E$
+    are SN.
+    The only interesting reduction is
+    $I \cdot E \contract[\beta] u[b] \perp \C_\Gamma$, thus $u[b]
+    \cdot \vec E \in \SN$.
+    Coinduction is not needed in this case.
+
+    \nextcase $I = \inn\to{01}(t,b)$.  In this case we have two
+      $\beta$-contractions of $I \cdot E$ which we handle as in the
+      previous cases.
+  \end{caselist}
+\end{proof}
 
 
 
