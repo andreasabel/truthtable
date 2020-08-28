@@ -14,8 +14,9 @@
 
 \bibliographystyle{plainurl}% the mandatory bibstyle
 
-\title{Reducibility Candidates for Truth-Table Natural Deduction}
-%\titlerunning{} %TODO optional, please use if title is longer than one line
+%\title{Reducibility Candidates for Truth-Table Natural Deduction}
+\title{Model-Theoretic Strong Normalization for Truth-Table Natural Deduction}
+\titlerunning{SN for Truth-Table ND} %TODO optional, please use if title is longer than one line
 
 \author{Andreas Abel
   }{Department of Computer Science,
@@ -67,6 +68,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage{xspace}
+\usepackage{stmaryrd}
 
 \newcommand{\bla}{\ensuremath{\mbox{$$}}}
 \newcommand{\ie}{\emph{i.e.}\xspace}
@@ -128,6 +130,7 @@
 \newcommand{\Gg}{\ensuremath{\gamma}}
 \newcommand{\Gl}{\ensuremath{\lambda}}
 \newcommand{\Gr}{\ensuremath{\rho}}
+\newcommand{\Gs}{\ensuremath{\sigma}}
 \newcommand{\GG}{\ensuremath{\Gamma}}
 \newcommand{\GS}{\ensuremath{\Sigma}}
 
@@ -163,6 +166,12 @@
 
 \section{Introduction}
 \label{sec:intro}
+
+Truth table natural deduction (which is non-confluent)
+has been shown strongly normalizing
+using CPS translations to parallel lambda calculus.  We investigate
+standard techniques such as reducibility candidates and
+biorthogonality to that end.
 
 \section{Intuitionistic Truth Table Natural Deduction}
 \label{sec:nd}
@@ -512,6 +521,58 @@ implication.  For the elimination rule, we have to do a bit of work.
 The rest, interpretation of types and contexts and the fundamental
 theorem is standard, showing the strong normalization.
 
+For pure implicational truth table natural deduction, types are formed
+from uninterpreted base types $o$ (propositional variables) and
+function space: $A,B ::= o \mid A \to B$.  Types are interpreted as
+the following reducibility candidates:
+\[
+\begin{array}{lll}
+  \Den o \Gamma & = & \SN(\Gamma \vdash o) \\
+  \Den{A \to B} \Gamma & = & (\den A \to \den B)_\Gamma \\
+\end{array}
+\]
+Contexts $\Gamma$ are interpreted as families of sets of
+substitutions.
+\[
+  \begin{array}{lll}
+\Den \Ge \Delta & = & \Delta \vdash \Ge \\
+\Den{\Gamma.A} \Delta & = & \{ \Gs.a \mid \Gs \in \Den \Gamma \Delta
+                            \mbox{ and } a \in \Den A \Delta \}
+  \end{array}
+\]
+Each well-typed term inhabits the corresponding semantic type:
+\begin{theorem}[Fundamental theorem of logical predicates]
+  \label{thm:fund}
+  If $a : \Gamma \vdash A$ and $\Gs \in \Den \Gamma \Delta$ then $a
+  \sigma \in \Den A \Delta$.
+\end{theorem}
+\begin{proof}
+  By induction on $a : \Gamma \vdash A$.
+  For variables, this follows by assumption on $\Gs$, for implication
+  introductions, by definition of $\A \to \B$, and for implication
+  elimination by \Cref{lem:app}.
+\end{proof}
+
+\begin{lemma}[Identity substitution]
+  \label{lem:id}
+  $\tid \in \Den \Gamma \Gamma$.
+\end{lemma}
+\begin{proof}
+  By induction on $\Gamma$.  In case $\Gamma.A$, we have
+  $\tid \in \Den \Gamma \Gamma$ by induction hypothesis, thus, by
+  weakening, ${\up} \in \Den\Gamma{\Gamma.A}$.  Further, the 0th de
+  Bruijn index $x_0 \in \Den A {\Gamma.A}$ by CR3 (it is SN and has no
+  reducts).  Thus $(\up.x_0) = \tid \in \Den{\Gamma.A}{\Gamma.A}$.
+\end{proof}
+
+\begin{corollary}[Strong normalization]
+  If $a : \Gamma \vdash A$ then $a \in \SN$.
+\end{corollary}
+\begin{proof}
+  By \Cref{thm:fund} with \Cref{lem:id}, $a\, \tid = a \in \Den A
+  \Gamma$, thus, $a \in \SN$ by CR1.
+\end{proof}
+
 The pattern outlined here for implication generalizes to arbitrary
 connectives given by truth tables.  Each connective is interpreted as
 an operation on candidates, using the least fixed-point of the closure
@@ -559,7 +620,8 @@ reduction $\whd[\pi]$ where
 \[
   \vec E \cdot E_1 \cdot E_2 \cdot \vec E'
   \whd[\pi]
- \vec E \cdot E_1{E_2} \cdot \vec E'
+ \vec E \cdot E_1\{E_2\} \cdot \vec E'
+ .
 \]
 
 \section{Biorthogonals}
@@ -833,33 +895,47 @@ We need the following stronger lemma.
   $E \cdot \vec E \in \F(\A \to \B)^\perp_\Gamma$.  This means to show
   $I \cdot E \cdot \vec E \in \SN$ for any
   $I \in \F(\A \to \B)_\Gamma$.
+  We do this by proving that all one-step reducts of $I \cdot E \cdot
+  \vec E$ are SN.
   We know that $\pi$ spine reduction $\whd[\pi]$ is strongly
-  normalizing, thus we side induct on $E \cdot \vec E \in \SN(\whd[\pi])$.
+  normalizing, thus we side induct on
+  $E \cdot \vec E \in \SN(\whd[\pi])$. This side induction hypothesis
+  covers the case that $E \cdot \vec E \whd[\pi] \vec E'$.
+  We further side induction on $I,E,\vec E \in \SN$.  By these side
+  induction hypotheses, we cover the case of inner reductions, i.e., that reduction occurs in
+  $I$, $E$ or $\vec E$.
+  It remains to treat the cases of $I \cdot E \contract[\beta] \_$
+  by distinguishing the different introduction forms $I$.
   \begin{caselist}
 
     \nextcase $I = \inn\to{00}(t,u')$ with
     $t \perp (\A \to \B)[\A]_\Gamma$ and
-    $u' \perp (\A \to \B)[\B]_\Gamma$.  We proceed by a second side induction on
-    $t,u',E, \vec E \in \SN$ and show that all possible reducts of $I
-    \cdot E \cdot \vec E$
-    are SN.
-    If reduction occurs in $I$ or $E$, we use the second side induction
-    hypothesis.
+    $u' \perp (\A \to \B)[\B]_\Gamma$.
 
-    If $E \cdot \vec E \whd[\pi] \vec E'$ we use the first side
-    induction hypothesis.
+    % We proceed by a second side induction on
+    % $t,u',E, \vec E \in \SN$ and show that all possible reducts of $I
+    % \cdot E \cdot \vec E$
+    % are SN.
+    % If reduction occurs in $I$ or $E$, we use the second side induction
+    % hypothesis.
 
-    Otherwise $I \cdot E \contract[\beta] t[a] \cdot E$.  We have
+    % If $E \cdot \vec E \whd[\pi] \vec E'$ we use the first side
+    % induction hypothesis.
+
+    %Otherwise
+    The reduction is $I \cdot E \contract[\beta] t[a] \cdot E$.  We have
     $t[a] \perp (\A \to \B)_\Gamma$ by assumption on $t$ and
     $E \cdot \vec E \in (\A \to \B)_\Gamma$ by the coinduction hypothesis.
     Thus, $t[a] \cdot E \cdot \vec E \in \SN$.
 
     \nextcase $I = \inn\to{11}(a,b)$ with $a \perp \A_\Gamma$ and
-    $b \perp \B_\Gamma$.  Again, we proceed by side induction on
-    $a,b,E, \vec E \in \SN$ and show that all possible reducts of $I
-    \cdot E \cdot \vec E$
-    are SN.
-    The only interesting reduction is
+    $b \perp \B_\Gamma$.
+    % Again, we proceed by side induction on
+    % $a,b,E, \vec E \in \SN$ and show that all possible reducts of $I
+    % \cdot E \cdot \vec E$
+    % are SN.
+    % The only interesting reduction is
+    The reduction is
     $I \cdot E \contract[\beta] u[b] \perp \C_\Gamma$, thus $u[b]
     \cdot \vec E \in \SN$.
     Coinduction is not needed in this case.
@@ -870,7 +946,10 @@ We need the following stronger lemma.
   \end{caselist}
 \end{proof}
 
+\section{Classical Truth-Table Natural Deduction}
 
+The biorthogonality technique should extend to a classical version of
+truth-table natural deduction with Parigot-style classicality!?
 
 
 
