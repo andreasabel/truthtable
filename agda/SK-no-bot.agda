@@ -5,7 +5,6 @@
 
 module SK-no-bot where
 
-open import Data.Product
 open import Function using (case_of_)
 open import Level using (suc)
 open import Relation.Nullary using (¬_)
@@ -79,6 +78,8 @@ SN = Acc _↦_
 sn-red : SN t → t ↦ t′ → SN t′
 sn-red (acc sn) r = sn r
 
+-- Values are SN:
+
 -- K is SN
 
 sn-K : SN (K {a} {b})
@@ -140,17 +141,20 @@ sn-cr .cr3 _ h = acc h
 
 -- Function space
 
-_⇨_ : (P : Pred a) (Q : Pred b) → Pred (a ⇒ b)
-(P ⇨ Q) t = SN t × ∀ {u} (hu : P u) → Q (t ∙ u)
+record _⇨_ (P : Pred a) (Q : Pred b) (t : Tm (a ⇒ b)) : Set where
+  field
+    sn  : SN t
+    app : ∀ {u} (hu : P u) → Q (t ∙ u)
+open _⇨_
 
 -- CRs are closed under function space
 
 ⇨-cr : (crP : CR P) (crQ : CR Q) → CR (P ⇨ Q)
-⇨-cr                crP crQ .cr1 h = h .proj₁
-⇨-cr crP crQ .cr2 ht r .proj₁      = sn-red (ht .proj₁) r
-⇨-cr crP crQ .cr2 ht r .proj₂ hu   = crQ .cr2 (ht .proj₂ hu) (↦l r)
-⇨-cr {P = P} {Q = Q} crP crQ .cr3 {t} n ht .proj₁ = acc (λ r → ht r .proj₁)
-⇨-cr {P = P} {Q = Q} crP crQ .cr3 {t} n ht .proj₂ hu = loop hu (crP .cr1 hu)
+⇨-cr                 crP crQ .cr1 h                = h .sn
+⇨-cr                 crP crQ .cr2 ht r .sn         = sn-red (ht .sn) r
+⇨-cr                 crP crQ .cr2 ht r .app hu     = crQ .cr2 (ht .app hu) (↦l r)
+⇨-cr {P = P} {Q = Q} crP crQ .cr3 {t} n ht .sn     = acc (λ r → ht r .sn)
+⇨-cr {P = P} {Q = Q} crP crQ .cr3 {t} n ht .app hu = loop hu (crP .cr1 hu)
   where
   -- Side induction on u SN.
   -- Uses that P is closed under reduction.
@@ -158,7 +162,7 @@ _⇨_ : (P : Pred a) (Q : Pred b) → Pred (a ⇒ b)
   loop pu (acc snu) = crQ .cr3 (napp n)
     λ{ ↦K     → Kt¬ne n
      ; ↦S     → Stu¬ne n
-     ; (↦l r) → ht r .proj₂ pu
+     ; (↦l r) → ht r .app pu
      ; (f↦ r) → loop (crP .cr2 pu r) (snu r)
      }
 
@@ -174,6 +178,9 @@ ty-cr : ∀ a → CR ⟦ a ⟧
 ty-cr o       = sn-cr
 ty-cr (a ⇒ b) = ⇨-cr (ty-cr a) (ty-cr b)
 
+sem-sn : ⟦ a ⟧ t → SN t
+sem-sn ht = ty-cr _ .cr1 ht
+
 -- Soundness
 
 -- Interpretation of S
@@ -184,7 +191,7 @@ ty-cr (a ⇒ b) = ⇨-cr (ty-cr a) (ty-cr b)
    → ⟦ b ⟧ (S ∙ t ∙ u ∙ v)
 
 ⦅S⦆ {b = b} ht (acc snt) hu (acc snu) hv (acc snv) = ty-cr b .cr3 Stuv
-  λ{ ↦S                → ht .proj₂ hv .proj₂ (hu .proj₂ hv)
+  λ{ ↦S                → ht .app hv .app (hu .app hv)
    ; (↦l (↦l (f↦ rt))) → ⦅S⦆ (ty-cr _ .cr2 ht rt) (snt rt)
                             hu (acc snu)
                             hv (acc snv)
@@ -208,22 +215,22 @@ ty-cr (a ⇒ b) = ⇨-cr (ty-cr a) (ty-cr b)
 -- Term interpretation (soundness)
 
 ⦅_⦆ : (t : Tm a) → ⟦ a ⟧ t
-⦅ S {c} {a} {b} ⦆ .proj₁                        = sn-S
-⦅ S {c} {a} {b} ⦆ .proj₂ ht .proj₁              = sn-St (ht .proj₁)
-⦅ S {c} {a} {b} ⦆ .proj₂ ht .proj₂ hu .proj₁    = sn-Stu (ht .proj₁) (hu .proj₁)
-⦅ S {c} {a} {b} ⦆ .proj₂ ht .proj₂ hu .proj₂ hv = ⦅S⦆ {c} {a} {b}
-  ht (ty-cr _ .cr1 ht)
-  hu (ty-cr _ .cr1 hu)
-  hv (ty-cr c .cr1 hv)
-⦅ K {a} ⦆ .proj₁                                = sn-K
-⦅ K {a} ⦆ .proj₂ ht .proj₁                      = sn-Kt (ty-cr a .cr1 ht )
-⦅ K {a} ⦆ .proj₂ ht .proj₂ hu                   = ⦅K⦆ ht (ty-cr a .cr1 ht) (ty-cr _ .cr1 hu)
-⦅ t ∙ u ⦆                                       = ⦅ t ⦆ .proj₂ ⦅ u ⦆
+⦅ S {c} {a} {b} ⦆ .sn                     = sn-S
+⦅ S {c} {a} {b} ⦆ .app ht .sn             = sn-St  (ht .sn)
+⦅ S {c} {a} {b} ⦆ .app ht .app hu .sn     = sn-Stu (ht .sn) (hu .sn)
+⦅ S {c} {a} {b} ⦆ .app ht .app hu .app hv = ⦅S⦆ {c} {a} {b}
+  ht (sem-sn ht)
+  hu (sem-sn hu)
+  hv (sem-sn hv)
+⦅ K {a} ⦆ .sn                             = sn-K
+⦅ K {a} ⦆ .app ht .sn                     = sn-Kt (sem-sn ht)
+⦅ K {a} ⦆ .app ht .app hu                 = ⦅K⦆ ht (sem-sn ht) (sem-sn hu)
+⦅ t ∙ u ⦆                                 = ⦅ t ⦆ .app ⦅ u ⦆
 
 -- Strong normalization
 
-sn : (t : Tm a) → SN t
-sn t = ty-cr _ .cr1 ⦅ t ⦆
+thm : (t : Tm a) → SN t
+thm t = sem-sn ⦅ t ⦆
 
 -- -}
 -- -}
