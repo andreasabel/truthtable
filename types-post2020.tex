@@ -69,6 +69,17 @@
 
 \usepackage{xspace}
 \usepackage{stmaryrd}
+\usepackage{enumitem}
+\usepackage[hang,flushmargin]{footmisc}
+
+% https://texblog.org/2012/03/21/cross-referencing-list-items/
+\makeatletter
+\def\namedlabel#1#2{\begingroup
+    #2%
+    \def\@currentlabel{#2}%
+    \phantomsection\label{#1}\endgroup
+}
+\makeatother
 
 \newcommand{\bla}{\ensuremath{\mbox{$$}}}
 \newcommand{\ie}{\emph{i.e.}\xspace}
@@ -167,16 +178,51 @@
 \section{Introduction}
 \label{sec:intro}
 
-Truth table natural deduction (which is non-confluent)
-has been shown strongly normalizing
-using CPS translations to parallel lambda calculus.  We investigate
+% ICLA'17
+%
+% Kripke semantics and completeness proof in ICLA'17 uses a classical
+% meta-theory.
+%
+% Propositions are boolean-valued.
+% ⟦c(A₁,...,Aₙ)⟧w = ⋀ { t_c(⟦A₁⟧w',...⟦Aₙ⟧w') | w' ≤ w }
+%
+% Completeness proof uses notion of ψ-maximal context (similar to
+% classical proof using maximally consistent contexts).
+%
+% SN via SAT only for optimized if-then-else, which is confluent.
+
+
+% TYPES'17
+%
+% Impredicative, elimination-based SN proof using Girard's
+% reducibility candidates.
+%
+% Uses a notion of key reduction (weak head reduction) to define the
+% expansion closure.  Instead no closure under β-reduction is needed
+% (and would not hold because of the wh-expansion closure).
+%
+% The condition the Ne ⊆ X is redundant.
+%
+% Proof of Lemma 58 c.
+%
+% Suppose t ∈ SN and ∀t′(t −→ka t′ ⇒ t′ ∈ c(X1,...,Xn))(*).
+% Let ri be a rule for c and let D ∈ SAT, p,q ∈ Term with ∀k(pk ∈ Xk)
+% and ∀ₗ ∀uₗ∈Xₗ(qₗ[yₗ:=uₗ] ∈ D).
+% For all t′ with t −→ka t′ we have t·ri[p;λy.q] −→ka t′·ri[p;λy.q]
+% and t′·ri[p;λy.q] ∈ D by (*).  So, t·ri[p;λy.q] ∈ D and so t ∈ c(X1,...,Xn).
+
+Truth table natural deduction
+\cite{geuversHurkens:icla17,geuversHurkens:types17}
+(which is non-confluent) has been shown
+strongly normalizing using CPS translations to parallel lambda
+calculus \cite{geuversGiessenHurkens:fundinf19}.  We investigate
 standard techniques such as reducibility candidates and
 biorthogonality to that end.
 
 \section{Intuitionistic Truth Table Natural Deduction}
 \label{sec:nd}
 
-Geuvers et al. \cite{todo} introduced a method to derive natural
+Geuvers et al. \cite{geuversHurkens:icla17} introduced a method to derive natural
 deduction proof rules from truth tables of logical connectives.
 For instance, consider the truth table for implication:
 \[
@@ -189,17 +235,48 @@ For instance, consider the truth table for implication:
   1 & 1 & 1 \\
 \end{array}
 \]
-For each line where $A \to B$ holds, \eg, the second line,
-an introduction rule is created
-where $0$-valued (or \emph{negative})
-operands $A$ become premises $\Gamma.A \vdash A \to B$
-and $1$-valued (or \emph{positive}) operands $B$ become premises $\Gamma \vdash B$.
-Lines like the third where $A \to B$ is false become elimination
-rules with a conclusion $\Gamma \vdash C$ for an arbitrary formula
-$C$.  Besides the principal premise $\Gamma \vdash A \to B$, the
-$1$-valued operands $A$ become premises $\Gamma \vdash A$, and the
-$0$-valued operands $B$ premises $\Gamma.B \vdash D$.
-This yields the following four rules:
+For each line where $A \to B$ holds, \eg, the second line, an
+introduction rule is created where $0$-valued (or \emph{negative})
+operands $A$ become premises $\Gamma.A \vdash A \to B$ and $1$-valued
+(or \emph{positive}) operands $B$ become premises $\Gamma \vdash B$.
+Lines like the third where $A \to B$ is false become elimination rules
+with a conclusion $\Gamma \vdash C$ for an arbitrary formula $C$.
+Besides the principal premise $\Gamma \vdash A \to B$, the $1$-valued
+operands $A$ become premises $\Gamma \vdash A$, and the $0$-valued
+operands $B$ premises $\Gamma.B \vdash D$.  This yields the following
+four rules:%
+%
+\footnote{%
+%\setlength{\leftskip}{0pt} %NO EFFECT
+Natural deduction asserts the truth of a proposition $A$
+  under a list of assumed propositions $\Gamma$, a context, via the
+  judgement $\Gamma \vdash A$.  Derivations of such a judgement using
+  proof rules form proof trees where nodes are labeled by the name of
+  the applied rule and the ordered subtrees correspond to the premises
+  of the rule.  Leaves are either applications of a rule that has no
+  premises or references to one of the hypotheses in $\Gamma$.
+\par
+  The list $\Gamma$ can be extended on the right by a proposition $A$
+  using the notation $\Gamma.A$.  Following de Bruijn
+  \cite{deBruijn:nameless}, we number the hypotheses from the right
+  starting with zero, and a reference to a hypothesis is a
+  non-negative number $i$ smaller than the length of $\Gamma$, a
+  so-called de Bruijn index.  For example, de Bruijn index zero
+  refers to proposition $A$ in context $\Gamma.A$.  We write $x :
+  \Gamma \vdash A$ to denote a de Bruijn index $x$ pointing to
+  proposition $A$ in context $\Gamma$.
+\par
+  In general, we use the notation $t : \Gamma \vdash A$ to state that
+  $t$ is a valid proof tree, also called proof term, whose conclusion
+  is the judgement $\Gamma \vdash A$.  We will only refer to terms $t$
+  that correspond to a valid proof tree, thus, we consider terms as
+  intrinsically typed
+  \cite{alti:monadic,bentonHurKennedyMcBride:jar12}.  This choice
+  however affects neither presentation nor results in this article
+  very much; they apply the same to extrinsic typing.
+%
+}%
+%
 \begin{gather*}
   \ru{t : \Gamma.A \vdash A \to B \qquad
       u : \Gamma.B \vdash A \to B
@@ -229,7 +306,7 @@ Replacing the distinguished hypothesis in $t$ by a derivation/term $a$
 is written $t[a]$.  We use letter $I$ for introduction terms, \ie,
 with $\tin$ at the root, and letter $E$ for an elimination in term $f
 \cdot E$, \ie, the $\tel$ part.  Heads $h$ are either variables $x$ or
-introductions $I$, an each term can be written in spine form $h \cdot
+introductions $I$, and each term can be written in spine form $h \cdot
 E_1 \cdot \dots \cdot E_n$.  This may be written $h \cdot \vec E$.
 
 \emph{Detour} or $\beta$ reductions can fire when an introduction is
@@ -274,23 +351,37 @@ reduction.  However, Girard's reducibility candidates accommodate
 non-confluent reduction, thus, his technique may be adapted to the
 present situation.
 
-\section{Reducibility Candidates}
-\label{sec:cr}
+\section{Model-theoretic proofs of strong normalization}
+\label{sec:model}
+
+\subsection{Preliminaries}
+\label{sec:prelim}
 
 We work with sets $\Gamma \vdash A$ of nameless well-typed terms and
 weakening under order-preserving embeddings (OPE)
 $\tau : \Delta \leq \Gamma$.  Here, $\tau$ witnesses that and how
 $\Gamma$ is a subsequence of $\Delta$.
-Then, $\Up\tau : \Delta.B \leq \Gamma.B$ be the lifted OPE.
+Then, $\Up\tau : \Delta.B \leq \Gamma.B$ be the \emph{lifted} OPE.
+Further, $\up : \Gamma.B \leq \Gamma$ is the OPE for weakening by one
+variable, and OPEs form a category with identity $\tid : \Gamma \leq
+\Gamma$ and composition $\_\circ\_ : (\Gamma \leq \Delta) \to (\Delta
+\leq \Phi) \to (\Gamma \leq \Phi)$.
 If $a : \Gamma \vdash A$ then
-weakening $a\tau : \Delta \vdash A$ is defined in the usual way.
-Substitution $\sigma : \Delta \vdash \Gamma$ are defined as lists of
+\emph{weakening} $a\tau : \Delta \vdash A$ is defined in the usual way.
+In particular, $\Up$ is used to traverse under binders.
+
+Substitutions $\sigma : \Delta \vdash \Gamma$ are defined as lists of
 terms typed by list $\Gamma$ under context $\Delta$.  Parallel
 substitution $a\sigma : \Delta \vdash A$ for $a : \Gamma \vdash A$ be
-defined as usual.  Substitutions compose with weakenings and
-substitutions in the usual way, and singleton substitution $t[b]$ be
-an instance for parallel substitution $t\sigma$ for a suitable
-$\sigma : \Gamma \vdash \Gamma.B$ obtained from $b : \Gamma \vdash B$.
+defined as usual.  OPEs $\tau : \Delta \leq \Gamma$ are silently
+coerced to substitutions $\Delta \vdash \Gamma$ consisting only of de
+Bruijn indices.
+Substitutions form a category, and we reuse $\tid$ and $\_\circ\_$ for
+identity and substitution.
+
+Single substitution $t[b]$ is
+an instance for parallel substitution $t\sigma$ for substitution
+$\sigma = \tid.b: \Gamma \vdash \Gamma.B$ obtained from $b : \Gamma \vdash B$.
 
 Reduction $a \red a'$ acts on same-typed terms
 $a,a' : \Gamma \vdash A$ by definition.  It is closed under weakening
@@ -298,7 +389,7 @@ and substitution.  It is even closed under \emph{anti-weakening}, \ie,
 if $a\tau \red a'\tau$ then also $a \red a'$.  (Not so for
 substitution, of course.)
 
-The ``set'' of strongly normalizing terms $\SN$
+The ``set'' of strongly normalizing terms $\SN$ given inductively by rule
 \[
   \ru{(a \red \_) \subseteq \SN
     }{a \in \SN}
@@ -310,21 +401,27 @@ under weakening, \ie, if $\tau : \Delta \leq \Gamma$ then
 $a\tau \in \SN$ as well.  This follows easily from anti-weakening for
 reduction.
 
+\section{Reducibility Candidates}
+\label{sec:cr}
+
 A \emph{reducibility candidate} $\A$ for a type $A$ is a context-indexed
 family of predicates on terms of type $A$, written as sets, with the following
 properties:
-\begin{itemize}
-\item[CR0]  If $a \in \A_\Gamma$ and $\tau : \Delta \leq \Gamma$ then
+\begin{itemize}[leftmargin=3em]
+\item[\namedlabel{it:cr0}{CR0}]
+  If $a \in \A_\Gamma$ and $\tau : \Delta \leq \Gamma$ then
   $a\tau \in \A_\Delta$.
-\item[CR1]  $\A_\Gamma \subseteq \SN$.
-\item[CR2]  If $a \in \A_\Gamma$ and $a \red a'$ then $a' \in
-  \A_\Gamma$.
-\item[CR3]  For $a : \Gamma \vdash A$, if $a \in \SN \setminus \Intro$
+\item[\namedlabel{it:cr1}{CR1}]
+  $\A_\Gamma \subseteq \SN$.
+\item[\namedlabel{it:cr2}{CR2}]
+  If $a \in \A_\Gamma$ and $a \red a'$ then $a' \in \A_\Gamma$.
+\item[\namedlabel{it:cr3}{CR3}]
+  For $a : \Gamma \vdash A$, if $a \in \SN \setminus \Intro$
   and $(a \red \_) \subseteq \A_\Gamma$, then $a \in \A_\Gamma$.
 \end{itemize}
 If $\A$ satisfies only CR0-2, it shall be called a \emph{precandidate}.
 
-Property CR3 can be forced by the following closure operation $\cl\A$
+Property \ref{it:cr3} can be forced by the following closure operation $\cl\A$
 on a term set $\A \subseteq \Gamma \vdash A$.
 \begin{gather*}
   \ru{a \in \A
@@ -343,13 +440,13 @@ $\A_\Gamma \subseteq \Gamma \vdash A$ of term sets.
   $\cl\A$ is a reducibility candidate for any precandidate $\A$.
 \end{lemma}
 \begin{proof}
-  CR3 is forced by the closure operation, and preservation of CR1 and
-  CR2 is immediate.
-  CR0 follows again from anti-weakening of reduction, and that being
+  \ref{it:cr3} is forced by the closure operation, and preservation of \ref{it:cr1} and
+  \ref{it:cr2} is immediate.
+  \ref{it:cr0} follows again from anti-weakening of reduction, and that being
   an introduction is not affected by weakening or anti-weakening.
 \end{proof}
 
-Note that the union $\A \cup \B$ preserves CR0-2, but not CR3; thus,
+Note that the union $\A \cup \B$ preserves CR0-2, but not \ref{it:cr3}; thus,
 to obtain a reducibility candidate from the union of two such
 candidates we need to apply the closure operation in general.
 
@@ -367,24 +464,24 @@ resp., let $\X[\A]$ be the term set family defined by
 \]
 Herein, $\tau.a : \Delta \vdash \Gamma.A$ is obtained by turning
 $\tau$ into a substitution and extending it by $a$.
-Clearly, $\X[\A]$ is monotone in $\X$ (and antitone in $\A$, but we
-shall not utilize that).
+Clearly, $\X[\A]$ is monotone in $\X$. (It is also antitone in $\A$, but we
+shall not utilize that.)
 % \begin{lemma}[Abstraction]
 %   If $\A$ and $\X$ are reducibility candidates, so is $\X[\A]$.
 % \end{lemma}
 % \begin{proof}
-%   CR0 is guaranteed by the \emph{Kripke}-style definition of $\X[\A]$.
-%   CR1 holds by definition, and CR2 relies on the closure of reduction
+%   \ref{it:cr0} is guaranteed by the \emph{Kripke}-style definition of $\X[\A]$.
+%   \ref{it:cr1} holds by definition, and \ref{it:cr2} relies on the closure of reduction
 %   under substitution.
 
-%   For CR3, let $t \in \SN(\Gamma.A \vdash X) \setminus \Intro$ and
+%   For \ref{it:cr3}, let $t \in \SN(\Gamma.A \vdash X) \setminus \Intro$ and
 %   $(t \red \_) \subseteq \X[\A]_\Gamma$.
 %   % We need to show that $t \in \X[\A]_\Gamma$.  In case that $t$ is de
 %   % Bruijn index 0 (and thus X = A)
 %   Further, to show that $t \in \X[\A]_\Gamma$, assume
 %   $\tau : \Delta \leq \Gamma$ and $a \in \A_\Delta$ and show
 %   $t(\tau.a) \in \X_\Delta$.
-%   By CR3 for $\X$, we first need to show that $t(\tau.a) \not\in
+%   By \ref{it:cr3} for $\X$, we first need to show that $t(\tau.a) \not\in
 %   \Intro$.  Since $t \not\in\Intro$, the only possibility for
 %   $t(\tau.a) \in \Intro$ is that $t : \Gamma.A \vdash X$ is the 0th de Bruijn index.
 %   However, this is excluded by the precondition $A \not=X$.
@@ -394,17 +491,17 @@ shall not utilize that).
 \label{lem:abs}
   Let $\A_\Gamma$ be inhabited for any $\Gamma$.
   If $\X$ is a precandidate, then $\X[\A]$ satisfies CR1/2 and is
-  closed under lifted weakening (almost CR0).
+  closed under lifted weakening (almost \ref{it:cr0}).
 \end{lemma}
 \begin{proof}
-  CR1 holds by non-emptiness of $\A$.  Given $t \in \X[\A]_\Gamma$ and
+  \ref{it:cr1} holds by non-emptiness of $\A$.  Given $t \in \X[\A]_\Gamma$ and
   arbitrary $a \in \A_\Gamma$ we have $t[a] \in \X_\Gamma$.  In
   particular, $t[a] \in \SN$, and thus, $t \in \SN$.
 
-  CR2 relies on the closure of reduction
+  \ref{it:cr2} relies on the closure of reduction
   under substitution:  Assume $\X[\A]_\Gamma \ni t \red t'$ and $\tau
   : \Delta \leq \Gamma$ and $a \in \A_\Delta$.  To show $t'(\tau.a)
-  \in \X_\Delta$ observe that $t(\tau.a) \in \X_\Delta$ and that CR2
+  \in \X_\Delta$ observe that $t(\tau.a) \in \X_\Delta$ and that \ref{it:cr2}
   holds for $\X$.
 
   For closure under lifted weakening, assume $t \in \X[\A]_\Gamma$ and
@@ -416,7 +513,7 @@ shall not utilize that).
   t(\tau'\tau.a)$ and $\tau'\tau : \Delta \leq \Gamma$ we conclude by
   $t \in \X[\A]_\Gamma$.
 
-  % CR0 is guaranteed by the \emph{Kripke}-style definition of $\X[\A]$:
+  % \ref{it:cr0} is guaranteed by the \emph{Kripke}-style definition of $\X[\A]$:
   % Let $t \in \X[\A]_\Gamma$ and $\tau' : \Gamma' \leq \Gamma$ to show
   % $t\tau' \in \X[\A]_{\Gamma'}$, assume $\tau : \Delta \leq \Gamma'$
   % and $a \in \A_\Delta$ and show $t\tau'(\tau,a) \in \X_\Delta$.
@@ -448,12 +545,12 @@ This operation acts on reducibility candidates:
 \end{lemma}
 \begin{proof}
   It is sufficient to show that $\F$ acts on reducibility candidates.
-  Since CR3 is forced, it is sufficient that $\F(\X)$ is a
+  Since \ref{it:cr3} is forced, it is sufficient that $\F(\X)$ is a
   precandidate for any candidate $\X$, and this follows mostly from
   \Cref{lem:abs} and the candidateship of $\A$ and $\B$.
-  CR0 is immediate, CR1 follows since any reduction of an introduction
+  \ref{it:cr0} is immediate, \ref{it:cr1} follows since any reduction of an introduction
   needs to happen in one of the arguments of $\tin$, which are SN.
-  CR2 follows by the same observation.
+  \ref{it:cr2} follows by the same observation.
 \end{proof}
 
 By definition, $\A \to \B$ models the introduction rules for
@@ -471,20 +568,20 @@ implication.  For the elimination rule, we have to do a bit of work.
 
     \nextcase $f \not\in \Intro$ and $f \red f'$ implies
     $f \in (\A \to \B)_\Gamma$:
-    We show $f \cdot E \in \C$ by side induction on $E \in \SN$ via CR3.
+    We show $f \cdot E \in \C$ by side induction on $E \in \SN$ via \ref{it:cr3}.
     First, $f \cdot E \not\in\Intro$.
     Assume $f \cdot E \red c$.  Since $f$ is not a introduction, we
     have either $f \red f'$ or $E \red E'$.  In the first case, by
     main induction hypothesis, $f' \cdot E \in \C$.
     In the second case, $f \cdot E' \in \C$ by side induction hypothesis.
     In any case, $c \in \C$.  Since $c$ was arbitrary, $f \cdot E \in
-    \C$ by CR3.
+    \C$ by \ref{it:cr3}.
 
     \nextcase $f = \inn\to{00}(t_1,t_2)$ where
     $t_1 \in (\A \to \B)[\A]_\Gamma$ and
     $t_2 \in (\A \to \B)[\B]_\Gamma$.
     We show $f \cdot E \in \C$ by side induction on $t_1,t_2,E \in
-    \SN$ via CR3.
+    \SN$ via \ref{it:cr3}.
     Given $f \cdot E \red c$, there are three cases.  Either $c = f' \cdot
     E$ with $f \red f'$ or $c = f \cdot E'$ with $E \red E'$ or $c =
     t_1[a] \cdot E$.  The first two cases are handled by the side
@@ -495,7 +592,7 @@ implication.  For the elimination rule, we have to do a bit of work.
     $t \in (\A \to \B)[\A]_\Gamma$ and
     $b \in \B_\Gamma$.
     We show $f \cdot E \in \C$ by side induction on $t,b,E \in
-    \SN$ via CR3.
+    \SN$ via \ref{it:cr3}.
     Given $f \cdot E \red c$, there are four cases.  Either $c = f' \cdot
     E$ with $f \red f'$ or $c = f \cdot E'$ with $E \red E'$ or $c =
     t[a] \cdot E$ or $c = u[b]$.  The first two cases are handled by the side
@@ -507,7 +604,7 @@ implication.  For the elimination rule, we have to do a bit of work.
     $a' \in \A_\Gamma$ and
     $b \in \B_\Gamma$.
     We show $f \cdot E \in \C$ by side induction on $a',b,E \in
-    \SN$ via CR3.
+    \SN$ via \ref{it:cr3}.
 
     Given $f \cdot E \red c$, there are three cases.  Either
     $c = f' \cdot E$ with $f \red f'$ or $c = f \cdot E'$ with
@@ -561,7 +658,7 @@ Each well-typed term inhabits the corresponding semantic type:
   By induction on $\Gamma$.  In case $\Gamma.A$, we have
   $\tid \in \Den \Gamma \Gamma$ by induction hypothesis, thus, by
   weakening, ${\up} \in \Den\Gamma{\Gamma.A}$.  Further, the 0th de
-  Bruijn index $x_0 \in \Den A {\Gamma.A}$ by CR3 (it is SN and has no
+  Bruijn index $x_0 \in \Den A {\Gamma.A}$ by \ref{it:cr3} (it is SN and has no
   reducts).  Thus $(\up.x_0) = \tid \in \Den{\Gamma.A}{\Gamma.A}$.
 \end{proof}
 
@@ -570,7 +667,7 @@ Each well-typed term inhabits the corresponding semantic type:
 \end{corollary}
 \begin{proof}
   By \Cref{thm:fund} with \Cref{lem:id}, $a\, \tid = a \in \Den A
-  \Gamma$, thus, $a \in \SN$ by CR1.
+  \Gamma$, thus, $a \in \SN$ by \ref{it:cr1}.
 \end{proof}
 
 The pattern outlined here for implication generalizes to arbitrary
@@ -608,7 +705,7 @@ case $f = f_0 \cdot E_0$ it could be that $c = f_0 \cdot E_0\{E\}$.
 This reduction is not covered by any induction hypothesis.
 
 We cannot arbitrarily tighten the restriction $\_ \not\in \Intro$ in
-the formulation of CR3, since CR3 is used in \Cref{lem:app} to
+the formulation of \ref{it:cr3}, since \ref{it:cr3} is used in \Cref{lem:app} to
 introduce terms of the shape $f \cdot E$
 into a reducibility candidate $\C$.  Such terms need to satisfy the
 restriction, therefore we cannot exclude $\pi$-redexes in general: a
@@ -641,7 +738,7 @@ Agda.
 
 In the following, when we speak of context-indexed families, we
 implicitly assume that the family is closed under weakening in analogy
-to CR0.
+to \ref{it:cr0}.
 
 Semantic types $\A$ shall now be context-indexed families of sets of
 evaluation contexts $\vec E$, and we write $a \perp \A_\Gamma$ to
