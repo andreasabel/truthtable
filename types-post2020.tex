@@ -145,10 +145,12 @@
 \newcommand{\GG}{\ensuremath{\Gamma}}
 \newcommand{\GS}{\ensuremath{\Sigma}}
 
+\newcommand{\Set}{\mathsf{Set}}
+
 \newcommand{\tin}{\ensuremath{\mathsf{in}}}
-\newcommand{\inn}[2]{\tin_{#1}^{#2}}
+\newcommand{\inn}[2]{\ensuremath{\tin_{#1}^{#2}}}
 \newcommand{\tel}{\mathsf{el}}
-\newcommand{\el}[2]{\tel_{#1}^{#2}}
+\newcommand{\el}[2]{\ensuremath{\tel_{#1}^{#2}}}
 
 \newcommand{\contract}[1][]{\mapsto_{#1}}
 \newcommand{\whd}[1][]{\rhd_{#1}}
@@ -256,6 +258,7 @@ Natural deduction asserts the truth of a proposition $A$
   of the rule.  Leaves are either applications of a rule that has no
   premises or references to one of the hypotheses in $\Gamma$.
 \par
+  We write $\Ge$ for empty lists.
   The list $\Gamma$ can be extended on the right by a proposition $A$
   using the notation $\Gamma.A$.  Following de Bruijn
   \cite{deBruijn:nameless}, we number the hypotheses from the right
@@ -294,7 +297,7 @@ Natural deduction asserts the truth of a proposition $A$
     }
 \\[2ex]
   \ru{f : \Gamma \vdash A \to B \qquad
-      a : \Gamma \vdash a \qquad
+      a : \Gamma \vdash A \qquad
       t : \Gamma.B \vdash C
     }{f \cdot \el\to{10}(a,t) : \Gamma \vdash C
     }
@@ -364,11 +367,13 @@ $\Gamma$ is a subsequence of $\Delta$.
 Then, $\Up\tau : \Delta.B \leq \Gamma.B$ be the \emph{lifted} OPE.
 Further, $\up : \Gamma.B \leq \Gamma$ is the OPE for weakening by one
 variable, and OPEs form a category with identity $\tid : \Gamma \leq
-\Gamma$ and composition $\_\circ\_ : (\Gamma \leq \Delta) \to (\Delta
-\leq \Phi) \to (\Gamma \leq \Phi)$.
+\Gamma$ and composition % $\_\circ\_ :
+$(\Gamma \leq \Delta) \to (\Delta \leq \Phi) \to (\Gamma \leq \Phi)$
+written as juxtaposition.
 If $a : \Gamma \vdash A$ then
 \emph{weakening} $a\tau : \Delta \vdash A$ is defined in the usual way.
-In particular, $\Up$ is used to traverse under binders.
+In particular, $\Up$ is used to traverse under binders, for instance,
+$\inn\to{01}(t,b)\tau = \inn\to{01}(t(\Up\tau),b\tau)$.
 
 Substitutions $\sigma : \Delta \vdash \Gamma$ are defined as lists of
 terms typed by list $\Gamma$ under context $\Delta$.  Parallel
@@ -376,30 +381,189 @@ substitution $a\sigma : \Delta \vdash A$ for $a : \Gamma \vdash A$ be
 defined as usual.  OPEs $\tau : \Delta \leq \Gamma$ are silently
 coerced to substitutions $\Delta \vdash \Gamma$ consisting only of de
 Bruijn indices.
-Substitutions form a category, and we reuse $\tid$ and $\_\circ\_$ for
+Substitutions form a category, and we reuse $\tid$ and %$\_\circ\_$
+juxtaposition for
 identity and substitution.
+Like for OPEs, we have lifting
+$\Up : (\Delta \vdash \Gamma) \to (\Delta.B \vdash \Gamma.B)$ to push
+substitutions under binders.
 
 Single substitution $t[b]$ is
 an instance for parallel substitution $t\sigma$ for substitution
 $\sigma = \tid.b: \Gamma \vdash \Gamma.B$ obtained from $b : \Gamma \vdash B$.
 
-Reduction $a \red a'$ acts on same-typed terms
+\emph{Reduction} $a \red a'$, which is defined using single substitution,
+acts on same-typed terms
 $a,a' : \Gamma \vdash A$ by definition.  It is closed under weakening
 and substitution.  It is even closed under \emph{anti-weakening}, \ie,
 if $a\tau \red a'\tau$ then also $a \red a'$.  (Not so for
 substitution, of course.)
 
-The ``set'' of strongly normalizing terms $\SN$ given inductively by rule
+Via the parallel substitution operation, the family $\_ \vdash A$ of
+terms of type $A$ is a contravariant functor (\ie, presheaf) into the
+category $\Set$ of sets and functions from the category of
+substitutions, and thus also from its subcategory OPE.  We will work a
+lot with presheafs of the latter kind, especially with families of
+predicates $P_\Gamma \subseteq (\Gamma \vdash A)$ closed under
+weakening, meaning if $a \in P_\Gamma$ and $\tau : \Delta \leq \Gamma$
+then $a \tau \in P_\Delta$.  We call such predicates \emph{term set
+  families}.
+
+Our prime example of a term set family are the strongly normalizing
+terms $\SN$ given inductively by rule
 \[
   \ru{(a \red \_) \subseteq \SN
     }{a \in \SN}
+  .
 \]
-is formally a family of inductive predicates on well-typed terms
-$a : \Gamma \vdash A$, but we mostly write $a \in \SN$ instead of
+While it is formally a family of inductive predicates on well-typed terms
+$a : \Gamma \vdash A$, we mostly write $a \in \SN$ instead of
 $a \in \SN(\Gamma \vdash A)$ for simplicity.  The set $\SN$ is closed
 under weakening, \ie, if $\tau : \Delta \leq \Gamma$ then
 $a\tau \in \SN$ as well.  This follows easily from anti-weakening for
 reduction.
+
+\subsection{Semantic types and normalization proofs}
+
+A typical model-theoretic proof of strong normalization will interpret
+types $A$ by families $\A = \den A$ of strongly normalizing terms of type $A$.
+To work smoothly for open terms, a further requirement on such
+semantic types $\A$ is that they contain the variables, \ie,
+if $x : \Gamma \vdash A$ then $x \in \A_\Gamma$.
+
+To obtains a compositional interpretation of types, each type
+constructor such as implication $A \to B$ is interpreted by a suitable
+operation $\A \to \B$ on semantic types.
+For pure implicational truth table natural deduction, types are formed
+from uninterpreted base types $o$ (propositional variables) and
+function space: $A,B ::= o \mid A \to B$.  Types are interpreted as
+the following semantic types:
+\[
+\begin{array}{lll}
+  \Den o \Gamma & = & \SN(\Gamma \vdash o) \\
+  \Den{A \to B} \Gamma & = & (\den A \to \den B)_\Gamma \\
+\end{array}
+\]
+
+The main structure of the normalization proofs then proceeds as follows:
+Contexts $\Gamma$ are interpreted as families of sets of
+substitutions.
+\[
+  \begin{array}{lll}
+\Den \Ge \Delta & = & \Delta \vdash \Ge \\
+\Den{\Gamma.A} \Delta & = & \{ \Gs.a \mid \Gs \in \Den \Gamma \Delta
+                            \mbox{ and } a \in \Den A \Delta \}
+  \end{array}
+\]
+Thanks to the requirement that the variables inhabit the semantic
+types, each context can be valuated by the identity substitution:
+\begin{lemma}[Identity substitution]
+  \label{lem:id}
+  $\tid \in \Den \Gamma \Gamma$.
+\end{lemma}
+\begin{proof}
+  By induction on $\Gamma$.  In case $\Gamma.A$, we have
+  $\tid \in \Den \Gamma \Gamma$ by induction hypothesis, thus, by
+  weakening, ${\up} \in \Den\Gamma{\Gamma.A}$.  Further, the 0th de
+  Bruijn index $x_0 \in \Den A {\Gamma.A}$.
+  Thus $(\up.x_0) = \tid \in \Den{\Gamma.A}{\Gamma.A}$.
+\end{proof}
+
+The main theorem shows that each well-typed term inhabits the corresponding semantic type:
+\begin{theorem}[Fundamental theorem of logical predicates]
+  \label{thm:fund}
+  If $a : \Gamma \vdash A$ and $\Gs \in \Den \Gamma \Delta$ then $a
+  \sigma \in \Den A \Delta$.
+\end{theorem}
+Normalization is then a direct consequence:
+\begin{corollary}[Strong normalization]
+  If $a : \Gamma \vdash A$ then $a \in \SN$.
+\end{corollary}
+\begin{proof}
+  By \Cref{thm:fund} with \Cref{lem:id}, $a\, \tid = a \in \Den A
+  \Gamma$, thus, $a \in \SN$ since each semantic type contains only
+  strongly normalizing terms.
+\end{proof}
+
+The definition of the semantic types such as $\A \to \B$ needs be
+crafted such as to allow us to prove \Cref{thm:fund}.
+In the next section we identify the necessary properties.
+
+\subsection{Modelling the inference rules}
+
+To formulate the properties that allow us to prove \Cref{thm:fund} we
+introduce an auxiliary construction $\C[\A]$ %, named \emph{abstraction},
+given semantic types $\A$ and $\C$, where $\A$ classifies terms of
+type $A$ and $\C$ terms of type $C$.
+\[
+  \C[\A]_\Gamma =
+  \{ t \in \Gamma.A \vdash C
+     \mid t(\tau.a) \in \C_\Delta
+     \mbox{ for all } \tau : \Delta \leq \Gamma
+     \mbox{ and } a \in \A_\Delta
+  \}
+  .
+\]
+The abstraction $\C[\A]$ is a presheaf via the weakening with the
+lifted OPE:
+\begin{lemma}
+  If $\tau : \Delta \leq \Gamma$ and $t \in \C[\A]_\Gamma$ then
+  $t(\Up\tau) : \C[\A]_\Delta$.
+\end{lemma}
+\begin{proof}
+  Assume $\tau' : \Phi \leq \Delta$ and $a \in \A_\Phi$ and show
+  $t(\Up\tau)(\tau'.a) \in \C_\Phi$.  Since $(\Up\tau)(\tau'.a) =
+  \tau\tau'.a$ this follows by definition of $t \in \C[\A]_\Gamma$.
+\end{proof}
+
+Using abstraction, the properties of the semantic implication $\A \to
+\B$ can be mechanically obtained from the inference rules connected to
+implication.
+\begin{itemize}[leftmargin=3em]
+
+\item[\namedlabel{it:in00}{(\inn\to{00})}]
+  If $t \in (\A \to \B)[\A]$ and $u \in (\A \to \B)[\B]$ then
+  $\inn\to{00}(t,u) \in \A \to \B$.
+
+\item[\namedlabel{it:in01}{(\inn\to{01})}]
+  If $t \in (\A \to \B)[\A]$ and $b \in \B$ then
+  $\inn\to{01}(t,b) \in \A \to \B$.
+
+\item[\namedlabel{it:in11}{(\inn\to{11})}]
+  If $a \in \A$ and $b \in \B$ then $\inn\to{11}(a,b) \in \A \to \B$.
+
+\item[\namedlabel{it:el10}{(\el\to{10})}]
+  If $f \in \A \to \B$ and $a \in \A$ and $t \in \C[\B]$ then
+  $f \cdot \el\to{01}(a,t) \in \C$.
+
+\end{itemize}
+
+Given these properties of semantic implication, we can show that
+semantic types model the inference rules:
+
+\begin{proof}[Proof of \Cref{thm:fund}]
+  By induction on $t : \Gamma \vdash C$, prove $t\Gs \in \Den C \Delta$ for
+  all $\Gs \in \Den \Gamma \Delta$.
+  In case of a variable $t = x$, we have
+  $x\Gs \in \Den{\Gamma(x)}\Delta$ by assumption on $\Gs$.
+
+  The other cases are covered by the assumptions on semantic
+  implication.  For instance, consider:
+  \[
+  \ru{t : \Gamma.A \vdash A \to B \qquad
+      b : \Gamma \vdash B
+    }{\inn\to{01}(t,b) : \Gamma \vdash A \to B
+    }
+  \]
+  By induction hypothesis $b\sigma \in \Den B \Delta$ and
+  for all $\tau : \Phi \leq \Delta$ and $a \in \Den A \Phi$
+  further $t(\sigma\tau.a) \in \Den{A \to B}\Phi$,
+  since $\sigma\tau \in \Den\Gamma\Phi$.
+  Hence,
+  $t(\Up\sigma) \in (\den{A \to B})[\den A]_\Delta$.  By property
+  \ref{it:in01}, if follows that
+  $\inn\to{01}(t,b)\sigma = \inn\to{01}(t(\Up\sigma),b\sigma) \in \Den{A \to B}\Delta$.
+\end{proof}
 
 \section{Reducibility Candidates}
 \label{sec:cr}
