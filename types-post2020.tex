@@ -15,7 +15,7 @@
 \bibliographystyle{plainurl}% the mandatory bibstyle
 
 %\title{Reducibility Candidates for Truth-Table Natural Deduction}
-\title{Model-Theoretic Strong Normalization for Truth-Table Natural Deduction}
+\title{On Model-Theoretic Strong Normalization for Truth-Table Natural Deduction}
 \titlerunning{SN for Truth-Table ND} %TODO optional, please use if title is longer than one line
 
 \author{Andreas Abel
@@ -69,7 +69,8 @@
 
 \usepackage{xspace}
 \usepackage{stmaryrd}
-\usepackage{enumitem}
+\usepackage{dsfont} % mathds
+%\usepackage{enumitem} %% not allowed, but would be needed for leftmargin
 \usepackage[hang,flushmargin]{footmisc}
 
 % https://texblog.org/2012/03/21/cross-referencing-list-items/
@@ -99,6 +100,7 @@
 \newcommand{\defiff}{\mathrel{{{:}{\Longleftrightarrow}}}}
 \newcommand{\subst}[3]{#3[#1/#2]}
 \newcommand{\tid}{\mathsf{id}}
+\newcommand{\sid}{\mathds{1}}
 
 \newcommand{\ru}{\dfrac}
 \newcommand{\nru}[3]{#1\;\dfrac{#2}{#3}}
@@ -172,12 +174,22 @@
 \newcommand{\Up}{\mathop{\Uparrow}}
 \newcommand{\up}{\mathord{\uparrow}}
 
+\newcommand{\ind}[1]{}    % _{#1}
+\newcommand{\indp}[2]{#1} % (#1)_{#2}
+
 \begin{document}
 
 \maketitle
 
 %TODO mandatory: add short abstract of the document
 \begin{abstract}
+Truth table natural deduction
+\cite{geuversHurkens:icla17,geuversHurkens:types17}
+(which is non-confluent) has been shown
+strongly normalizing using CPS translations to parallel lambda
+calculus \cite{geuversGiessenHurkens:fundinf19}.  We investigate
+standard techniques such as reducibility candidates and
+biorthogonality to that end.
 \end{abstract}
 
 \section{Introduction}
@@ -215,6 +227,17 @@
 % and ∀ₗ ∀uₗ∈Xₗ(qₗ[yₗ:=uₗ] ∈ D).
 % For all t′ with t −→ka t′ we have t·ri[p;λy.q] −→ka t′·ri[p;λy.q]
 % and t′·ri[p;λy.q] ∈ D by (*).  So, t·ri[p;λy.q] ∈ D and so t ∈ c(X1,...,Xn).
+
+Recently, Geuvers and Hurkens \cite{geuversHurkens:icla17} have
+observed that, departing from the truth table of a logical connective,
+one can in a schematic way construct introduction and elimination
+rules for that connective both for intuitionistic and classical
+natural deduction.  For each line in the truth table where the
+connective computes to \emph{true} one obtains an introduction rule,
+and for the \emph{false} lines one obtains an elimination rule.
+It is shown that these \emph{truth table natural deduction} (TTND)
+calculi are equivalent to the original calculi in the sense that the
+same judgements can be derived.  However, the schematic rules
 
 Truth table natural deduction
 \cite{geuversHurkens:icla17,geuversHurkens:types17}
@@ -369,7 +392,7 @@ $\tau : \Delta \leq \Gamma$.  Here, $\tau$ witnesses that and how
 $\Gamma$ is a subsequence of $\Delta$.
 Then, $\Up\tau : \Delta.B \leq \Gamma.B$ be the \emph{lifted} OPE.
 Further, $\up : \Gamma.B \leq \Gamma$ is the OPE for weakening by one
-variable, and OPEs form a category with identity $\tid : \Gamma \leq
+variable, and OPEs form a category with identity $\sid : \Gamma \leq
 \Gamma$ and composition % $\_\circ\_ :
 $(\Gamma \leq \Delta) \to (\Delta \leq \Phi) \to (\Gamma \leq \Phi)$
 written as juxtaposition.
@@ -384,7 +407,7 @@ substitution $a\sigma : \Delta \vdash A$ for $a : \Gamma \vdash A$ be
 defined as usual.  OPEs $\tau : \Delta \leq \Gamma$ are silently
 coerced to substitutions $\Delta \vdash \Gamma$ consisting only of de
 Bruijn indices.
-Substitutions form a category, and we reuse $\tid$ and %$\_\circ\_$
+Substitutions form a category, and we reuse $\sid$ and %$\_\circ\_$
 juxtaposition for
 identity and substitution.
 Like for OPEs, we have lifting
@@ -393,7 +416,7 @@ substitutions under binders.
 
 Single substitution $t[b]$ is
 an instance for parallel substitution $t\sigma$ for substitution
-$\sigma = \tid.b: \Gamma \vdash \Gamma.B$ obtained from $b : \Gamma \vdash B$.
+$\sigma = \sid.b: \Gamma \vdash \Gamma.B$ obtained from $b : \Gamma \vdash B$.
 
 \emph{Reduction} $a \red a'$, which is defined using single substitution,
 acts on same-typed terms
@@ -413,6 +436,8 @@ predicates $P_\Gamma \subseteq (\Gamma \vdash A)$ closed under
 weakening, meaning if $a \in P_\Gamma$ and $\tau : \Delta \leq \Gamma$
 then $a \tau \in P_\Delta$.  We call such predicates \emph{term set
   families}.
+We may simply write $a \in P$ instead of $a \in P_\Gamma$ if $\Gamma$
+is fixed but arbitrary or determined by the context.
 
 Our prime example of a term set family are the strongly normalizing
 terms $\SN$ given inductively by rule
@@ -464,14 +489,14 @@ Thanks to the requirement that the variables inhabit the semantic
 types, each context can be valuated by the identity substitution:
 \begin{lemma}[Identity substitution]
   \label{lem:id}
-  $\tid \in \Den \Gamma \Gamma$.
+  $\sid \in \Den \Gamma \Gamma$.
 \end{lemma}
 \begin{proof}
   By induction on $\Gamma$.  In case $\Gamma.A$, we have
-  $\tid \in \Den \Gamma \Gamma$ by induction hypothesis, thus, by
+  $\sid \in \Den \Gamma \Gamma$ by induction hypothesis, thus, by
   weakening, ${\up} \in \Den\Gamma{\Gamma.A}$.  Further, the 0th de
   Bruijn index $x_0 \in \Den A {\Gamma.A}$.
-  Thus $(\up.x_0) = \tid \in \Den{\Gamma.A}{\Gamma.A}$.
+  Thus $(\up.x_0) = \sid \in \Den{\Gamma.A}{\Gamma.A}$.
 \end{proof}
 
 The main theorem shows that each well-typed term inhabits the corresponding semantic type:
@@ -485,7 +510,7 @@ Normalization is then a direct consequence:
   If $a : \Gamma \vdash A$ then $a \in \SN$.
 \end{corollary}
 \begin{proof}
-  By \Cref{thm:fund} with \Cref{lem:id}, $a\, \tid = a \in \Den A
+  By \Cref{thm:fund} with \Cref{lem:id}, $a\, \sid = a \in \Den A
   \Gamma$, thus, $a \in \SN$ since each semantic type contains only
   strongly normalizing terms.
 \end{proof}
@@ -509,7 +534,11 @@ type $A$ and $\C$ terms of type $C$.
   \}
   .
 \]
-The abstraction $\C[\A]$ is a presheaf via the weakening with the
+The \emph{abstraction}%
+\footnote{Matthes \cite[Sec.~6.2]{matthes:intersection} uses the
+  notation $\mathsf{S}_x(\A,\C)$ for abstraction (in a setting with
+  named variables $x$).}
+$\C[\A]$ is a presheaf via the weakening with the
 lifted OPE:
 \begin{lemma}
   If $\tau : \Delta \leq \Gamma$ and $t \in \C[\A]_\Gamma$ then
@@ -524,7 +553,8 @@ lifted OPE:
 Using abstraction, the properties of the semantic implication $\A \to
 \B$ can be mechanically obtained from the inference rules connected to
 implication.
-\begin{itemize}[leftmargin=3em]
+\begin{itemize}%[leftmargin=3em] %enumitem
+\setlength{\itemindent}{2.7em}
 
 \item[\namedlabel{it:in00}{\rm(\inn\to{00})}]
   If $t \in (\A \to \B)[\A]$ and $u \in (\A \to \B)[\B]$ then
@@ -601,7 +631,11 @@ such as reduction in truth-table natural deduction.
 
 When defining the semantic versions of the logical connectives such as
 $\A \to \B$, we have the choice to base the definition either on the
-introduction rules or the elimination rules.  We will study both
+introduction rules or the elimination rules.
+\footnote{See Matthes' \cite[Section 6.2]{matthes:intersection}
+  systematic exposition of introduction-based vs.\ elimination-based
+  definition of semantic types (in the context of the saturated sets method).}
+We will study both
 approaches, but first, we recapitulate the definition of reducibility
 candidates.
 
@@ -614,17 +648,25 @@ is a term set family
 %  is a context-indexed
 % family of predicates on terms of type $A$, written as sets,
 with the following properties:
-\begin{itemize}[leftmargin=3em]
+\begin{itemize}%[leftmargin=3em]
+\setlength{\itemindent}{2.7em}
+
 % \item[\namedlabel{it:cr0}{CR0}]
 %   If $a \in \A_\Gamma$ and $\tau : \Delta \leq \Gamma$ then
 %   $a\tau \in \A_\Delta$.
+
 \item[\namedlabel{it:cr1}{CR1}]
-  $\A_\Gamma \subseteq \SN$.
+  $\A\ind\Gamma \subseteq \SN$.
+
 \item[\namedlabel{it:cr2}{CR2}]
-  If $a \in \A_\Gamma$ and $a \red a'$ then $a' \in \A_\Gamma$.
+  If $a \in \A\ind\Gamma$ and $a \red a'$ then $a' \in \A\ind\Gamma$.
+
 \item[\namedlabel{it:cr3}{CR3}]
-  For $a : \Gamma \vdash A$, if $a \in \SN \setminus \Intro$
-  and $(a \red \_) \subseteq \A_\Gamma$, then $a \in \A_\Gamma$.
+  For $a : \Gamma \vdash A$,
+  % if $a \in \SN \setminus \Intro$
+  if $a \not\in \Intro$
+  and $(a \red \_) \subseteq \A\ind\Gamma$, then $a \in \A\ind\Gamma$.
+
 \end{itemize}
 We write $\A \in \CR$ if $\A$ is a term set family satisfying CR1-3.
 It is easy to see that $\SN \in \CR$.
@@ -634,7 +676,7 @@ Term set abstraction operates on precandidates:
 \begin{lemma}[Abstraction]
 \label{lem:abs}
   Let $\A_\Gamma$ be inhabited for any $\Gamma$.
-  If $\C$ is a precandidate, then so is $\C[\A]$.
+  If $\C$ is a precandidate, so is $\C[\A]$.
  % satisfies CR1/2 and is
  %  closed under lifted weakening (almost \ref{it:cr0}).
 \end{lemma}
@@ -656,8 +698,12 @@ Term set abstraction operates on precandidates:
 
 Geuvers and Hurkens \cite{geuversHurkens:types17} base the semantic
 definition of the logical connective on the elimination rules.
-In case of implication, \fbox{$f \in (\A \to \B)_\Gamma$} iff
+A term inhabits a semantic type if it can be soundly eliminated by all
+possible eliminations for that type.
+In case of implication, % \fbox{$f \in (\A \to \B)_\Gamma$} iff
 \[
+  f \in (\A \to \B)_\Gamma
+  \iff
   \forall \C \in \CR, \,
   a \in \A_\Gamma, \,
   t \in \C[\B]_\Gamma.\
@@ -672,6 +718,9 @@ of implication, which is the single rule:
     }{f \cdot \el\to{10}(a,t) : \Gamma \vdash C
     }
 \]
+In case of several elimination rules, the definition of the semantic
+type has to require the closure under all rules \cite{geuversHurkens:types17}.
+
 Note the impredicative quantification over all reducibility candidates
 $\C$, which requires an impredicative meta-theory to formalize this
 definition.  Such an impredicative quantification is not required in
@@ -695,34 +744,47 @@ Soundness of the introduction rules requires some work.
 \end{lemma}
 \begin{proof}
   We show property \ref{it:in01}, the others are analogous.  Assume
-  $t \in (\A \to \B)[\A]_\Gamma$ and $b \in \B_\Gamma$ and show
-  $\inn\to{01}(t,b) \in (\A \to \B)_\Gamma$.  To this end, assume
-  $\C \in \CR$ and $a \in \A_\Gamma$ and $u \in \C[\B]_\Gamma$ and
-  show $v := \inn\to{01}(t,b) \cdot \el\to{10}(a,u) \in \C_\Gamma$ by
+  $t \in (\A \to \B)[\A]\ind\Gamma$ and $b \in \B\ind\Gamma$ and show
+  $\inn\to{01}(t,b) \in \indp{\A \to \B}{\Gamma}$.  To this end, assume
+  $\C \in \CR$ and $a \in \A\ind\Gamma$ and $u \in \C[\B]\ind\Gamma$ and
+  show $v := \inn\to{01}(t,b) \cdot \el\to{10}(a,u) \in \C\ind\Gamma$ by
   induction on $t,b,a,u \in \SN$ (obtained by \ref{it:cr1}).
 
   Since $v$ is not an introduction we shall utilize \ref{it:cr3} for
   $\C$.  Therefore, we have to show that all reducts of $v$ are
-  already in $\C_\Gamma$.
+  already in $\C\ind\Gamma$.
 
   If reduction happens in subterm $b$, so $b \red b'$, we can apply
-  the induction hypothesis on $b' \in \SN$, since $b' \in \B_\Gamma$
+  the induction hypothesis on $b' \in \SN$, since $b' \in \B\ind\Gamma$
   by \ref{it:cr2}.  Reduction in one of the other subterms $t,a,u$ of
   $v$ is treated analgously.
 
   It remains to cover the $\beta$-reductions at the root, which are
   $v \red u[b]$ and $v \red t[a] \cdot \el\to{10}(a,u)$.
-  We have $u[b] \in \C_\Gamma$ by assumptions on $u$ and $b$.  Further, since
-  $t[a] \in (\A \to \B)_\Gamma$, by definition $t[a] \cdot
-  \el\to{10}(a,u) \in \C_\Gamma$.
+  We have $u[b] \in \C\ind\Gamma$ by assumptions on $u$ and $b$.  Further, since
+  $t[a] \in \indp{\A \to \B}{\Gamma}$, by definition $t[a] \cdot
+  \el\to{10}(a,u) \in \C\ind\Gamma$.
 \end{proof}
 
 Strong normalization now follows according to \Cref{sec:model}.
 
+
 \subsection{Introduction-based approach}
 \label{sec:introbased}
 
-Property \ref{it:cr3} can be forced by the following closure operation $\cl\A$
+Instead of the impredicative elimination-based definition of sematic
+types like $\A \to \B$, we can base the definition on the introduction
+rules.  The rough idea is that elements of $\A \to \B$ can be
+introduced by any of $\inn\to{00}$, $\inn\to{01}$, and
+$\inn\to{11}$---this is a union of reducibility candidates.
+However, since the first two of these need already the implication
+they introduce, the construction of a least fixed-point is required.
+
+
+Note that the union $\A \cup \B$ of two reducibility candidates $\A$
+and $\B$ preserves CR1/2, but not \ref{it:cr3}.
+However,
+property \ref{it:cr3} can be forced by the following closure operation $\cl\A$
 on a term set $\A \subseteq \Gamma \vdash A$.
 \begin{gather*}
   \nru{\remb
@@ -732,7 +794,8 @@ on a term set $\A \subseteq \Gamma \vdash A$.
 \qquad
   \nru{\rexp
      }{a : \Gamma \vdash A \qquad
-       a \in \SN \setminus \Intro \qquad
+       % a \in \SN \setminus \Intro \qquad
+       a \not\in \Intro \qquad
        (a \red \_) \subseteq \cl\A
      }{a \in \cl\A}
 \end{gather*}
@@ -758,15 +821,19 @@ $\A_\Gamma \subseteq \Gamma \vdash A$ of term sets.
   $\cl\A$ is a reducibility candidate for any precandidate $\A$.
 \end{lemma}
 \begin{proof}
-  \ref{it:cr3} is forced by the closure operation, and preservation of \ref{it:cr1} and
-  \ref{it:cr2} is immediate.
+  \ref{it:cr3} is forced by the closure operation.
+  Closure under reduction (\ref{it:cr2}) and preservation of SN
+  (\ref{it:cr1}) are proven by induction on $t \in \cl\A$,
+  the latter using that $t \in \SN$ when all its reducts are.
+  % and preservation of \ref{it:cr1} and
+  % \ref{it:cr2} is immediate.
   % \ref{it:cr0} follows again from anti-weakening of reduction, and that being
   % an introduction is not affected by weakening or anti-weakening.
 \end{proof}
 
-Note that the union $\A \cup \B$ preserves CR1/2, but not \ref{it:cr3}; thus,
-to obtain a reducibility candidate from the union of two such
-candidates we need to apply the closure operation in general.
+% Note that the union $\A \cup \B$ preserves CR1/2, but not \ref{it:cr3}; thus,
+% to obtain a reducibility candidate from the union of two such
+% candidates we need to apply the closure operation in general.
 
 % Given two term set families $\A$ and $\X$ for types $A$ and $X$,
 % resp., let $\X[\A]$ be the term set family defined by
@@ -876,20 +943,22 @@ This operation acts on reducibility candidates:
 \end{proof}
 
 By definition, $\A \to \B$ models the introduction rules for
-implication.  For the elimination rule, we have to do a bit of work.
+implication:
+properties \ref{it:in00}, \ref{it:in01} and \ref{it:in11}.
+For the elimination rule, property \ref{it:el10}, we have to do a bit of work.
 \begin{lemma}[Function elimination]
   \label{lem:app}
   Let $\A,\B,\C$ be candidates.
-  If $f \in (\A \to \B)_\Gamma$ and $a \in \A_\Gamma$ and
-  $u \in \C[\B]_\Gamma$ then $f \cdot E \in \C$
+  If $f \in \indp{\A \to \B}{\Gamma}$ and $a \in \A\ind\Gamma$ and
+  $u \in \C[\B]\ind\Gamma$ then $f \cdot E \in \C$
   where $E = \el\to{10}(a,u)$.
 \end{lemma}
 \begin{proof}
-  By main induction on $f \in (\A \to \B)_\Gamma$.
+  By main induction on $f \in \indp{\A \to \B}{\Gamma}$.
   \begin{caselist}
 
     \nextcase $f \not\in \Intro$ and $f \red f'$ implies
-    $f \in (\A \to \B)_\Gamma$:
+    $f' \in \indp{\A \to \B}{\Gamma}$:
     We show $f \cdot E \in \C$ by side induction on $E \in \SN$ via \ref{it:cr3}.
     First, $f \cdot E \not\in\Intro$.
     Assume $f \cdot E \red c$.  Since $f$ is not a introduction, we
@@ -900,31 +969,31 @@ implication.  For the elimination rule, we have to do a bit of work.
     \C$ by \ref{it:cr3}.
 
     \nextcase $f = \inn\to{00}(t_1,t_2)$ where
-    $t_1 \in (\A \to \B)[\A]_\Gamma$ and
-    $t_2 \in (\A \to \B)[\B]_\Gamma$.
+    $t_1 \in (\A \to \B)[\A]\ind\Gamma$ and
+    $t_2 \in (\A \to \B)[\B]\ind\Gamma$.
     We show $f \cdot E \in \C$ by side induction on $t_1,t_2,E \in
     \SN$ via \ref{it:cr3}.
     Given $f \cdot E \red c$, there are three cases.  Either $c = f' \cdot
     E$ with $f \red f'$ or $c = f \cdot E'$ with $E \red E'$ or $c =
     t_1[a] \cdot E$.  The first two cases are handled by the side
     induction hypotheses, the last case by main induction hypothesis
-    on $t_1[a] \in (\A \to \B)_\Gamma$.
+    on $t_1[a] \in \indp{\A \to \B}{\Gamma}$.
 
     \nextcase $f = \inn\to{01}(t_1,b)$ where
-    $t \in (\A \to \B)[\A]_\Gamma$ and
-    $b \in \B_\Gamma$.
+    $t \in (\A \to \B)[\A]\ind\Gamma$ and
+    $b \in \B\ind\Gamma$.
     We show $f \cdot E \in \C$ by side induction on $t,b,E \in
     \SN$ via \ref{it:cr3}.
     Given $f \cdot E \red c$, there are four cases.  Either $c = f' \cdot
     E$ with $f \red f'$ or $c = f \cdot E'$ with $E \red E'$ or $c =
     t[a] \cdot E$ or $c = u[b]$.  The first two cases are handled by the side
     induction hypotheses, the butlast case by main induction hypothesis
-    on $t[a] \in (\A \to \B)_\Gamma$, and the last case by assumption
-    $u \in \C[\B]_\Gamma$.
+    on $t[a] \in \indp{\A \to \B}{\Gamma}$, and the last case by assumption
+    $u \in \C[\B]\ind\Gamma$.
 
     \nextcase $f = \inn\to{11}(a',b)$ where
-    $a' \in \A_\Gamma$ and
-    $b \in \B_\Gamma$.
+    $a' \in \A\ind\Gamma$ and
+    $b \in \B\ind\Gamma$.
     We show $f \cdot E \in \C$ by side induction on $a',b,E \in
     \SN$ via \ref{it:cr3}.
 
@@ -932,8 +1001,8 @@ implication.  For the elimination rule, we have to do a bit of work.
     $c = f' \cdot E$ with $f \red f'$ or $c = f \cdot E'$ with
     $E \red E'$ or $c = u[b]$.  The first two cases are handled by the
     side induction hypotheses and the last case by
-    assumption $u \in \C[\B]_\Gamma$.
-
+    assumption $u \in \C[\B]\ind\Gamma$.
+  \popQED
   \end{caselist}
 \end{proof}
 
@@ -974,21 +1043,21 @@ implication.  For the elimination rule, we have to do a bit of work.
 
 % \begin{lemma}[Identity substitution]
 %   \label{lem:id}
-%   $\tid \in \Den \Gamma \Gamma$.
+%   $\sid \in \Den \Gamma \Gamma$.
 % \end{lemma}
 % \begin{proof}
 %   By induction on $\Gamma$.  In case $\Gamma.A$, we have
-%   $\tid \in \Den \Gamma \Gamma$ by induction hypothesis, thus, by
+%   $\sid \in \Den \Gamma \Gamma$ by induction hypothesis, thus, by
 %   weakening, ${\up} \in \Den\Gamma{\Gamma.A}$.  Further, the 0th de
 %   Bruijn index $x_0 \in \Den A {\Gamma.A}$ by \ref{it:cr3} (it is SN and has no
-%   reducts).  Thus $(\up.x_0) = \tid \in \Den{\Gamma.A}{\Gamma.A}$.
+%   reducts).  Thus $(\up.x_0) = \sid \in \Den{\Gamma.A}{\Gamma.A}$.
 % \end{proof}
 
 % \begin{corollary}[Strong normalization]
 %   If $a : \Gamma \vdash A$ then $a \in \SN$.
 % \end{corollary}
 % \begin{proof}
-%   By \Cref{thm:fund} with \Cref{lem:id}, $a\, \tid = a \in \Den A
+%   By \Cref{thm:fund} with \Cref{lem:id}, $a\, \sid = a \in \Den A
 %   \Gamma$, thus, $a \in \SN$ by \ref{it:cr1}.
 % \end{proof}
 
@@ -1008,7 +1077,7 @@ permutations.
 Outer eliminations can be shifted into the negative branches of inner
 eliminations.  We write
 $h \cdot E \cdot E' \contract[\pi] h \cdot E\{E'\}$ for a permutation
-contraction.  The composition $E{E'}$ of eliminations moves a weakened
+contraction.  The composition $E\{E'\}$ of eliminations moves a weakened
 version of $E'$ to the negative branches of $E$.  In the case of
 implication, we have
 \[
@@ -1049,14 +1118,15 @@ reduction $\whd[\pi]$ where
 Since the reducibility candidate method does not immediately extend to
 permutations, we turn to a more powerful technique: biorthogonals.
 Lindley and Stark \cite{lindleyStark:redComput} have observed that
-biorthogonals (``$\top\top$-lifting) deal well with the permutation
+biorthogonals (``$\top\top$-lifting'') deal well with the permutation
 reduction for the monadic bind in a strong normalization proof for the
 monadic meta-language.  We shall thus adapt this technique, although
-it is more demanding on our meta-language, requiring greatest
+it is more demanding on our meta-theory, requiring greatest
 fixed-points of non-strictly positive operators.  This is covered by
 Knaster and Tarski's fixed-point theorem \cite{tarski:fixpoint}, but
-not readily available in type-theoretic proof assistants like Coq and
-Agda.
+not readily available in type-theoretic proof assistants like Coq
+\cite{coq:8120} and
+Agda \cite{agda:261}.
 
 In the following, when we speak of context-indexed families, we
 implicitly assume that the family is closed under weakening in analogy
@@ -1095,12 +1165,13 @@ $\pi$-contractions along the spine.
 
 More formally, a semantic type $\A_\Gamma$ for syntactic type $A$ at
 context $\Gamma$ is a set of \emph{pairs}
-$(C, \vec E : \Gamma \mid A \vdash C)$.
+$(C, (\vec E : \Gamma \mid A \vdash C))$.
 Then $a \perp \A_\Gamma$ is defined as
 $a \cdot \vec E \in \SN(\Gamma \vdash C)$
 for all $(C, \vec E : \Gamma \mid A \vdash C) \in \A_\Gamma$.
 However, we typically
-suppress the type component $C$ which is implicitly determined by $E$.
+suppress the type component $C$ which is implicitly determined by
+$\vec E$.
 \begin{lemma}[Semantic types]
   Let $\A$ be a semantic type for $A$.
   \begin{enumerate}
@@ -1119,9 +1190,10 @@ suppress the type component $C$ which is implicitly determined by $E$.
   \item Given $t \perp \A_\Gamma$ show $t \in \SN$.
    Since $\tid \in \A_\Gamma$, we have $t \cdot \tid = t \in \SN$.
 
-  \item Given $\A_\Gamma \perp t \red t'$ and $\vec E \in \A_\Gamma$ we
+  \item Given $t \perp \A_\Gamma$ and $t \red t'$ and $\vec E \in \A_\Gamma$ we
     have $t' \cdot \vec E \in \SN$ since $t \cdot \vec E \in \SN$ and
     $t \cdot \vec E \red t' \cdot \vec E$.
+  \popQED
   \end{enumerate}
 \end{proof}
 
@@ -1148,7 +1220,7 @@ construct a semantic type:
   Then $\T^\perp \subseteq \SN$ since $\T$ is non-empty.
 \end{proof}
 
-It is well-known that orthogonality gives rised to the Galois
+It is well-known that orthogonality gives rise to the Galois
 connection
 \[
   \T^\perp \supseteq \A \iff \T \subseteq \A^\perp
@@ -1160,7 +1232,7 @@ $\A \subseteq \A^{\perp\perp}$.
 The abstraction type $\X[\A]$ is now defined by
 \[
   \X[\A]_\Gamma =
-  \{ (C, \vec E : \Gamma.A \mid X \vdash C)
+  \{ (C, (\vec E : \Gamma.A \mid X \vdash C))
      \mid \vec E (\tau.a) \in \X_\Delta
      \mbox{ for all } \tau : \Delta \leq \Gamma
      \mbox{ and } a \perp \A_\Delta
@@ -1175,12 +1247,12 @@ Abstraction operates on semantic types:
 \end{lemma}
 \begin{proof}
   We first show that
-  $(X,\tid : \Gamma.A \mid X \vdash X) \in \X[\A]_\Gamma$.
+  $(X, (\tid : \Gamma.A \mid X \vdash X)) \in \X[\A]_\Gamma$.
   To this end, assume $\tau : \Delta \leq \Gamma$ and $a \in
   \A_\Delta$ and show $\tid(\tau.a) \in \X_\Delta$.  This is trivial,
   since $\tid(\tau.a) = \tid$ and $\X$ is a semantic type.
 
-  Then, assume $(C, \vec E : \Gamma.A \mid X \vdash C) \in
+  Then, assume $(C, (\vec E : \Gamma.A \mid X \vdash C)) \in
   \X[\A]_\Gamma$ and show $\vec E \in \SN$.
   Choose $\tau = \up : \Gamma.A \leq \Gamma$ and $a = x_0 \in
   \A_{\Gamma.A}$ the 0th de Bruijn index, then $\vec E (\up,x_0) =
@@ -1286,6 +1358,7 @@ orthogonalization on $\X$.
     \nextcase $I = \inn\to{01}(t,b)$.  In this case we have two
       $\beta$-contractions of $I \cdot E$ which we handle as in the
       previous cases.
+  \popQED
   \end{caselist}
 \end{proof}
 
@@ -1362,6 +1435,7 @@ We need the following stronger lemma.
     \nextcase $I = \inn\to{01}(t,b)$.  In this case we have two
       $\beta$-contractions of $I \cdot E$ which we handle as in the
       previous cases.
+  \popQED
   \end{caselist}
 \end{proof}
 
