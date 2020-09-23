@@ -48,7 +48,7 @@ variable h : Hd a
 -- Terms and stacks
 
 infixl 5 _∙_ _∘_
-infixr 6 _∷_ _++_
+infixr 6 _∷_ _++_ _⦅++⦆_
 
 mutual
 
@@ -83,8 +83,6 @@ _++_ : Stack a b → Stack b c → Stack a c
 
 _∘_ : Tm a → Stack a c → Tm c
 h ∙ E ∘ E' = h ∙ E ++ E'
--- S E ∘ E' = S (E ++ E')
--- K E ∘ E' = K (E ++ E')
 
 app-ε : t ∘ ε ≡ t
 app-ε {t = h ∙ E} = refl -- ++-ε
@@ -274,7 +272,6 @@ Sem-sn ⟦A⟧ ⦅t⦆ = ⦅t⦆ (⟦A⟧ .id)
 
 Sem-snₑ : (⟦A⟧ : SemTy A) (⦅E⦆ : E ∈ A) → SNₑ E
 Sem-snₑ ⟦A⟧ = ⟦A⟧ .sn
--- Sem-snₑ ⟦A⟧ ⦅E⦆ = ⟦A⟧ .sn ⦅E⦆
 
 -- UNUSED
 -- -- Semantic types are closed under reduction of their inhabitants.
@@ -331,9 +328,9 @@ sem-snₑ {a = a} ⦅E⦆ = ty-sem a .sn ⦅E⦆
 ⦅ε_⦆ : ∀ a → ε ∈ ⟦ a ⟧
 ⦅ε a ⦆ = ty-sem a .id
 
-⦅++⦆ : ⟦ a ⟧ (b , E) → ⟦ b ⟧ (c , E') → ⟦ a ⟧ (c , E ++ E')
-⦅++⦆       {E = ε} _            ⦅E'⦆ = ⦅E'⦆
-⦅++⦆ {a = a₁ ⇒ a₂} (⦅u⦆ ∷ ⦅E⦆)  ⦅E'⦆ = ⦅u⦆ ∷ ⦅++⦆ {a = a₂} ⦅E⦆ ⦅E'⦆
+_⦅++⦆_ : ⟦ a ⟧ (b , E) → ⟦ b ⟧ (c , E') → ⟦ a ⟧ (c , E ++ E')
+_⦅++⦆_     {E = ε} _         ⦅E'⦆ = ⦅E'⦆
+_⦅++⦆_ {a = _ ⇒ _} (⦅u⦆ ∷ ⦅E⦆) ⦅E'⦆ = ⦅u⦆ ∷  ⦅E⦆ ⦅++⦆ ⦅E'⦆
 
 -- Interpretation of K
 
@@ -363,8 +360,8 @@ mutual
   ⦅ u ∷ E ⦆ₑ     = ⦅ u ⦆ ∷ ⦅ E ⦆ₑ
 
   ⦅_⦆ : (t : Tm a) → t ⊥ ⟦ a ⟧
-  ⦅ S {c} {a} {b} ∙ E ⦆ ⦅E'⦆ = ⦅S⦆ (⦅++⦆ {a = S-ty c a b} ⦅ E ⦆ₑ ⦅E'⦆)
-  ⦅ K     {a} {b} ∙ E ⦆ ⦅E'⦆ = ⦅K⦆ (⦅++⦆ {a = K-ty a b}   ⦅ E ⦆ₑ ⦅E'⦆)
+  ⦅ S ∙ E ⦆ ⦅E'⦆ = ⦅S⦆ (⦅ E ⦆ₑ ⦅++⦆ ⦅E'⦆)
+  ⦅ K ∙ E ⦆ ⦅E'⦆ = ⦅K⦆ (⦅ E ⦆ₑ ⦅++⦆ ⦅E'⦆)
 
 -- Strong normalization
 
