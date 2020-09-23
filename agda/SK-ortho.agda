@@ -53,8 +53,6 @@ infixr 6 _∷_ _++_
 mutual
 
   data Tm : (d : Ty) → Set where
-    -- S∙ : (E : Stack ((c ⇒ (a ⇒ b)) ⇒ (c ⇒ a) ⇒ c ⇒ b) d) → Tm d
-    -- K∙ : (E : Stack (a ⇒ (b ⇒ a)) d) → Tm d
     _∙_ : (h : Hd a) (E : Stack a c) → Tm c
 
   variable t t′ u u′ v v′ : Tm a
@@ -253,6 +251,8 @@ variable A B C D : Predₑ a
 
 -- Elementhood in stack sets
 
+infix 2 _∈_
+
 _∈_ : (E : Stack a c) (A : Predₑ a) → Set
 E ∈ A = A (_ , E)
 
@@ -262,8 +262,6 @@ record SemTy (A : Predₑ a) : Set where
   field
     sn : E ∈ A → SNₑ E
     id : ε ∈ A
-    -- sn : A (c , E) → SNₑ E
-    -- id : A (a , ε)
 open SemTy
 
 -- Semantic objects
@@ -286,26 +284,25 @@ Sem-snₑ ⟦A⟧ = ⟦A⟧ .sn
 
 -- Singleton stack set {ε}
 
-Idₑ : ∀{a} → Predₑ a
-Idₑ (_ , ε)     = True
-Idₑ (_ , _ ∷ _) = False
+data Idₑ {a} : Predₑ a where
+  ε : ε ∈ Idₑ
 
 -- SN is the semantic type given by {ε}
 
 ⟦Id⟧ : SemTy (Idₑ {a = a})
-⟦Id⟧ .sn {E = ε} _ = sn-ε
-⟦Id⟧ .id = _
+⟦Id⟧ .sn ε = sn-ε
+⟦Id⟧ .id   = ε
 
 -- Function space on semantic types
 
-_⇨_ : (A : Predₑ a) (B : Predₑ b) (cE : ∃ (Stack (a ⇒ b))) → Set
-(A ⇨ B) (_ , ε)     = True
-(A ⇨ B) (_ , u ∷ E) = (u ⊥ A) × B (_ , E)
+data _⇨_ (A : Predₑ a) (B : Predₑ b) : Predₑ (a ⇒ b) where
+  ε   : ε ∈ (A ⇨ B)
+  _∷_ : (⦅u⦆ : u ⊥ A) (⦅E⦆ : E ∈ B) → (u ∷ E) ∈ (A ⇨ B)
 
 ⇨-sem : (⟦A⟧ : SemTy A) (⟦B⟧ : SemTy B) → SemTy (A ⇨ B)
-⇨-sem ⟦A⟧ ⟦B⟧ .sn {E = ε}     _         = sn-ε
-⇨-sem ⟦A⟧ ⟦B⟧ .sn {E = u ∷ E} (⦅u⦆ , ⦅E⦆) = sn-∷ (Sem-sn ⟦A⟧ ⦅u⦆) (⟦B⟧ .sn ⦅E⦆)
-⇨-sem ⟦A⟧ ⟦B⟧ .id = _
+⇨-sem ⟦A⟧ ⟦B⟧ .sn ε         = sn-ε
+⇨-sem ⟦A⟧ ⟦B⟧ .sn (⦅u⦆ ∷ ⦅E⦆) = sn-∷ (Sem-sn ⟦A⟧ ⦅u⦆) (⟦B⟧ .sn ⦅E⦆)
+⇨-sem ⟦A⟧ ⟦B⟧ .id = ε
 
 -- Type interpretation
 
@@ -335,25 +332,25 @@ sem-snₑ {a = a} ⦅E⦆ = ty-sem a .sn ⦅E⦆
 ⦅ε a ⦆ = ty-sem a .id
 
 ⦅++⦆ : ⟦ a ⟧ (b , E) → ⟦ b ⟧ (c , E') → ⟦ a ⟧ (c , E ++ E')
-⦅++⦆               {E = ε}      _        ⦅E'⦆ = ⦅E'⦆
-⦅++⦆ {a = a₁ ⇒ a₂} {E = u ∷ E} (⦅u⦆ , ⦅E⦆) ⦅E'⦆ = ⦅u⦆ , ⦅++⦆ {a = a₂} ⦅E⦆ ⦅E'⦆
+⦅++⦆       {E = ε} _            ⦅E'⦆ = ⦅E'⦆
+⦅++⦆ {a = a₁ ⇒ a₂} (⦅u⦆ ∷ ⦅E⦆)  ⦅E'⦆ = ⦅u⦆ ∷ ⦅++⦆ {a = a₂} ⦅E⦆ ⦅E'⦆
 
 -- Interpretation of K
 
 ⦅K⦆ : (K ∙ ε) ⊥ ⟦ K-ty a b ⟧
-⦅K⦆     {E = ε}         _                  = sn-K
-⦅K⦆ {a} {E = t ∷ ε}     (⦅t⦆ , ⦅ε⦆)        = sn-Kt (sem-sn ⦅t⦆)
-⦅K⦆     {E = t ∷ u ∷ E} (⦅t⦆ , ⦅u⦆ , ⦅E⦆)  = sn-KtuE (⦅t⦆ ⦅E⦆) (sem-sn ⦅t⦆) (sem-sn ⦅u⦆) (sem-snₑ ⦅E⦆)
+⦅K⦆ ε                  = sn-K
+⦅K⦆ (⦅t⦆ ∷ ε)          = sn-Kt (sem-sn ⦅t⦆)
+⦅K⦆ (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅E⦆)  = sn-KtuE (⦅t⦆ ⦅E⦆) (sem-sn ⦅t⦆) (sem-sn ⦅u⦆) (sem-snₑ ⦅E⦆)
 
 -- Interpretation of S
 
 ⦅S⦆ : (S ∙ ε) ⊥ ⟦ S-ty c a b ⟧
-⦅S⦆ {E = ε}             _                        = sn-S
-⦅S⦆ {E = t ∷ ε}         (⦅t⦆ , _)                = sn-St (sem-sn ⦅t⦆)
-⦅S⦆ {E = t ∷ u ∷ ε}     (⦅t⦆ , ⦅u⦆ , _)          = sn-Stu (sem-sn ⦅t⦆) (sem-sn ⦅u⦆)
-⦅S⦆ {E = t ∷ u ∷ v ∷ E} (⦅t⦆ , ⦅u⦆ , ⦅v⦆ , ⦅E⦆)  =
+⦅S⦆ ε                        = sn-S
+⦅S⦆ (⦅t⦆ ∷ ε)                = sn-St (sem-sn ⦅t⦆)
+⦅S⦆ (⦅t⦆ ∷ ⦅u⦆ ∷ ε)          = sn-Stu (sem-sn ⦅t⦆) (sem-sn ⦅u⦆)
+⦅S⦆ (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅v⦆ ∷ ⦅E⦆)  =
   sn-StuvE
-   (⦅t⦆ (⦅v⦆ , (λ ⦅E'⦆ → ⦅u⦆ (⦅v⦆ , ⦅E'⦆)) , ⦅E⦆))
+   (⦅t⦆ (⦅v⦆ ∷ (λ ⦅E'⦆ → ⦅u⦆ (⦅v⦆ ∷ ⦅E'⦆)) ∷ ⦅E⦆))
    (sem-sn ⦅t⦆) (sem-sn ⦅u⦆) (sem-sn ⦅v⦆) (sem-snₑ ⦅E⦆)
 
 -- Term interpretation (soundness)
@@ -363,7 +360,7 @@ sem-snₑ {a = a} ⦅E⦆ = ty-sem a .sn ⦅E⦆
 mutual
   ⦅_⦆ₑ : (E : Stack a c) → E ∈ ⟦ a ⟧
   ⦅ ε {c = a} ⦆ₑ = ⦅ε a ⦆
-  ⦅ u ∷ E ⦆ₑ     = ⦅ u ⦆ , ⦅ E ⦆ₑ
+  ⦅ u ∷ E ⦆ₑ     = ⦅ u ⦆ ∷ ⦅ E ⦆ₑ
 
   ⦅_⦆ : (t : Tm a) → t ⊥ ⟦ a ⟧
   ⦅ S {c} {a} {b} ∙ E ⦆ ⦅E'⦆ = ⦅S⦆ (⦅++⦆ {a = S-ty c a b} ⦅ E ⦆ₑ ⦅E'⦆)
