@@ -25,7 +25,6 @@ data Ty : Set where
 variable a b c : Ty
 
 -- Terms
--- Every type is inhabited by ⊥, which replaces free variables.
 
 infixl 5 _∙_
 
@@ -63,15 +62,10 @@ infix 2 _⊂_
 _⊂_ : (P Q : Pred a) → Set
 P ⊂ Q = ∀{t} (h : P t) → Q t
 
--- Accessibility
+-- Strong normalization: t is SN if all of its reducts are, inductively.
 
-data Acc {A} (R : ∀ (t t′ : A) → Set) (t : A) : Set where
-  acc : (h : ∀{t′} (r : R t t′) → Acc R t′) → Acc R t
-
--- Strong normalization
-
-SN : Pred a
-SN = Acc _↦_
+data SN (t : Tm a) : Set where
+  acc : (h : t ↦_ ⊂ SN) → SN t
 
 -- Reducts of SN terms are SN
 
@@ -108,7 +102,7 @@ sn-Stu (acc snt) (acc snu) = acc
    ; (f↦ r)      → sn-Stu (acc snt) (snu r)
    }
 
--- Neutral (fully applied for →w) a la Girard
+-- Neutral a la Girard.  In this case, the weak head redexes are neutral.
 
 data Ne : Pred a where
   Ktu  : Ne (K ∙ t ∙ u)
