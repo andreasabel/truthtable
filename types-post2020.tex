@@ -174,6 +174,8 @@
 \newcommand{\Intro}{\mathsf{Intro}}
 \newcommand{\Up}{\mathop{\Uparrow}}
 \newcommand{\up}{\mathord{\uparrow}}
+\newcommand{\Neut}{\mathsf{Neut}}
+\newcommand{\SAT}{\mathsf{SAT}}
 
 \newcommand{\indy}[1]{_{#1}}
 \newcommand{\indyp}[2]{(#1)_{#2}}
@@ -934,7 +936,81 @@ Strong normalization now follows according to \Cref{sec:model}.
 \subsection{A gap in the proof by Geuvers and Hurkens}
 \label{sec:gap}
 
-% In their elimination-based
+In their elimination-based SN proof, Geuvers and Hurkens
+\cite[Section~6.1]{geuversHurkens:types17} use for semantic types
+saturated sets with the expansion closure modified to liken
+\ref{it:cr3}.  To explain their approach, let us first introduce weak
+head reduction (called \emph{key reduction} in \loccit),
+$I \cdot E \cdot \vec E \whd[\beta] v \cdot \vec E$ where
+$\beta$-redex $I \cdot E$ contracts to $v$ and the elimination
+sequence $\vec E$ is arbitrary (can be empty).  Any SN term that is
+not a $\whd[\beta]$-redex is called neutral (set $\Neut$).
+
+In Def.~57.3 \cite{geuversHurkens:types17}
+a set of terms $\X$ is defined to be saturated ($\X \in
+\SAT$) if
+\begin{enumerate}[a.]
+
+\item (\namedlabel{it:sat1}{SAT1}) $\X \subseteq \SN$,
+
+\item (\namedlabel{it:sat2}{SAT2}) $\Neut \subseteq \X$, and
+
+\item (\namedlabel{it:sat3}{SAT3$'$}) $\X$ is closed under
+  $\whd[\beta]$-expansion, namely if $t \in \SN$ and
+  $(t \whd[\beta]\_) \subseteq \X$ (*) then $t \in \X$.
+
+\end{enumerate}
+In the original formulation (SAT3) of the saturated sets
+method,\footnote{See for instance the exposition by Luo \cite{luo:thesis}.}
+the requirement (*) is that $(t \whd[\beta]\_) \cap \X$ is inhabited,
+meaning that $t$ is the weak-head expansion of some term that is already
+in $\X$.  In the new formulation the requirement is that all
+weak-head reducts of $t$ are in $\X$.  It is easy to see that now
+\ref{it:sat2} is subsumed under \ref{it:sat3}, since neutrals have
+no weak-head reducts, and the condition (*) is trivially satisfied.
+The modification of SAT3 towards CR3-style \ref{it:sat3} was perhaps
+undertaken to account for the non-determinism of $\whd[\beta]$ in
+ITTND.
+
+Unfortunately, with \ref{it:sat3} it is not clear how to show the equivalent of
+\Cref{lem:funcr}, $(\A \to \B) \in \SAT$ \cite[Lemma~58]{geuversHurkens:types17}.
+In the formulation based on untyped terms, $\A \to \B$ is defined by
+\[
+  f \in (\A \to \B)
+  \iff
+  \forall \C \in \SAT, \,
+  a \in \A, \,
+  t \in \C[\B].\
+  f \cdot \el\to{10}(a,t) \in \C .
+\]
+To attempt to show \ref{it:sat3} for $\A \to \B$, assume $f \in \SN$ with
+$(f \whd[\beta]\_) \subseteq \A \to \B$ and derive $f \in \A \to \B$.
+To this end, assume $\C \in \SAT$ and $a \in \A$ and $t \in \C[\B]$
+and show $f \cdot E \in \C$ with $E = \el\to{10}(a,t)$.  Since $\C$ is
+arbitrary, we have to rely on \ref{it:sat3} to introduce elements into
+$\C$.  Thus, we need to show (1) $f \cdot E \in \SN$ and (2)
+$t' \in \C$ whenever $f \cdot E \whd[\beta] t'$.  For both goals we need to
+analyze the reducts of $f \cdot E$.  The problem is that $f$ could be
+an introduction and, hence, $f \cdot E$ a $\beta$-redex reducing to
+some $v$.  We lack assumptions to show $v \in \C$ and even $v \in
+\SN$, since $v$ is not of the same form as $f \cdot E$.  Were it either
+$f' \cdot E$ (with $f \red f'$) or $f \cdot E'$ (with $E \red E'$)
+there would be some hope to use the assumptions, in particular $f,E \in \SN$.
+
+Note that with the original SAT3 the relevant part of the proof goes
+in the other direction, we can exploit the closure of weak head
+reduction under elimination, namely if $f \whd[\beta] f'$
+then $f \cdot E \whd[\beta] f' \cdot E$.  It seems that this direction
+is employed in the proof sketch
+\cite[Lemma~58.c]{geuversHurkens:types17}, not matching the new
+requirement \ref{it:sat3}.
+
+At the moment, we do not see an easy fix for the arguably more elegant
+$\SAT$ method, and have to confine to the more pedestrian $\CR$ method
+as laid out in \Cref{sec:elimbased}.  However, we can get rid of the
+impredicative definition of $\A \to \B$ and use an inductive
+definitions instead.
+
 
 \subsection{Introduction-based approach}
 \label{sec:introbased}
@@ -947,12 +1023,11 @@ $\inn\to{11}$---this is a union of reducibility candidates.
 However, since the first two of these need already the implication
 they introduce, the construction of a least fixed-point is required.
 
-
 Note that the union $\A \cup \B$ of two reducibility candidates $\A$
 and $\B$ preserves CR1/2, but not \ref{it:cr3}.
 However,
 property \ref{it:cr3} can be forced by the following closure operation $\cl\A$
-on a term set $\A \subseteq \Gamma \vdash A$.
+on a term set $\A \subseteq (\Gamma \vdash A)$.
 \begin{gather*}
   \nru{\remb
     }{a \in \A
