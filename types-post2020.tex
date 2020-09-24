@@ -237,20 +237,117 @@ connective computes to \emph{true} one obtains an introduction rule,
 and for the \emph{false} lines one obtains an elimination rule.
 It is shown that these \emph{truth table natural deduction} (TTND)
 calculi are equivalent to the original calculi in the sense that the
-same judgements can be derived.  However, the schematic rules
+same judgements can be derived.  However, the schematic rules are
+sometimes unwieldy and unintuitive---for instance, in TTND there are three
+introduction rules for implication since $A \to B$ is true for three
+out of four valuations of $(A,B)$.  As a remedy, Geuvers and Hurkens
+show how the original TTND rules can be optimized in a systematic
+way.  In this article, we shall confine ourselves to the schematic,
+unoptimized rules of intuitionistic TTND (ITTND).
 
-Truth table natural deduction
-\cite{geuversHurkens:icla17,geuversHurkens:types17}
-(which is non-confluent) has been shown
-strongly normalizing using CPS translations to parallel lambda
-calculus \cite{geuversGiessenHurkens:fundinf19}.  We investigate
-standard techniques such as reducibility candidates and
-biorthogonality to that end.
+When studying proof terms and proof normalization for ITTND, one can
+observe that $\beta$-reduction---the reduction of detours, \ie, introductions followed
+directly by eliminations\footnotemark---is essentially non-deterministic and even
+non-confluent.
+\footnotetext{Geuvers and Hurkens call detour redexes
+\emph{direct intuitionistic cuts} \cite{geuversHurkens:icla17}
+or $a$-redexes \cite{geuversHurkens:types17} and with van der Giessen
+D-redexes \cite{geuversGiessenHurkens:fundinf19}.  We follow
+Joachimski and Matthes \cite{joachimskiMatthes:rta00} and call detour
+reductions simply $\beta$-reductions, as these are a generalization of
+the $\beta$-reduction of $\lambda$-calculus.}%
+% This non-confluence raises questions about the suitability of ITTND as
+% a programming language under the Curry-Howard isomorphism.
+Non-confluence poses some challenges to the proof that reduction is
+terminating, the so-called strong normalization (SN) property.  In the
+original presentation \cite{geuversHurkens:icla17}, the authors
+confine the SN proof to ITTND with a single but universal
+connective, if-then-else, and the optimized inference rules for
+if-then-else which yield confluent and standardizing $\beta$-reduction.  The proof
+follows the \emph{saturated sets} method pioneered by Tait
+\cite{tait:functionalsFiniteTypeI} which is known to rely on
+standardization by using deterministic weak head
+reduction.\footnote{Weak head reduction is sometimes called \emph{key
+  reduction} in the context of saturated sets.}
+
+In subsequent work \cite{geuversHurkens:types17}, the authors attack
+SN for full ITTND with non-confluent $\beta$-reduction, introducing
+elements of Girard's technique of \emph{reducibility candidates} (RCs)
+\cite{girard:thesis,girardLafontTaylor:proofsAndTypes}.  However, this
+innovative mix of Tait and Girard seems to have problems, as we shall
+investigate in \Cref{sec:gap}.  We show how to remedy the problems by
+returning to Girard's original definition of RCs in \Cref{sec:cr}.
+The repaired proof in \Cref{sec:elimbased} relies on impredicativity
+and could not be formalized in a predicative metatheory such as
+Martin-Löf Type Theory \cite{MartinLoef84}.  We thus give in
+\Cref{sec:introbased} a variant that
+replaces the use of impredicativity by inductive definitions.
+
+The schematic elimination rules of ITTND have the flavor of
+disjunction elimination or, more general, of the left rules of
+intuitionistic sequent calculus.  Those left rules do not pose any
+restriction on the formula on the right.  Likewise, eliminations in
+ITTND have an arbitrary target.  In such settings, subsequent eliminations
+are unnecessary and can be considered a form of detour, called
+\emph{permutation} or \emph{$\pi$-redexes}\footnotemark{}, for instance,
+by Joachimski and Matthes \cite{joachimskiMatthes:rta00}
+in the context of intuitionistic sequent calculus restricted to implication.
+\footnotetext{Geuvers and Hurkens call $\pi$-redexes $b$-redexes
+  \cite{geuversHurkens:types17} and, with van der Giessen, P-redexes
+  \cite{geuversGiessenHurkens:fundinf19}.}%
+Permutation reduction for ITTND by itself is terminating
+\cite{geuversHurkens:types17}, and in \loccit it is shown that the
+free combination with $\beta$-reduction, $\beta\pi$, is weakly
+normalizing.  Strong normalization was left open until the joint work
+with van der Giessen \cite{geuversGiessenHurkens:fundinf19}, where SN
+was established via a continuation-passing-style (CPS) translation to
+the parallel simply-typed lambda calculus (parallel STLC), which is
+similar to STLC with explicit non-determinism.
+
+The change of proof strategy begs the question whether the usual
+model-theoretic SN proofs could not work also for
+$\beta\pi$-reduction.  While the saturated sets method applied in
+a similar situation by Joackimski and Matthes
+\cite{joachimskiMatthes:rta00} fails due to non-confluence of $\beta$,
+Girard's RCs do not cover $\pi$.  However, there is a third popular
+method, \emph{biorthogonals}, that have been successfully applied by
+Lindley and Stark \cite{lindleyStark:tlca05} to prove SN for Moggi's
+``monadic metalanguage'', that is STLC with introduction, elimination,
+and permutation rules for the monad.  We show in \Cref{sec:biortho} that
+biorthogonals, putting elimination sequences at the center of
+attention, can show SN for $\beta\pi$ of ITTND.
+
+While we limit our presentation on the implicational fragment of ITTND
+for didactical purposes and convenience of exposition, our techniques
+scale immeditately to the general case.
+
+\paragraph*{Overview}
+%
+In \Cref{sec:nd} we recapitulate Geuvers and Hurkens' construction of
+intuitionistic inference rules from truthtables and the associated
+$\beta$-rules.
+%
+In \Cref{sec:model} we present a common structure of model-theoretic
+SN proofs.
+%
+This structure is instantiated to RCs in \Cref{sec:cr} and we present
+the two ways of constructing the interpretation of the connectives:
+via the elimination rules (\Cref{sec:elimbased}) and via the
+introduction rules (\Cref{sec:introbased}).  Further, we take a
+critical look at the proof of Geuvers and Hurkens
+\cite{geuversHurkens:types17} in \Cref{sec:gap}.
+%
+In \Cref{sec:perm} we turn to $\pi$-reduction, laying some foundation
+for the SN proof for $\beta\pi$ using orthogonality
+(\Cref{sec:biortho}), which is the main contribution of this paper.
+%
+We conclude with a short discussion in \Cref{sec:concl}.
+
 
 \section{Intuitionistic Truth Table Natural Deduction}
 \label{sec:nd}
 
-Geuvers et al. \cite{geuversHurkens:icla17} introduced a method to derive natural
+Geuvers and Hurkens \cite{geuversHurkens:icla17} introduced a method to derive natural
 deduction proof rules from truth tables of logical connectives.
 For instance, consider the truth table for implication:
 \[
@@ -768,6 +865,8 @@ Soundness of the introduction rules requires some work.
 
 Strong normalization now follows according to \Cref{sec:model}.
 
+\subsection{A gap in the proof by Geuvers and Hurkens}
+\label{sec:gap}
 
 \subsection{Introduction-based approach}
 \label{sec:introbased}
@@ -1129,8 +1228,9 @@ not readily available in type-theoretic proof assistants like Coq
 Agda \cite{agda:261}.
 
 In the following, when we speak of context-indexed families, we
-implicitly assume that the family is closed under weakening in analogy
-to \ref{it:cr0}.
+implicitly assume that the family is closed under weakening.
+% in analogy
+% to \ref{it:cr0}.
 
 Semantic types $\A$ shall now be context-indexed families of sets of
 evaluation contexts $\vec E$, and we write $a \perp \A_\Gamma$ to
@@ -1439,16 +1539,22 @@ We need the following stronger lemma.
   \end{caselist}
 \end{proof}
 
-\section{Classical Truth-Table Natural Deduction}
+\section{Conclusion}
+\label{sec:concl}
 
-The biorthogonality technique should extend to a classical version of
-truth-table natural deduction with Parigot-style classicality!?
-
-
+\paragraph*{Acknowledgements}  Thanks to Herman Geuvers for explaining
+me truth-table natural deduction during a 2018 visit to Nijmegen for
+the purpose of Henning Basold's PhD ceremony.  Thanks to Ralph Matthes
+for some email discussions on the topics of this article.
 
 \clearpage
 
 \appendix
+
+\section{Classical Truth-Table Natural Deduction}
+
+The biorthogonality technique should extend to a classical version of
+truth-table natural deduction with Parigot-style classicality!?
 
 \section{Trash}
 
