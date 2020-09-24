@@ -151,6 +151,7 @@
 
 \newcommand{\Set}{\mathsf{Set}}
 
+\newcommand{\x}{\mathsf{x}}
 \newcommand{\tin}{\ensuremath{\mathsf{in}}}
 \newcommand{\inn}[2]{\ensuremath{\tin_{#1}^{#2}}}
 \newcommand{\tel}{\mathsf{el}}
@@ -174,6 +175,8 @@
 \newcommand{\Up}{\mathop{\Uparrow}}
 \newcommand{\up}{\mathord{\uparrow}}
 
+\newcommand{\indy}[1]{_{#1}}
+\newcommand{\indyp}[2]{(#1)_{#2}}
 \newcommand{\ind}[1]{}    % _{#1}
 \newcommand{\indp}[2]{#1} % (#1)_{#2}
 
@@ -387,7 +390,7 @@ Natural deduction asserts the truth of a proposition $A$
   \cite{deBruijn:nameless}, we number the hypotheses from the right
   starting with zero, and a reference to a hypothesis is a
   non-negative number $i$ smaller than the length of $\Gamma$, a
-  so-called de Bruijn index.  For example, de Bruijn index zero
+  so-called de Bruijn index.  For example, de Bruijn index zero $\x_0$
   refers to proposition $A$ in context $\Gamma.A$.  We write $x :
   \Gamma \vdash A$ to denote a de Bruijn index $x$ pointing to
   proposition $A$ in context $\Gamma$.
@@ -483,7 +486,10 @@ present situation.
 \subsection{Preliminaries}
 \label{sec:prelim}
 
-We work with sets $\Gamma \vdash A$ of nameless well-typed terms and
+We work with sets $\Gamma \vdash A$ of nameless well-typed terms.
+De Bruijn indices are written $\x_n : \Gamma.A.\Delta \vdash A$ where
+$\Delta$ has length $n$.
+Instead of full-fledged renaming, we confine to
 weakening under order-preserving embeddings (OPE)
 $\tau : \Delta \leq \Gamma$.  Here, $\tau$ witnesses that and how
 $\Gamma$ is a subsequence of $\Delta$.
@@ -592,8 +598,8 @@ types, each context can be valuated by the identity substitution:
   By induction on $\Gamma$.  In case $\Gamma.A$, we have
   $\sid \in \Den \Gamma \Gamma$ by induction hypothesis, thus, by
   weakening, ${\up} \in \Den\Gamma{\Gamma.A}$.  Further, the 0th de
-  Bruijn index $x_0 \in \Den A {\Gamma.A}$.
-  Thus $(\up.x_0) = \sid \in \Den{\Gamma.A}{\Gamma.A}$.
+  Bruijn index $\x_0 \in \Den A {\Gamma.A}$.
+  Thus $(\up.\x_0) = \sid \in \Den{\Gamma.A}{\Gamma.A}$.
 \end{proof}
 
 The main theorem shows that each well-typed term inhabits the corresponding semantic type:
@@ -712,12 +718,13 @@ strong normalization proofs.
   non-deterministic and even non-confluent weak head reduction.
 \item Reducibility candidates following Girard
   \cite{girard:thesis,girardLafontTaylor:proofsAndTypes}.  We apply
-  this method in \Cref{sec:cr}
+  this method in \Cref{sec:cr}.
 \item Biorthogonals that have been used in SN proofs for
   $\lambda$-calculi for classical logic, e.g. by Parigot \cite{parigot:jsl97},
   and in SN proofs for the monadic meta-language by Lindley and Stark
   \cite{lindleyStark:tlca05}. We shall turn to these in \Cref{sec:biortho}.
 \end{enumerate}
+
 
 \section{Reducibility Candidates}
 \label{sec:cr}
@@ -753,16 +760,16 @@ with the following properties:
 %   $a\tau \in \A_\Delta$.
 
 \item[\namedlabel{it:cr1}{CR1}]
-  $\A\ind\Gamma \subseteq \SN$.
+  $\A\indy\Gamma \subseteq \SN$.
 
 \item[\namedlabel{it:cr2}{CR2}]
-  If $a \in \A\ind\Gamma$ and $a \red a'$ then $a' \in \A\ind\Gamma$.
+  If $a \in \A\indy\Gamma$ and $a \red a'$ then $a' \in \A\indy\Gamma$.
 
 \item[\namedlabel{it:cr3}{CR3}]
   For $a : \Gamma \vdash A$,
   % if $a \in \SN \setminus \Intro$
   if $a \not\in \Intro$
-  and $(a \red \_) \subseteq \A\ind\Gamma$, then $a \in \A\ind\Gamma$.
+  and $(a \red \_) \subseteq \A\indy\Gamma$, then $a \in \A\indy\Gamma$.
 
 \end{itemize}
 We write $\A \in \CR$ if $\A$ is a term set family satisfying CR1-3.
@@ -789,6 +796,16 @@ Term set abstraction operates on precandidates:
   holds for $\C$.
 \end{proof}
 
+\begin{remark}[On emptyness of RCs]
+  In untyped presentations of RCs, \ref{it:cr3} guarantees
+  non-emptyness of any $\A \in \CR$, since automatically all variables
+  will inhabit $\A$ by virtue of \ref{it:cr3}.  In our case, $\A_\Gamma$
+  may be empty since there may be no variables $x : \Gamma \vdash a$
+  of the correct type $a$.  We thus have to be a bit careful when
+  carrying over the textbook proofs
+  \cite{girardLafontTaylor:proofsAndTypes}.
+\end{remark}
+
 
 \subsection{Elimination-based approach}
 \label{sec:elimbased}
@@ -802,11 +819,17 @@ In case of implication, % \fbox{$f \in (\A \to \B)_\Gamma$} iff
   f \in (\A \to \B)_\Gamma
   \iff
   \forall \C \in \CR, \,
-  a \in \A_\Gamma, \,
-  t \in \C[\B]_\Gamma.\
-  f \cdot \el\to{10}(a,t) \in \C_\Gamma .
+  \tau : \Delta \leq \Gamma, \,
+  a \in \A_\Delta, \,
+  t \in \C[\B]_\Delta.\
+  f\tau \cdot \el\to{10}(a,t) \in \C_\Delta .
 \]
-This definition can be mechanically derived from the elimination rules
+Due to our intrinsic typing,
+in contrast to Geuvers and Hurkens \cite{geuversHurkens:types17},
+we need \emph{Kripke-style functions space}, \ie,
+quantify over all extensions $\Delta$ of $\Gamma$ with
+their respective embeddings $\tau : \Delta \leq \Gamma$.
+Still, this definition can be mechanically derived from the elimination rules
 of implication, which is the single rule:
 \[
   \ru{f : \Gamma \vdash A \to B \qquad
@@ -831,7 +854,7 @@ elimination rules for free.
   (Property \ref{it:el10}.)
 \end{lemma}
 \begin{proof}
-  By definition of $\A \to \B$.
+  By definition of $\A \to \B$ using $\tau = \sid$.
 \end{proof}
 
 Soundness of the introduction rules requires some work.
@@ -843,30 +866,75 @@ Soundness of the introduction rules requires some work.
   We show property \ref{it:in01}, the others are analogous.  Assume
   $t \in (\A \to \B)[\A]\ind\Gamma$ and $b \in \B\ind\Gamma$ and show
   $\inn\to{01}(t,b) \in \indp{\A \to \B}{\Gamma}$.  To this end, assume
-  $\C \in \CR$ and $a \in \A\ind\Gamma$ and $u \in \C[\B]\ind\Gamma$ and
-  show $v := \inn\to{01}(t,b) \cdot \el\to{10}(a,u) \in \C\ind\Gamma$ by
-  induction on $t,b,a,u \in \SN$ (obtained by \ref{it:cr1}).
+  $\C \in \CR$ and
+  $\tau : \Delta \leq \Gamma$ and
+  $a \in \A\indy\Delta$ and $u \in \C[\B]\indy\Delta$ and
+  show $v := \inn\to{01}(t,b)\tau \cdot \el\to{10}(a,u) \in \C\indy\Delta$ by
+  induction on $t(\Up\tau),b\tau,a,u \in \SN$ (obtained by \ref{it:cr1}).
 
   Since $v$ is not an introduction we shall utilize \ref{it:cr3} for
   $\C$.  Therefore, we have to show that all reducts of $v$ are
-  already in $\C\ind\Gamma$.
+  already in $\C\indy\Delta$.
 
-  If reduction happens in subterm $b$, so $b \red b'$, we can apply
-  the induction hypothesis on $b' \in \SN$, since $b' \in \B\ind\Gamma$
+  If reduction happens in subterm $b\tau$, so $b\tau \red b'$, we can apply
+  the induction hypothesis on $b' \in \SN$, since $b' \in \B\indy\Delta$
   by \ref{it:cr2}.  Reduction in one of the other subterms $t,a,u$ of
   $v$ is treated analgously.
 
   It remains to cover the $\beta$-reductions at the root, which are
-  $v \red u[b]$ and $v \red t[a] \cdot \el\to{10}(a,u)$.
-  We have $u[b] \in \C\ind\Gamma$ by assumptions on $u$ and $b$.  Further, since
-  $t[a] \in \indp{\A \to \B}{\Gamma}$, by definition $t[a] \cdot
-  \el\to{10}(a,u) \in \C\ind\Gamma$.
+  $v \red u[b\tau]$ and $v \red t(\tau.a) \cdot \el\to{10}(a,u)$.
+  We have $u[b\tau] \in \C\indy\Delta$ by assumptions on $u$ and $b$.  Further, since
+  $t(\tau.a) \in \indyp{\A \to \B}{\Delta}$, by definition $t(\tau.a) \cdot
+  \el\to{10}(a,u) \in \C\indy\Delta$.
+\end{proof}
+
+Let us not forget to verify that $\A \to \B$ is indeed a reducibility
+candidate.
+\begin{lemma}[Function space]
+  \label{lem:funcr}
+  If $\A,\B \in \CR$ then $(\A \to \B) \in \CR$.
+\end{lemma}
+\begin{proof}
+  First, $\A \to \B$ needs to be a term set family.
+  This is facilitated by the Kripke-style definition of the function space:
+  Assume $f \in (\A \to \B)_\Gamma$ and $\tau : \Delta \leq \Gamma$
+  and show $f \tau \in (\A \to \B)_\Delta$.  To this end assume $\C
+  \in \CR$ and $\tau' \in \Phi \leq \Delta$ and $a \in \A_\Phi$ and $t
+  \in \C[\B]_\Phi$ and show $f\tau\tau' \cdot \el\to{10}(a,t) \in
+  \C_\Phi$.  This follows from the assumption on $f$ with OPE
+  $\tau\tau' : \Phi \leq \Gamma$.
+
+  For \ref{it:cr1}, assume $f \in (\A \to \B)_\Gamma$ and show $f \in \SN$.
+  Let $\C = \A$ (this choice is simplest, but any RC would do) and
+  $\Delta = \Gamma.A$.  Clearly $a := (\x_0 : \Delta \vdash A) \in
+  \A_\Delta$ and $t := (\x_1 : \Delta.B \vdash A) \in \C[\B]_\Delta$.
+  Thus $f\tau \cdot \el\to{10}(a,t) \in \C_\Delta \subseteq \SN$.
+  This implies $f \in \SN$.
+
+  Closure under reduction (\ref{it:cr2}) follows because reduction is
+  closed under weakening and elimination.
+
+  For \ref{it:cr3}, assume $f : \Gamma \vdash A \to B$ that is not an
+  introduction and whose reducts are in $(\A \to \B)_\Gamma$.  To show
+  $f \in (\A \to \B)_\Gamma$, assume $\C \in \CR$ and $\tau : \Delta \leq \Gamma$ and
+  $a \in \A_\Delta$ and $t \in \C[B]_\Delta$ and show $f\tau \cdot E \in
+  \C_\Delta$ where $E = \el\to{10}(a,t)$.  We proceed by \ref{it:cr3}
+  for $\C$, exploiting that $f\tau \cdot E$ is not an introduction
+  either.  It is sufficient to show that all reducts of $f\tau \cdot
+  E$ are in $\C_\Delta$.  We proceed by induction on $a,t \in \SN$.
+  Since $f$ is not an introduction, we can only reduce in $f$ or in $E$.
+  Reductions in $f$ are covered by the assumption on $f$.
+  Reductions in $E$ are either $a \red a' $ or $t \red t'$ and covered by the
+  respective induction hypothesis, since $a'$ and $t'$ stay in their
+  respective RCs by virtue of \ref{it:cr2}.
 \end{proof}
 
 Strong normalization now follows according to \Cref{sec:model}.
 
 \subsection{A gap in the proof by Geuvers and Hurkens}
 \label{sec:gap}
+
+% In their elimination-based
 
 \subsection{Introduction-based approach}
 \label{sec:introbased}
@@ -1186,8 +1254,12 @@ where $\up : \Gamma.B \leq \Gamma$ and
 $E' \up$ shall denote the weakening of elimination $E'$ by $\up$.
 In particular, $\el\to{10}(a',u') \up = \el\to{10}(a' \up, u' (\Up\up))$.
 
-Just throwing permutation reductions into the mix and replaying the SN
-proof for $\beta$ does not work.  The proof of \Cref{lem:app} relies
+If in the above display $u$ is an introduction, it may $\beta$-react with $E'$
+to eliminate further detours.  Thus, $\pi$-reductions can lead to
+significant further normalization.
+
+Just throwing permutation reductions into the mix and replaying the CR
+proof for SN-$\beta$ does not work.  The proof of \Cref{lem:app} relies
 on the fact that if $f \cdot E \red c$ and $f \not\in \Intro$ then
 either $f \red f'$ or $E \red E'$, but the structure of the
 elimination $f \cdot E$ is preserved.  However, with permutations, in
@@ -1354,8 +1426,8 @@ Abstraction operates on semantic types:
 
   Then, assume $(C, (\vec E : \Gamma.A \mid X \vdash C)) \in
   \X[\A]_\Gamma$ and show $\vec E \in \SN$.
-  Choose $\tau = \up : \Gamma.A \leq \Gamma$ and $a = x_0 \in
-  \A_{\Gamma.A}$ the 0th de Bruijn index, then $\vec E (\up,x_0) =
+  Choose $\tau = \up : \Gamma.A \leq \Gamma$ and $a = \x_0 \in
+  \A_{\Gamma.A}$ the 0th de Bruijn index, then $\vec E (\up,\x_0) =
   \vec E \in \X_{\Gamma.A}$ and hence SN.
 \end{proof}
 Given two semantic types $\A$ and $\B$, the function space $\A \to \B$
