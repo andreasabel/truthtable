@@ -432,30 +432,26 @@ data Idₑ {a} : Predₑ a where
 
 record ⟦bool⟧ (cE : Cont bool) : Set where
   field
-    then : let cont E = cE in SN (tt ∙ E)
-    else : let cont E = cE in SN (ff ∙ E)
+    br : let cont E = cE in ∀ h → SN (h ∙ E)
 open ⟦bool⟧
 
 bool-sem : SemTy ⟦bool⟧
-bool-sem .id .then = sn-Hd
-bool-sem .id .else = sn-Hd
-bool-sem .sn  ⦅E⦆   = sn-spine (⦅E⦆ .then)
-bool-sem .red {p = p} ⦅E⦆ r .then = sn-red (⦅E⦆ .then) (↦E {p = p} r)
-bool-sem .red {p = p} ⦅E⦆ r .else = sn-red (⦅E⦆ .else) (↦E {p = p} r)
+bool-sem .id .br h = sn-Hd
+bool-sem .sn  ⦅E⦆   = sn-spine (⦅E⦆ .br tt)
+bool-sem .red {p = p} ⦅E⦆ r .br h = sn-red (⦅E⦆ .br h) (↦E {p = p} r)
 
 -- Boolean values
 
 ⦅tt⦆ : (tt ∙ ε) ⊥ ⟦bool⟧
-⦅tt⦆ .run ⦅E⦆ = ⦅E⦆ .then
+⦅tt⦆ .run ⦅E⦆ = ⦅E⦆ .br tt
 
 ⦅ff⦆ : (ff ∙ ε) ⊥ ⟦bool⟧
-⦅ff⦆ .run ⦅E⦆ = ⦅E⦆ .else
+⦅ff⦆ .run ⦅E⦆ = ⦅E⦆ .br ff
 
 --
-
-case-hd : {u v : Tm a} → case u v ∷ E ∈ ⟦bool⟧ → case u v ∷ ε ∈ ⟦bool⟧
-case-hd ⦅caseE⦆ .then = {!⦅caseE⦆ .then!}
-case-hd ⦅caseE⦆ .else = {!!}
+-- NOT NEEDED
+-- case-hd : {u v : Tm a} → case u v ∷ E ∈ ⟦bool⟧ → case u v ∷ ε ∈ ⟦bool⟧
+-- case-hd ⦅caseE⦆ .br h = {!⦅caseE⦆ .then!}
 
 -- case-tl : {u v : Tm a} → case u v ∷ E ∈ ⟦bool⟧ → E ∈ ⟦ a ⟧
 
@@ -496,8 +492,8 @@ ty-sem (a ⇒ b) = ⇨-sem (ty-sem a) (ty-sem b)
 sem-sn : t ⊥ ⟦ a ⟧ → SN t
 sem-sn {a = a} ⦅t⦆ = Sem-sn (ty-sem a) ⦅t⦆
 
-sem-snₑ : (e ∷ ε) ∈ ⟦ a ⟧ → SNₑ e
-sem-snₑ {a = a} ⦅E⦆ = {! ⦅E⦆ !}
+-- sem-snₑ : (e ∷ ε) ∈ ⟦ a ⟧ → SNₑ e
+-- sem-snₑ {a = a} ⦅E⦆ = {! ⦅E⦆ !}
 
 sem-snₛ : E ∈ ⟦ a ⟧ → SNₛ E
 sem-snₛ {a = a} ⦅E⦆ = ty-sem a .sn ⦅E⦆
@@ -505,9 +501,9 @@ sem-snₛ {a = a} ⦅E⦆ = ty-sem a .sn ⦅E⦆
 
 --
 
--- NOT PROVABLE
-case-tl : {u v : Tm a} → case u v ∷ E ∈ ⟦bool⟧ → E ∈ ⟦ a ⟧
-case-tl ⦅caseE⦆ = {!⦅caseE⦆ .then!}
+-- -- NOT PROVABLE
+-- case-tl : {u v : Tm a} → case u v ∷ E ∈ ⟦bool⟧ → E ∈ ⟦ a ⟧
+-- case-tl ⦅caseE⦆ = {!⦅caseE⦆ .then!}
 
 -- Soundness
 
@@ -515,11 +511,6 @@ case-tl ⦅caseE⦆ = {!⦅caseE⦆ .then!}
 
 ⦅ε_⦆ : ∀ a → ε ∈ ⟦ a ⟧
 ⦅ε a ⦆ = ty-sem a .id
-
-_⦅++⦆_ : ⟦ a ⟧ (cont E) → ⟦ b ⟧ (cont E′) → ⟦ a ⟧ (cont (E ++ E′))
-_⦅++⦆_     {E = ε} _         ⦅E′⦆ = ⦅E′⦆
-_⦅++⦆_ {a = _ ⇒ _} (⦅u⦆ ∷ ⦅E⦆) ⦅E′⦆ = ⦅u⦆ ∷  ⦅E⦆ ⦅++⦆ ⦅E′⦆
-_⦅++⦆_ {a = bool} {E = case u v ∷ E} ⦅E⦆ ⦅E′⦆ = {!!}
 
 -- Interpretation of K
 
@@ -551,12 +542,13 @@ _⦅++⦆_ {a = bool} {E = case u v ∷ E} ⦅E⦆ ⦅E′⦆ = {!!}
 
 -- v ⊥ ⟦ a ⟧ → u ⊥ ⟦ a ⟧ → E ∈ ⟦ a ⟧ → case u v ∷ E ∈ ⟦bool⟧
 
-bar : (⦅e⦆ : case t u ∷ ε ∈ ⟦bool⟧) (⦅E⦆ : E ∈ ⟦bool⟧) → case t u ∷ E ∈ ⟦bool⟧
-bar ⦅e⦆ ⦅E⦆ = {!!}
+-- bar : (⦅e⦆ : case t u ∷ ε ∈ ⟦bool⟧) (⦅E⦆ : E ∈ ⟦bool⟧) → case t u ∷ E ∈ ⟦bool⟧
+-- bar ⦅e⦆ ⦅E⦆ = {!!}
 
-foo : v ⊥ ⟦bool⟧ → case t u ∷ ε ∈ ⟦bool⟧ → (v ∘ case t u ∷ ε) ⊥ ⟦bool⟧
-foo ⦅v⦆ ⦅e⦆ .run ⦅E⦆ = ⦅v⦆ .run {!!}
+-- foo : v ⊥ ⟦bool⟧ → case t u ∷ ε ∈ ⟦bool⟧ → (v ∘ case t u ∷ ε) ⊥ ⟦bool⟧
+-- foo ⦅v⦆ ⦅e⦆ .run ⦅E⦆ = ⦅v⦆ .run {!!}
 
+-- NOT NEEDED:
 module _ (⟦A⟧ : SemTy A) where
 
   ⦅case-ε⦆' : (⦅t⦆ : t ⊥ A) (snt : SN t)
@@ -580,28 +572,34 @@ module _ (⟦A⟧ : SemTy A) where
 
   -- This is a special case of the lemma ⦅case⦆ below.
   ⦅case-ε⦆ : (⦅t⦆ : t ⊥ A) (⦅u⦆ : u ⊥ A) → case t u ∷ ε ∈ ⟦bool⟧
-  ⦅case-ε⦆ ⦅t⦆ ⦅u⦆ .then = acc (⦅case-ε⦆' ⦅t⦆ (Sem-sn ⟦A⟧ ⦅t⦆) ⦅u⦆ (Sem-sn ⟦A⟧ ⦅u⦆))
-  ⦅case-ε⦆ ⦅t⦆ ⦅u⦆ .else = acc (⦅case-ε⦆' ⦅t⦆ (Sem-sn ⟦A⟧ ⦅t⦆) ⦅u⦆ (Sem-sn ⟦A⟧ ⦅u⦆))
+  ⦅case-ε⦆ ⦅t⦆ ⦅u⦆ .br h = acc (⦅case-ε⦆' ⦅t⦆ (Sem-sn ⟦A⟧ ⦅t⦆) ⦅u⦆ (Sem-sn ⟦A⟧ ⦅u⦆))
 
 
-case-sn : {E : Stack n a c} (i : Size) (w : WF i n)
+-- This is the key lemma:
+
+case-sn' : {E : Stack n a c} (i : Size) (w : WF i n)
           (sntE : SN (t ∘ E))
           (snuE : SN (u ∘ E))
           (r : h ∙ case t u ∷ E ↦ v) → SN v
-case-sn i w sntE snuE ↦tt = sntE
-case-sn i w sntE snuE ↦ff = snuE
-case-sn i w (acc sntE) snuE (↦E (here (↦caseₗ r))) = acc (case-sn i w (sntE (∘↦ₗ r)) snuE)
-case-sn i w sntE (acc snuE) (↦E (here (↦caseᵣ r))) = acc (case-sn i w sntE (snuE (∘↦ₗ r)))
-case-sn {t = t} {u = u} i w (acc sntE) (acc snuE) (↦E (there {p = p} r)) = acc
-  (case-sn i (wf-≤ w p)
+case-sn' i w sntE snuE ↦tt = sntE
+case-sn' i w sntE snuE ↦ff = snuE
+case-sn' i w (acc sntE) snuE (↦E (here (↦caseₗ r))) = acc (case-sn' i w (sntE (∘↦ₗ r)) snuE)
+case-sn' i w sntE (acc snuE) (↦E (here (↦caseᵣ r))) = acc (case-sn' i w sntE (snuE (∘↦ₗ r)))
+case-sn' {t = t} {u = u} i w (acc sntE) (acc snuE) (↦E (there {p = p} r)) = acc
+  (case-sn' i (wf-≤ w p)
     (sntE (∘↦ᵣ {p = p} {t = t} r))
     (snuE (∘↦ᵣ {p = p} {t = u} r))
   )
-case-sn i (acc {j} w) sntE snuE (↦E π) = acc (case-sn j (w ≤-refl) sntE snuE )
+case-sn' i (acc {j} w) sntE snuE (↦E π) = acc (case-sn' j (w ≤-refl) sntE snuE )
+
+
+case-sn : (sntE : SN (t ∘ E))
+          (snuE : SN (u ∘ E))
+          → SN (h ∙ case t u ∷ E)
+case-sn sntE snuE = acc (case-sn' ∞ wf-ℕ sntE snuE)
 
 ⦅case⦆ : (⦅t⦆ : t ⊥ ⟦ a ⟧) (⦅u⦆ : u ⊥ ⟦ a ⟧) (⦅E⦆ : E ∈ ⟦ a ⟧) → case t u ∷ E ∈ ⟦bool⟧
-⦅case⦆ ⦅t⦆ ⦅u⦆ ⦅E⦆ .then = acc (case-sn ∞ wf-ℕ (⦅t⦆ .run ⦅E⦆) (⦅u⦆ .run ⦅E⦆))
-⦅case⦆ ⦅t⦆ ⦅u⦆ ⦅E⦆ .else = acc (case-sn ∞ wf-ℕ (⦅t⦆ .run ⦅E⦆) (⦅u⦆ .run ⦅E⦆))
+⦅case⦆ ⦅t⦆ ⦅u⦆ ⦅E⦆ .br h = case-sn (⦅t⦆ .run ⦅E⦆) (⦅u⦆ .run ⦅E⦆)
 
 {-
 mutual
@@ -666,21 +664,42 @@ mutual
 -- ⦅case⦆ : (⟦A⟧ : SemTy A) (⦅v⦆ : v ⊥ ⟦ a ⟧) (⦅u⦆ : u ⊥ ⟦ a ⟧) (⦅E⦆ : E ∈ ⟦ a ⟧) → case u v ∷ E ∈ ⟦bool⟧
 -- ⦅case⦆ ⟦A⟧ ⦅v⦆ ⦅u⦆ ⦅E⦆ .then = {!!}
 -- ⦅case⦆ ⟦A⟧ ⦅v⦆ ⦅u⦆ ⦅E⦆ .else = {!!}
+-- -}
+-- -}
 
 -- Term interpretation (soundness)
 
 -- infix 100 ⦅_⦆ ⦅_⦆ₑ
 
+-- foo : case u v ∷ E ∈ ⟦bool⟧ → (u ∘ E) ⊥ ⟦ a ⟧
+-- foo ⦅caseE⦆ .run ⦅E⦆ = {!⦅caseE⦆ .br tt!}
+
 mutual
-  ⦅_⦆ₑ : (E : Stack a c) → E ∈ ⟦ a ⟧
-  ⦅ ε {c = a} ⦆ₑ = ⦅ε a ⦆
-  ⦅ app u ∷ E ⦆ₑ = ⦅ u ⦆ ∷ ⦅ E ⦆ₑ
-  ⦅ case u v ∷ E ⦆ₑ .then = {!⦅ u ⦆!}
-  ⦅ case u v ∷ E ⦆ₑ .else = sn-ff-case (⦅ v ⦆ .run ⦅ E ⦆ₑ) {!sem-snₛ ⦅ case u v ∷ E ⦆ₑ!}
--- ⦅ u ⦆ ∷ ⦅ E ⦆ₑ
+--   ⦅_⦆ₑ : (E : Stack n a c) → E ∈ ⟦ a ⟧
+--   ⦅ ε {c = a} ⦆ₑ = ⦅ε a ⦆
+--   ⦅ app u ∷ E ⦆ₑ = ⦅ u ⦆ ∷ ⦅ E ⦆ₑ
+--   ⦅ case u v ∷ E ⦆ₑ = ⦅case⦆ ⦅ u ⦆ ⦅ v ⦆ ⦅ E ⦆ₑ
+-- --   ⦅ case u v ∷ E ⦆ₑ .br tt = {!⦅ u ⦆!}
+-- --   ⦅ case u v ∷ E ⦆ₑ .br ff = sn-ff-case (⦅ v ⦆ .run ⦅ E ⦆ₑ) {!sem-snₛ ⦅ case u v ∷ E ⦆ₑ!}
+-- -- -- ⦅ u ⦆ ∷ ⦅ E ⦆ₑ
+
+--   ⦅_⦆ : (t : Tm a) → t ⊥ ⟦ a ⟧
+--   ⦅ h ∙ E ⦆ .run ⦅E′⦆ = ⦅ h ⦆ₕ .run (⦅ E ⦆ₑ ⦅++⦆ ⦅E′⦆)
+
+--   _⦅++⦆_ : E ∈ ⟦ a ⟧ → E′ ∈ ⟦ b ⟧ → (E ++ E′) ∈ ⟦ a ⟧
+--   _⦅++⦆_     {E = ε} _         ⦅E′⦆ = ⦅E′⦆
+--   _⦅++⦆_ {a = _ ⇒ _} (⦅u⦆ ∷ ⦅E⦆) ⦅E′⦆ = ⦅u⦆ ∷  ⦅E⦆ ⦅++⦆ ⦅E′⦆
+--   -- _⦅++⦆_ {a = bool} {E = case u v ∷ E} ⦅E⦆ ⦅E′⦆ = {!⦅case⦆ ⦅ u ⦆ ⦅ v ⦆ (⦅E⦆ ⦅++⦆ ⦅E′⦆)!}
+--   _⦅++⦆_ {a = bool} {E = case u v ∷ E} ⦅E⦆ ⦅E′⦆ .br h = case-sn {!⦅E⦆ .br tt!} {!!}
+--   -- {!⦅case⦆ ⦅ u ⦆ ⦅ v ⦆ (⦅E⦆ ⦅++⦆ ⦅E′⦆)!}
 
   ⦅_⦆ : (t : Tm a) → t ⊥ ⟦ a ⟧
-  ⦅ h ∙ E ⦆ .run ⦅E′⦆ = ⦅ h ⦆ₕ .run (⦅ E ⦆ₑ ⦅++⦆ ⦅E′⦆)
+  ⦅ h ∙ E ⦆ .run ⦅E′⦆ = ⦅ h ⦆ₕ .run (⦅ E ⦆ₛ ⦅E′⦆)
+
+  ⦅_⦆ₛ : (E : Stack n a c) (⦅E'⦆ : E' ∈ ⟦ c ⟧) → (E ++ E') ∈ ⟦ a ⟧
+  ⦅ ε {c = a}    ⦆ₛ ⦅E'⦆ = ⦅E'⦆
+  ⦅ app u ∷ E    ⦆ₛ ⦅E'⦆ = ⦅ u ⦆ ∷ ⦅ E ⦆ₛ ⦅E'⦆
+  ⦅ case u v ∷ E ⦆ₛ ⦅E'⦆ = ⦅case⦆ ⦅ u ⦆ ⦅ v ⦆ (⦅ E ⦆ₛ ⦅E'⦆)
 
 -- Strong normalization
 
