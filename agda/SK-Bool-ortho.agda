@@ -385,11 +385,11 @@ record _⊥_ (t : Tm a) (A : Predₛ a) : Set where
     run : (⦅E⦆ : E ∈ A) → SN (t ∘ E)
 open _⊥_
 
-Sem-sn : (⟦A⟧ : SemTy A) (⦅t⦆ : t ⊥ A) → SN t
-Sem-sn ⟦A⟧ ⦅t⦆ = ⦅t⦆ .run (⟦A⟧ .id)
+Sem-sn : (⟪A⟫ : SemTy A) (⦅t⦆ : t ⊥ A) → SN t
+Sem-sn ⟪A⟫ ⦅t⦆ = ⦅t⦆ .run (⟪A⟫ .id)
 
-Sem-snₑ : (⟦A⟧ : SemTy A) (⦅E⦆ : E ∈ A) → SNₛ E
-Sem-snₑ ⟦A⟧ = ⟦A⟧ .sn
+Sem-snₑ : (⟪A⟫ : SemTy A) (⦅E⦆ : E ∈ A) → SNₛ E
+Sem-snₑ ⟪A⟫ = ⟪A⟫ .sn
 
 -- Semantic types are closed under reduction of their inhabitants.
 
@@ -398,14 +398,14 @@ sem-red ⦅t⦆ r .run ⦅E⦆ = sn-red (⦅t⦆ .run ⦅E⦆) (∘↦ₗ r)
 
 -- Singleton stack set {ε}
 
-data Idₑ {a} : Predₛ a where
-  ε : ε ∈ Idₑ
+data ⟦o⟧ {a} : Predₛ a where
+  ε : ε ∈ ⟦o⟧
 
 -- SN is the semantic type given by {ε}
 
-⟦Id⟧ : SemTy (Idₑ {a = a})
-⟦Id⟧ .id    = ε
-⟦Id⟧ .sn  ε = sn-ε
+⟪o⟫ : SemTy (⟦o⟧ {a = a})
+⟪o⟫ .id    = ε
+⟪o⟫ .sn  ε = sn-ε
 
 -- Semantic booleans
 
@@ -414,9 +414,9 @@ record ⟦bool⟧ (cE : Cont bool) : Set where
     br : let cont E = cE in ∀ h → SN (h ∙ E)
 open ⟦bool⟧
 
-bool-sem : SemTy ⟦bool⟧
-bool-sem .id .br h = sn-Hd
-bool-sem .sn  ⦅E⦆   = sn-spine (⦅E⦆ .br tt)
+⟪bool⟫ : SemTy ⟦bool⟧
+⟪bool⟫ .id .br h = sn-Hd
+⟪bool⟫ .sn  ⦅E⦆   = sn-spine (⦅E⦆ .br tt)
 
 -- Boolean values
 
@@ -433,18 +433,18 @@ bool-sem .sn  ⦅E⦆   = sn-spine (⦅E⦆ .br tt)
 
 -- Function space on semantic types
 
-data _⇨_ (A : Predₛ a) (B : Predₛ b) : Predₛ (a ⇒ b) where
-  ε   : ε ∈ (A ⇨ B)
-  _∷_ : (⦅u⦆ : u ⊥ A) (⦅E⦆ : E ∈ B) → (app u ∷ E) ∈ (A ⇨ B)
+data _⟦→⟧_ (A : Predₛ a) (B : Predₛ b) : Predₛ (a ⇒ b) where
+  ε   : ε ∈ (A ⟦→⟧ B)
+  _∷_ : (⦅u⦆ : u ⊥ A) (⦅E⦆ : E ∈ B) → (app u ∷ E) ∈ (A ⟦→⟧ B)
 
-⇨-sem : (⟦A⟧ : SemTy A) (⟦B⟧ : SemTy B) → SemTy (A ⇨ B)
-⇨-sem ⟦A⟧ ⟦B⟧ .id = ε
-⇨-sem ⟦A⟧ ⟦B⟧ .sn ε         = sn-ε
-⇨-sem ⟦A⟧ ⟦B⟧ .sn (⦅u⦆ ∷ ⦅E⦆) = sn-app∷ (Sem-sn ⟦A⟧ ⦅u⦆) (⟦B⟧ .sn ⦅E⦆)
+_⟪→⟫_ : (⟪A⟫ : SemTy A) (⟪B⟫ : SemTy B) → SemTy (A ⟦→⟧ B)
+(⟪A⟫ ⟪→⟫ ⟪B⟫) .id           = ε
+(⟪A⟫ ⟪→⟫ ⟪B⟫) .sn ε         = sn-ε
+(⟪A⟫ ⟪→⟫ ⟪B⟫) .sn (⦅u⦆ ∷ ⦅E⦆) = sn-app∷ (Sem-sn ⟪A⟫ ⦅u⦆) (⟪B⟫ .sn ⦅E⦆)
 
 -- Application
 
-⦅app⦆ : (⦅t⦆ : t ⊥ (A ⇨ B)) (⦅u⦆ : u ⊥ A) → (t ∘ app u ∷ ε) ⊥ B
+⦅app⦆ : (⦅t⦆ : t ⊥ (A ⟦→⟧ B)) (⦅u⦆ : u ⊥ A) → (t ∘ app u ∷ ε) ⊥ B
 ⦅app⦆ ⦅t⦆ ⦅u⦆ .run ⦅E⦆ = ⦅t⦆ .run (⦅u⦆ ∷ ⦅E⦆)
 
 -- Soundness
@@ -453,24 +453,24 @@ data _⇨_ (A : Predₛ a) (B : Predₛ b) : Predₛ (a ⇒ b) where
 -- Type interpretation
 
 ⟦_⟧ : ∀ a → Predₛ a
-⟦ o ⟧     = Idₑ
+⟦ o ⟧     = ⟦o⟧
 ⟦ bool ⟧  = ⟦bool⟧
-⟦ a ⇒ b ⟧ = ⟦ a ⟧ ⇨ ⟦ b ⟧
+⟦ a ⇒ b ⟧ = ⟦ a ⟧ ⟦→⟧ ⟦ b ⟧
 
 -- Types are interpreted as semantic types
 
-ty-sem : ∀ a → SemTy ⟦ a ⟧
-ty-sem o       = ⟦Id⟧
-ty-sem bool    = bool-sem
-ty-sem (a ⇒ b) = ⇨-sem (ty-sem a) (ty-sem b)
+⟪_⟫ : ∀ a → SemTy ⟦ a ⟧
+⟪ o     ⟫ = ⟪o⟫
+⟪ bool  ⟫ = ⟪bool⟫
+⟪ a ⇒ b ⟫ = ⟪ a ⟫ ⟪→⟫ ⟪ b ⟫
 
 -- Semantic objects are SN
 
 sem-sn : t ⊥ ⟦ a ⟧ → SN t
-sem-sn {a = a} ⦅t⦆ = Sem-sn (ty-sem a) ⦅t⦆
+sem-sn {a = a} ⦅t⦆ = Sem-sn (⟪ a ⟫) ⦅t⦆
 
 sem-snₛ : E ∈ ⟦ a ⟧ → SNₛ E
-sem-snₛ {a = a} ⦅E⦆ = ty-sem a .sn ⦅E⦆
+sem-snₛ {a = a} ⦅E⦆ = ⟪ a ⟫ .sn ⦅E⦆
 
 -- Soundness
 
