@@ -375,7 +375,6 @@ record SemTy (A : Predₑ a) : Set where
   field
     id  : ε ∈ A
     sn  : (⦅E⦆ : E ∈ A) → SNₛ E
-    red : (⦅E⦆ : E ∈ A) (r : E ↦ₛ[ p ] E') → E' ∈ A
 open SemTy
 
 -- Semantic objects
@@ -410,7 +409,6 @@ data Idₑ {a} : Predₑ a where
 ⟦Id⟧ : SemTy (Idₑ {a = a})
 ⟦Id⟧ .id    = ε
 ⟦Id⟧ .sn  ε = sn-ε
-⟦Id⟧ .red ε ()
 
 -- Semantic booleans
 
@@ -422,7 +420,6 @@ open ⟦bool⟧
 bool-sem : SemTy ⟦bool⟧
 bool-sem .id .br h = sn-Hd
 bool-sem .sn  ⦅E⦆   = sn-spine (⦅E⦆ .br tt)
-bool-sem .red {p = p} ⦅E⦆ r .br h = sn-red (⦅E⦆ .br h) (↦E {p = p} r)
 
 -- Boolean values
 
@@ -442,9 +439,6 @@ data _⇨_ (A : Predₑ a) (B : Predₑ b) : Predₑ (a ⇒ b) where
 ⇨-sem ⟦A⟧ ⟦B⟧ .id = ε
 ⇨-sem ⟦A⟧ ⟦B⟧ .sn ε         = sn-ε
 ⇨-sem ⟦A⟧ ⟦B⟧ .sn (⦅u⦆ ∷ ⦅E⦆) = sn-app∷ (Sem-sn ⟦A⟧ ⦅u⦆) (⟦B⟧ .sn ⦅E⦆)
-⇨-sem ⟦A⟧ ⟦B⟧ .red ε ()
-⇨-sem ⟦A⟧ ⟦B⟧ .red (⦅u⦆ ∷ ⦅E⦆) (here (↦app r)) = sem-red ⦅u⦆ r ∷ ⦅E⦆
-⇨-sem ⟦A⟧ ⟦B⟧ .red (⦅u⦆ ∷ ⦅E⦆) (there {p = p} r) = ⦅u⦆ ∷ ⟦B⟧ .red {p = p} ⦅E⦆ r
 
 -- Application
 
