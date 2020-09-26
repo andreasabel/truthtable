@@ -1,12 +1,12 @@
+-- Strong normalization for simply-typed combinatory logic with booleans
+-- using orthogonality.
+
+-- Preamble
+---------------------------------------------------------------------------
+
 {-# OPTIONS --postfix-projections #-}
 {-# OPTIONS --rewriting #-}
 {-# OPTIONS --sized-types #-}
--- {-# OPTIONS --experimental-irrelevance #-}
--- {-# OPTIONS --show-implicit #-}
--- {-# OPTIONS -v tc.polarity:10 #-}
-
--- Strong normalization for simply-typed combinatory logic with booleans
--- using orthogonality.
 
 module SK-Bool-ortho where
 
@@ -192,7 +192,7 @@ data Acc {A : Set} (R : ∀ (t t′ : A) → Set) (t : A) : Set where
 
 -- Reducts of SN things are SN things
 
-sn-red : {A : Set} {R : A → A → Set}{t t′ : A} → Acc R t  → R t t′ → Acc R t′
+sn-red : {A : Set} {R : A → A → Set}{t t′ : A} → Acc R t → R t t′ → Acc R t′
 sn-red (acc sn) r = sn r
 
 -- Strong normalization: t is SN if all of its reducts are, inductively.
@@ -211,28 +211,28 @@ SNₛ = Acc _↦ₛ_
 sn-spine : SN (h ∙ E) → SNₛ E
 sn-spine (acc sntE) = acc λ r → sn-spine (sntE (↦E r))
 
--- Elim constructors preserve SN
+-- Constants are SN
 
-sn-app : SN u → SNₑ (app {a} {b} u)
-sn-app (acc snu) = acc λ{ (↦app r) → sn-app (snu r) }
+-- Heads are SN
 
--- Stack constructors preserve SN
+sn-Hd : SN (h ∙ ε)
+sn-Hd = acc λ{ (↦E ()) }
+
+-- The empty stack is SN
 
 sn-ε : SNₛ (ε {c = a})
 sn-ε = acc λ()
+
+-- Function elimination preserves SN
+
+sn-app : SN u → SNₑ (app {a} {b} u)
+sn-app (acc snu) = acc λ{ (↦app r) → sn-app (snu r) }
 
 sn-app∷ : SN u → SNₛ E → SNₛ (app u ∷ E)
 sn-app∷ (acc snu) snE@(acc snE') = acc
   λ{ (here (↦app r)) → sn-app∷ (snu r) snE
    ; (there r) → sn-app∷ (acc snu) (snE' r)
    }
-
--- Values are SN:
-
--- Heads are SN
-
-sn-Hd : SN (h ∙ ε)
-sn-Hd = acc λ{ (↦E ()) }
 
 -- Underapplied functions are SN
 
@@ -255,26 +255,6 @@ sn-Stu (acc snt) (acc snu) = acc
    }
 
 -- Redexes are SN
-
--- This is the key lemma:
-
-case-sn' : {E : Stack i a c} -- (i : Size)
-          (sntE : SN (t ∘ E))
-          (snuE : SN (u ∘ E))
-          (r : h ∙ case t u ∷ E ↦ v) → SN v
-case-sn' sntE snuE ↦tt = sntE
-case-sn' sntE snuE ↦ff = snuE
-case-sn' (acc sntE) snuE (↦E (here (↦caseₗ r))) = acc (case-sn' (sntE (∘↦ₗ r)) snuE)
-case-sn' sntE (acc snuE) (↦E (here (↦caseᵣ r))) = acc (case-sn' sntE (snuE (∘↦ₗ r)))
-case-sn' {t = t} {u = u} (acc sntE) (acc snuE) (↦E (there r)) = acc
-  (case-sn'
-    (sntE (∘↦ᵣ {t = t} r))
-    (snuE (∘↦ᵣ {t = u} r))
-  )
-case-sn' {i = .(↑ i)} sntE snuE (↦E (π {i = i})) = acc (case-sn' {i = i} sntE snuE )
-
-case-sn : (sntE : SN (t ∘ E)) (snuE : SN (u ∘ E)) → SN (h ∙ case t u ∷ E)
-case-sn sntE snuE = acc (case-sn' sntE snuE)
 
 -- KtuE is SN
 
@@ -345,6 +325,26 @@ sn-StuvE' {t = t} {u = u} sntvuvE@(acc h)  = acc
    }
 -}
 
+-- This is the key lemma:
+
+sn-case' : {E : Stack i a c} -- (i : Size)
+          (sntE : SN (t ∘ E))
+          (snuE : SN (u ∘ E))
+          (r : h ∙ case t u ∷ E ↦ v) → SN v
+sn-case' sntE snuE ↦tt = sntE
+sn-case' sntE snuE ↦ff = snuE
+sn-case' (acc sntE) snuE (↦E (here (↦caseₗ r))) = acc (sn-case' (sntE (∘↦ₗ r)) snuE)
+sn-case' sntE (acc snuE) (↦E (here (↦caseᵣ r))) = acc (sn-case' sntE (snuE (∘↦ₗ r)))
+sn-case' {t = t} {u = u} (acc sntE) (acc snuE) (↦E (there r)) = acc
+  (sn-case'
+    (sntE (∘↦ᵣ {t = t} r))
+    (snuE (∘↦ᵣ {t = u} r))
+  )
+sn-case' {i = .(↑ i)} sntE snuE (↦E (π {i = i})) = acc (sn-case' {i = i} sntE snuE )
+
+sn-case : (sntE : SN (t ∘ E)) (snuE : SN (u ∘ E)) → SN (h ∙ case t u ∷ E)
+sn-case sntE snuE = acc (sn-case' sntE snuE)
+
 -- Semantic types
 ---------------------------------------------------------------------------
 
@@ -369,14 +369,6 @@ infix 2 _∈_
 _∈_ : (E : Stack i a c) (A : Predₛ a) → Set
 E ∈ A = A (cont E)
 
--- Semantic types are specified by sets of SN stacks that contain ε.
-
-record SemTy (A : Predₛ a) : Set where
-  field
-    id  : ε ∈ A
-    sn  : (⦅E⦆ : E ∈ A) → SNₛ E
-open SemTy
-
 -- Semantic objects
 
 -- We use a record to help Agda's unifier.
@@ -385,27 +377,17 @@ record _⊥_ (t : Tm a) (A : Predₛ a) : Set where
     run : (⦅E⦆ : E ∈ A) → SN (t ∘ E)
 open _⊥_
 
-Sem-sn : (⟪A⟫ : SemTy A) (⦅t⦆ : t ⊥ A) → SN t
-Sem-sn ⟪A⟫ ⦅t⦆ = ⦅t⦆ .run (⟪A⟫ .id)
+module Remark1 where
 
-Sem-snₑ : (⟪A⟫ : SemTy A) (⦅E⦆ : E ∈ A) → SNₛ E
-Sem-snₑ ⟪A⟫ = ⟪A⟫ .sn
+  -- Semantic objects are closed under reduction.
 
--- Semantic types are closed under reduction of their inhabitants.
-
-sem-red : t ⊥ A → t ↦ t′ → t′ ⊥ A
-sem-red ⦅t⦆ r .run ⦅E⦆ = sn-red (⦅t⦆ .run ⦅E⦆) (∘↦ₗ r)
+  sem-red : t ⊥ A → t ↦ t′ → t′ ⊥ A
+  sem-red ⦅t⦆ r .run ⦅E⦆ = sn-red (⦅t⦆ .run ⦅E⦆) (∘↦ₗ r)
 
 -- Singleton stack set {ε}
 
 data ⟦o⟧ {a} : Predₛ a where
   ε : ε ∈ ⟦o⟧
-
--- SN is the semantic type given by {ε}
-
-⟪o⟫ : SemTy (⟦o⟧ {a = a})
-⟪o⟫ .id    = ε
-⟪o⟫ .sn  ε = sn-ε
 
 -- Semantic booleans
 
@@ -413,10 +395,6 @@ record ⟦bool⟧ (cE : Cont bool) : Set where
   field
     br : let cont E = cE in ∀ h → SN (h ∙ E)
 open ⟦bool⟧
-
-⟪bool⟫ : SemTy ⟦bool⟧
-⟪bool⟫ .id .br h = sn-Hd
-⟪bool⟫ .sn  ⦅E⦆   = sn-spine (⦅E⦆ .br tt)
 
 -- Boolean values
 
@@ -429,7 +407,7 @@ open ⟦bool⟧
 -- Interpretation of case
 
 ⦅case⦆ : (⦅t⦆ : t ⊥ A) (⦅u⦆ : u ⊥ A) (⦅E⦆ : E ∈ A) → case t u ∷ E ∈ ⟦bool⟧
-⦅case⦆ ⦅t⦆ ⦅u⦆ ⦅E⦆ .br h = case-sn (⦅t⦆ .run ⦅E⦆) (⦅u⦆ .run ⦅E⦆)
+⦅case⦆ ⦅t⦆ ⦅u⦆ ⦅E⦆ .br h = sn-case (⦅t⦆ .run ⦅E⦆) (⦅u⦆ .run ⦅E⦆)
 
 -- Function space on semantic types
 
@@ -437,15 +415,42 @@ data _⟦→⟧_ (A : Predₛ a) (B : Predₛ b) : Predₛ (a ⇒ b) where
   ε   : ε ∈ (A ⟦→⟧ B)
   _∷_ : (⦅u⦆ : u ⊥ A) (⦅E⦆ : E ∈ B) → (app u ∷ E) ∈ (A ⟦→⟧ B)
 
-_⟪→⟫_ : (⟪A⟫ : SemTy A) (⟪B⟫ : SemTy B) → SemTy (A ⟦→⟧ B)
-(⟪A⟫ ⟪→⟫ ⟪B⟫) .id           = ε
-(⟪A⟫ ⟪→⟫ ⟪B⟫) .sn ε         = sn-ε
-(⟪A⟫ ⟪→⟫ ⟪B⟫) .sn (⦅u⦆ ∷ ⦅E⦆) = sn-app∷ (Sem-sn ⟪A⟫ ⦅u⦆) (⟪B⟫ .sn ⦅E⦆)
-
 -- Application
 
 ⦅app⦆ : (⦅t⦆ : t ⊥ (A ⟦→⟧ B)) (⦅u⦆ : u ⊥ A) → (t ∘ app u ∷ ε) ⊥ B
 ⦅app⦆ ⦅t⦆ ⦅u⦆ .run ⦅E⦆ = ⦅t⦆ .run (⦅u⦆ ∷ ⦅E⦆)
+
+-- Semantic Types
+---------------------------------------------------------------------------
+
+-- Semantic types are specified by sets of SN stacks that contain ε.
+
+record SemTy (A : Predₛ a) : Set where
+  field
+    id  : ε ∈ A
+    sn  : (⦅E⦆ : E ∈ A) → SNₛ E
+open SemTy
+
+Sem-sn : (⟨A⟩ : SemTy A) (⦅t⦆ : t ⊥ A) → SN t
+Sem-sn ⟨A⟩ ⦅t⦆ = ⦅t⦆ .run (⟨A⟩ .id)
+
+Sem-snₑ : (⟨A⟩ : SemTy A) (⦅E⦆ : E ∈ A) → SNₛ E
+Sem-snₑ ⟨A⟩ = ⟨A⟩ .sn
+
+-- SN is the semantic type given by {ε}
+
+⟨o⟩ : SemTy (⟦o⟧ {a = a})
+⟨o⟩ .id    = ε
+⟨o⟩ .sn  ε = sn-ε
+
+⟨bool⟩ : SemTy ⟦bool⟧
+⟨bool⟩ .id .br h = sn-Hd
+⟨bool⟩ .sn  ⦅E⦆   = sn-spine (⦅E⦆ .br tt)
+
+_⟨→⟩_ : (⟨A⟩ : SemTy A) (⟨B⟩ : SemTy B) → SemTy (A ⟦→⟧ B)
+(⟨A⟩ ⟨→⟩ ⟨B⟩) .id           = ε
+(⟨A⟩ ⟨→⟩ ⟨B⟩) .sn ε         = sn-ε
+(⟨A⟩ ⟨→⟩ ⟨B⟩) .sn (⦅u⦆ ∷ ⦅E⦆) = sn-app∷ (Sem-sn ⟨A⟩ ⦅u⦆) (⟨B⟩ .sn ⦅E⦆)
 
 -- Soundness
 ---------------------------------------------------------------------------
@@ -459,18 +464,18 @@ _⟪→⟫_ : (⟪A⟫ : SemTy A) (⟪B⟫ : SemTy B) → SemTy (A ⟦→⟧ B)
 
 -- Types are interpreted as semantic types
 
-⟪_⟫ : ∀ a → SemTy ⟦ a ⟧
-⟪ o     ⟫ = ⟪o⟫
-⟪ bool  ⟫ = ⟪bool⟫
-⟪ a ⇒ b ⟫ = ⟪ a ⟫ ⟪→⟫ ⟪ b ⟫
+⟨_⟩ : ∀ a → SemTy ⟦ a ⟧
+⟨ o     ⟩ = ⟨o⟩
+⟨ bool  ⟩ = ⟨bool⟩
+⟨ a ⇒ b ⟩ = ⟨ a ⟩ ⟨→⟩ ⟨ b ⟩
 
 -- Semantic objects are SN
 
 sem-sn : t ⊥ ⟦ a ⟧ → SN t
-sem-sn {a = a} ⦅t⦆ = Sem-sn (⟪ a ⟫) ⦅t⦆
+sem-sn {a = a} ⦅t⦆ = Sem-sn (⟨ a ⟩) ⦅t⦆
 
 sem-snₛ : E ∈ ⟦ a ⟧ → SNₛ E
-sem-snₛ {a = a} ⦅E⦆ = ⟪ a ⟫ .sn ⦅E⦆
+sem-snₛ {a = a} ⦅E⦆ = ⟨ a ⟩ .sn ⦅E⦆
 
 -- Soundness
 
