@@ -125,7 +125,7 @@ app-app {t = h ∙ E} = refl  -- ++-assoc
 
 -- Reduction relations
 
-infix 4 _↦_ _↦ₑ_ _↦ₛ_
+infix 4 _↦_ _↦⁺_ _↦ₑ_ _↦ₛ_
 
 -- One-step reduction in terms and stacks
 
@@ -175,6 +175,17 @@ mutual
 ∘↦ᵣ : E ↦ₛ E′ → t ∘ E ↦ t ∘ E′
 ∘↦ᵣ {t = _∙_ h E} r = ↦E (++↦ᵣ E r)
 
+-- Transitive closure
+
+infixr 100 _⁺
+
+data _⁺ {A : Set} (R : A → A → Set) (t v : A) : Set where
+  sg  : (r : R t v) → (R ⁺) t v
+  _∷_ : {u : A} (r : R t u) (rs : (R ⁺) u v) → (R ⁺) t v
+
+_↦⁺_ : (t t′ : Tm a) → Set
+_↦⁺_ = _↦_ ⁺
+
 -- Strong normalization
 ---------------------------------------------------------------------------
 
@@ -187,8 +198,22 @@ P ⊂ Q = ∀{t} (r : P t) → Q t
 
 -- Accessibility
 
-data Acc {A : Set} (R : ∀ (t t′ : A) → Set) (t : A) : Set where
+data Acc {A : Set} (R : A → A → Set) (t : A) : Set where
   acc : (h : ∀ {t′} (r : R t t′) → Acc R t′) → Acc R t
+
+-- A relation is wellfounded if its transitive closure is.
+
+wf⁻ : {A : Set} {R : A → A → Set} → Acc (R ⁺) ⊂ Acc R
+wf⁻ (acc h) = acc λ r → wf⁻ (h (sg r))
+
+-- If a relation is well-founded, so is its transitive closure.
+
+wf⁺ : {A : Set} {R : A → A → Set} → Acc R ⊂ Acc (R ⁺)
+wf⁺ {R = R} hR = acc (loop hR)
+  where
+  loop : ∀{t} → Acc R t → (R ⁺) t ⊂ Acc (R ⁺)
+  loop (acc h) (sg r)   = wf⁺ (h r)
+  loop (acc h) (r ∷ rs) = loop (h r) rs
 
 -- Reducts of SN things are SN things
 
@@ -197,8 +222,9 @@ sn-red (acc sn) r = sn r
 
 -- Strong normalization: t is SN if all of its reducts are, inductively.
 
-SN : Tm a → Set
+SN SN⁺ : Tm a → Set
 SN  = Acc _↦_
+SN⁺ = Acc _↦⁺_
 
 SNₑ : Elim a c → Set
 SNₑ = Acc _↦ₑ_
@@ -225,8 +251,8 @@ sn-ε = acc λ()
 
 -- Function elimination preserves SN
 
-sn-app : SN u → SNₑ (app {a} {b} u)
-sn-app (acc snu) = acc λ{ (↦app r) → sn-app (snu r) }
+-- sn-app : SN u → SNₑ (app {a} {b} u)
+-- sn-app (acc snu) = acc λ{ (↦app r) → sn-app (snu r) }
 
 sn-app∷ : SN u → SNₛ E → SNₛ (app u ∷ E)
 sn-app∷ (acc snu) snE@(acc snE') = acc
@@ -267,14 +293,22 @@ sn-KtuE {t = t} sntE (acc snt) (acc sne) snE@(acc snE') = acc
        sn-KtuE (sn-red sntE (∘↦ᵣ {t = t} r)) (acc snt) (acc sne) (snE' r)
    }
 
-sn-KtuE' : SN (t ∘ E) → SNₑ e → SN (K ∙ app t ∷ e ∷ E)
-sn-KtuE' {t = t} sntE@(acc h) (acc sne)  = acc
-  λ{ ↦K                     → sntE
-   ; (↦E (here (↦app r)))   → sn-KtuE' (h (∘↦ₗ r)) (acc sne)
-   ; (↦E (there (here  r))) → sn-KtuE' sntE       (sne r)
-   ; (↦E (there (there r))) →
-       sn-KtuE' (h (∘↦ᵣ {t = t} r)) (acc sne)
+sn-KtuE' : SN (t ∘ E) → SN u → SN (K ∙ app t ∷ app u ∷ E)
+sn-KtuE' {t = t} sntE@(acc h) (acc snu)  = acc
+  λ{ ↦K                            → sntE
+   ; (↦E (here (↦app r)))          → sn-KtuE' (h (∘↦ₗ r))          (acc snu)
+   ; (↦E (there (here (↦app r))))  → sn-KtuE' sntE                (snu r)
+   ; (↦E (there (there r)))        → sn-KtuE' (h (∘↦ᵣ {t = t} r)) (acc snu)
    }
+
+-- sn-KtuE' : SN (t ∘ E) → SNₑ e → SN (K ∙ app t ∷ e ∷ E)
+-- sn-KtuE' {t = t} sntE@(acc h) (acc sne)  = acc
+--   λ{ ↦K                     → sntE
+--    ; (↦E (here (↦app r)))   → sn-KtuE' (h (∘↦ₗ r)) (acc sne)
+--    ; (↦E (there (here  r))) → sn-KtuE' sntE       (sne r)
+--    ; (↦E (there (there r))) →
+--        sn-KtuE' (h (∘↦ᵣ {t = t} r)) (acc sne)
+--    }
 
 -- StuvE is SN
 
@@ -302,28 +336,25 @@ sn-StuvE {t = t} {u = u} sntvuvE (acc snt) (acc snu) (acc snv) snE@(acc snE') = 
          (acc snt) (acc snu) (acc snv) (snE' r)
    }
 
-{-
--- NEED sized SN
-sn-StuvE' : SN (t ∘ app v ∷ app (u ∘ app v ∷ ε) ∷ E) → SN (S ∙ app t ∷ app u ∷ app v ∷ E)
-sn-StuvE' {t = t} {u = u} sntvuvE@(acc h)  = acc
+sn-StuvE' : SN⁺ (t ∘ app v ∷ app (u ∘ app v ∷ ε) ∷ E)
+          → SN (S ∙ app t ∷ app u ∷ app v ∷ E)
+sn-StuvE' {t = t} {u = u} sntvuvE@(acc h) = acc
   λ{ ↦S →
-       sntvuvE
+       wf⁻ sntvuvE
 
    ; (↦E (here (↦app r))) →
-       sn-StuvE' (h (∘↦ₗ r))
+       sn-StuvE' (h (sg (∘↦ₗ r)))
 
    ; (↦E (there (here (↦app r)))) →
-       sn-StuvE' (h (∘↦ᵣ {t = t} (there (here (↦app (∘↦ₗ r))))))
+       sn-StuvE' (h (sg (∘↦ᵣ {t = t} (there (here (↦app (∘↦ₗ r)))))))
 
    ; (↦E (there (there (here (↦app r))))) →
-       sn-StuvE' (sn-red
-                  (h (∘↦ᵣ {t = t} (here (↦app r))))
-                  (∘↦ᵣ {t = t} (there (here (↦app (∘↦ᵣ {t = u} (here (↦app r))))))))
+       sn-StuvE' (h (∘↦ᵣ {t = t} (here (↦app r)) ∷
+                    sg (∘↦ᵣ {t = t} (there (here (↦app (∘↦ᵣ {t = u} (here (↦app r)))))))))
 
    ; (↦E (there (there (there r)))) →
-       sn-StuvE' (h (∘↦ᵣ {t = t} (there (there r))))
+       sn-StuvE' (h (sg (∘↦ᵣ {t = t} (there (there r)))))
    }
--}
 
 -- This is the key lemma:
 
@@ -484,7 +515,7 @@ sem-snₛ {a = a} ⦅E⦆ = ⟨ a ⟩ .sn ⦅E⦆
 ⦅K⦆ : (K ∙ ε) ⊥ ⟦ K-ty a b ⟧
 ⦅K⦆ .run ε                  = sn-Hd
 ⦅K⦆ .run (⦅t⦆ ∷ ε)          = sn-Kt (sem-sn ⦅t⦆)
-⦅K⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅E⦆)  = sn-KtuE' (⦅t⦆ .run ⦅E⦆) (sn-app (sem-sn ⦅u⦆))
+⦅K⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅E⦆)  = sn-KtuE' (⦅t⦆ .run ⦅E⦆) (sem-sn ⦅u⦆)
 -- ⦅K⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅E⦆)  = sn-KtuE (⦅t⦆ .run ⦅E⦆) (sem-sn ⦅t⦆) (sn-app (sem-sn ⦅u⦆)) (sem-snₛ ⦅E⦆)
 
 -- Interpretation of S
@@ -493,10 +524,11 @@ sem-snₛ {a = a} ⦅E⦆ = ⟨ a ⟩ .sn ⦅E⦆
 ⦅S⦆ .run ε                        = sn-Hd
 ⦅S⦆ .run (⦅t⦆ ∷ ε)                = sn-St (sem-sn ⦅t⦆)
 ⦅S⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ε)          = sn-Stu (sem-sn ⦅t⦆) (sem-sn ⦅u⦆)
-⦅S⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅v⦆ ∷ ⦅E⦆)  =
-  sn-StuvE
-   (⦅t⦆ .run (⦅v⦆ ∷ ⦅app⦆ ⦅u⦆ ⦅v⦆ ∷ ⦅E⦆))
-   (sem-sn ⦅t⦆) (sem-sn ⦅u⦆) (sem-sn ⦅v⦆) (sem-snₛ ⦅E⦆)
+⦅S⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅v⦆ ∷ ⦅E⦆)  = sn-StuvE' (wf⁺ (⦅t⦆ .run (⦅v⦆ ∷ ⦅app⦆ ⦅u⦆ ⦅v⦆ ∷ ⦅E⦆)))
+-- ⦅S⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅v⦆ ∷ ⦅E⦆)  =
+--   sn-StuvE
+--    (⦅t⦆ .run (⦅v⦆ ∷ ⦅app⦆ ⦅u⦆ ⦅v⦆ ∷ ⦅E⦆))
+--    (sem-sn ⦅t⦆) (sem-sn ⦅u⦆) (sem-sn ⦅v⦆) (sem-snₛ ⦅E⦆)
 
 -- Interpretation of constants
 
