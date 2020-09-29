@@ -61,16 +61,22 @@ infixr 6 _∷_ _++_
 
 mutual
 
+  -- Terms are heads under a stack
+
   data Tm : (d : Ty) → Set where
     _∙_ : (h : Hd a) (E : Stack i a c) → Tm c
 
   variable t t′ u u′ v v′ t' u' v' : Tm a
+
+  -- Single elimination for function or boolean
 
   data Elim : (a c : Ty) → Set where
     app  : (u : Tm a) → Elim (a ⇒ b) b
     case : (u v : Tm a) → Elim bool a
 
   variable e e′ e' e₀ e₁ e₂ : Elim a c
+
+  -- Stacks of eliminations (sized type).
 
   data Stack (i : Size) : (a c : Ty) → Set where
     ε    : Stack i c c
@@ -172,12 +178,12 @@ mutual
 ∘↦ₗ ↦ff    = ↦ff
 ∘↦ₗ (↦E r) = ↦E (++↦ₗ r)
 
-∘↦ᵣ : E ↦ₛ E′ → t ∘ E ↦ t ∘ E′
-∘↦ᵣ {t = _∙_ h E} r = ↦E (++↦ᵣ E r)
+∘↦ᵣ : ∀ (t : Tm a) → E ↦ₛ E′ → t ∘ E ↦ t ∘ E′
+∘↦ᵣ (_∙_ h E) r = ↦E (++↦ᵣ E r)
 
 -- Transitive closure
 
-infixr 100 _⁺
+-- infixr 100 _⁺
 
 data _⁺ {A : Set} (R : A → A → Set) (t v : A) : Set where
   sg  : (r : R t v) → (R ⁺) t v
@@ -290,7 +296,7 @@ sn-KtuE {t = t} sntE (acc snt) (acc sne) snE@(acc snE') = acc
    ; (↦E (here (↦app r)))   → sn-KtuE (sn-red sntE (∘↦ₗ r)) (snt r) (acc sne) snE
    ; (↦E (there (here  r))) → sn-KtuE sntE                 (acc snt) (sne r) snE
    ; (↦E (there (there r))) →
-       sn-KtuE (sn-red sntE (∘↦ᵣ {t = t} r)) (acc snt) (acc sne) (snE' r)
+       sn-KtuE (sn-red sntE (∘↦ᵣ t r)) (acc snt) (acc sne) (snE' r)
    }
 
 sn-KtuE' : SN (t ∘ E) → SN u → SN (K ∙ app t ∷ app u ∷ E)
@@ -298,7 +304,7 @@ sn-KtuE' {t = t} sntE@(acc h) (acc snu)  = acc
   λ{ ↦K                            → sntE
    ; (↦E (here (↦app r)))          → sn-KtuE' (h (∘↦ₗ r))          (acc snu)
    ; (↦E (there (here (↦app r))))  → sn-KtuE' sntE                (snu r)
-   ; (↦E (there (there r)))        → sn-KtuE' (h (∘↦ᵣ {t = t} r)) (acc snu)
+   ; (↦E (there (there r)))        → sn-KtuE' (h (∘↦ᵣ t r)) (acc snu)
    }
 
 -- sn-KtuE' : SN (t ∘ E) → SNₑ e → SN (K ∙ app t ∷ e ∷ E)
@@ -307,7 +313,7 @@ sn-KtuE' {t = t} sntE@(acc h) (acc snu)  = acc
 --    ; (↦E (here (↦app r)))   → sn-KtuE' (h (∘↦ₗ r)) (acc sne)
 --    ; (↦E (there (here  r))) → sn-KtuE' sntE       (sne r)
 --    ; (↦E (there (there r))) →
---        sn-KtuE' (h (∘↦ᵣ {t = t} r)) (acc sne)
+--        sn-KtuE' (h (∘↦ᵣ t r)) (acc sne)
 --    }
 
 -- StuvE is SN
@@ -322,17 +328,17 @@ sn-StuvE {t = t} {u = u} sntvuvE (acc snt) (acc snu) (acc snv) snE@(acc snE') = 
          (snt r) (acc snu) (acc snv) snE
 
    ; (↦E (there (here (↦app r)))) →
-       sn-StuvE (sn-red sntvuvE (∘↦ᵣ {t = t} (there (here (↦app (∘↦ₗ r))))))
+       sn-StuvE (sn-red sntvuvE (∘↦ᵣ t (there (here (↦app (∘↦ₗ r))))))
          (acc snt) (snu r) (acc snv) snE
 
    ; (↦E (there (there (here (↦app r))))) →
        sn-StuvE (sn-red
-                  (sn-red sntvuvE  (∘↦ᵣ {t = t} (here (↦app r))))
-                  (∘↦ᵣ {t = t} (there (here (↦app (∘↦ᵣ {t = u} (here (↦app r))))))))
+                  (sn-red sntvuvE  (∘↦ᵣ t (here (↦app r))))
+                  (∘↦ᵣ t (there (here (↦app (∘↦ᵣ u (here (↦app r))))))))
          (acc snt) (acc snu) (snv r) snE
 
    ; (↦E (there (there (there r)))) →
-       sn-StuvE (sn-red sntvuvE (∘↦ᵣ {t = t} (there (there r))))
+       sn-StuvE (sn-red sntvuvE (∘↦ᵣ t (there (there r))))
          (acc snt) (acc snu) (acc snv) (snE' r)
    }
 
@@ -346,14 +352,14 @@ sn-StuvE' {t = t} {u = u} sntvuvE@(acc h) = acc
        sn-StuvE' (h (sg (∘↦ₗ r)))
 
    ; (↦E (there (here (↦app r)))) →
-       sn-StuvE' (h (sg (∘↦ᵣ {t = t} (there (here (↦app (∘↦ₗ r)))))))
+       sn-StuvE' (h (sg (∘↦ᵣ t (there (here (↦app (∘↦ₗ r)))))))
 
    ; (↦E (there (there (here (↦app r))))) →
-       sn-StuvE' (h (∘↦ᵣ {t = t} (here (↦app r)) ∷
-                    sg (∘↦ᵣ {t = t} (there (here (↦app (∘↦ᵣ {t = u} (here (↦app r)))))))))
+       sn-StuvE' (h (∘↦ᵣ t (here (↦app r)) ∷
+                    sg (∘↦ᵣ t (there (here (↦app (∘↦ᵣ u (here (↦app r)))))))))
 
    ; (↦E (there (there (there r)))) →
-       sn-StuvE' (h (sg (∘↦ᵣ {t = t} (there (there r)))))
+       sn-StuvE' (h (sg (∘↦ᵣ t (there (there r)))))
    }
 
 -- This is the key lemma:
@@ -368,8 +374,8 @@ sn-case' (acc sntE) snuE (↦E (here (↦caseₗ r))) = acc (sn-case' (sntE (∘
 sn-case' sntE (acc snuE) (↦E (here (↦caseᵣ r))) = acc (sn-case' sntE (snuE (∘↦ₗ r)))
 sn-case' {t = t} {u = u} (acc sntE) (acc snuE) (↦E (there r)) = acc
   (sn-case'
-    (sntE (∘↦ᵣ {t = t} r))
-    (snuE (∘↦ᵣ {t = u} r))
+    (sntE (∘↦ᵣ t r))
+    (snuE (∘↦ᵣ u r))
   )
 sn-case' {i = .(↑ i)} sntE snuE (↦E (π {i = i})) = acc (sn-case' {i = i} sntE snuE )
 
@@ -465,8 +471,8 @@ open SemTy
 Sem-sn : (⟨A⟩ : SemTy A) (⦅t⦆ : t ⊥ A) → SN t
 Sem-sn ⟨A⟩ ⦅t⦆ = ⦅t⦆ .run (⟨A⟩ .id)
 
-Sem-snₑ : (⟨A⟩ : SemTy A) (⦅E⦆ : E ∈ A) → SNₛ E
-Sem-snₑ ⟨A⟩ = ⟨A⟩ .sn
+-- Sem-snₑ : (⟨A⟩ : SemTy A) (⦅E⦆ : E ∈ A) → SNₛ E
+-- Sem-snₑ ⟨A⟩ = ⟨A⟩ .sn
 
 -- SN is the semantic type given by {ε}
 
@@ -503,10 +509,10 @@ _⟨→⟩_ : (⟨A⟩ : SemTy A) (⟨B⟩ : SemTy B) → SemTy (A ⟦→⟧ B)
 -- Semantic objects are SN
 
 sem-sn : t ⊥ ⟦ a ⟧ → SN t
-sem-sn {a = a} ⦅t⦆ = Sem-sn (⟨ a ⟩) ⦅t⦆
+sem-sn {a = a} ⦅t⦆ = Sem-sn ⟨ a ⟩ ⦅t⦆
 
-sem-snₛ : E ∈ ⟦ a ⟧ → SNₛ E
-sem-snₛ {a = a} ⦅E⦆ = ⟨ a ⟩ .sn ⦅E⦆
+-- sem-snₛ : E ∈ ⟦ a ⟧ → SNₛ E
+-- sem-snₛ {a = a} ⦅E⦆ = ⟨ a ⟩ .sn ⦅E⦆
 
 -- Soundness
 
