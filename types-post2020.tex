@@ -241,7 +241,9 @@ natural deduction.  For each line in the truth table where the
 connective computes to \emph{true} one obtains an introduction rule,
 and for the \emph{false} lines one obtains an elimination rule.
 It is shown that these \emph{truth table natural deduction} (TTND)
-calculi are equivalent to the original calculi in the sense that the
+calculi are equivalent to Gentzen's original calculi
+\cite{gentzen:natuerlichesSchliessen}
+in the sense that the
 same judgements can be derived.  However, the schematic rules are
 sometimes unwieldy and unintuitive---for instance, in TTND there are three
 introduction rules for implication since $A \to B$ is true for three
@@ -267,7 +269,7 @@ Non-confluence poses some challenges to the proof that reduction is
 terminating, the so-called strong normalization (SN) property.  In the
 original presentation \cite{geuversHurkens:icla17}, the authors
 confine the SN proof to ITTND with a single but universal
-connective, if-then-else, and the optimized inference rules for
+connective \emph{if-then-else} and the optimized inference rules for
 if-then-else which yield confluent and standardizing $\beta$-reduction.  The proof
 follows the \emph{saturated sets} method pioneered by Tait
 \cite{tait:functionalsFiniteTypeI} which is known to rely on
@@ -288,15 +290,23 @@ Martin-Löf Type Theory \cite{MartinLoef84}.  We thus give in
 \Cref{sec:introbased} a variant that
 replaces the use of impredicativity by inductive definitions.
 
+However, $\beta$-reduction is not the only form of proof optimization in ITTND.
 The schematic elimination rules of ITTND have the flavor of
 disjunction elimination or, more general, of the left rules of
 intuitionistic sequent calculus.  Those left rules do not pose any
 restriction on the formula on the right.  Likewise, eliminations in
-ITTND have an arbitrary target.  In such settings, subsequent eliminations
-are unnecessary and can be considered a form of detour, called
-\emph{permutation} or \emph{$\pi$-redexes}\footnotemark{}, for instance,
-by Joachimski and Matthes \cite{joachimskiMatthes:rta00}
-in the context of intuitionistic sequent calculus restricted to implication.
+ITTND have an arbitrary target.  In such settings, one eliminate a hypothesis to directly prove the desired conclusion.
+Eliminating into an intermediate conclusion which is then eliminated
+again is thus considered a detour.
+Joachimski and Matthes \cite{joachimskiMatthes:rta00}
+call such a detour a \emph{permutation redex} or
+\emph{$\pi$-redex}\footnotemark{}
+---in the context of intuitionistic sequent calculus restricted to implication.
+%% subsequent eliminations
+%% are unnecessary and can be considered a form of detour, called
+%% \emph{permutation} or \emph{$\pi$-redexes}\footnotemark{}, for instance,
+%% by Joachimski and Matthes \cite{joachimskiMatthes:rta00}
+%% in the context of intuitionistic sequent calculus restricted to implication.
 \footnotetext{Geuvers and Hurkens call $\pi$-redexes $b$-redexes
   \cite{geuversHurkens:types17} and, with van der Giessen, P-redexes
   \cite{geuversGiessenHurkens:fundinf19}.}%
@@ -304,10 +314,11 @@ Permutation reduction for ITTND by itself is terminating
 \cite{geuversHurkens:types17}, and in \loccit it is shown that the
 free combination with $\beta$-reduction, $\beta\pi$, is weakly
 normalizing.  Strong normalization was left open until the joint work
+of Geuvers and Hurkens
 with van der Giessen \cite{geuversGiessenHurkens:fundinf19}, where SN
 was established via a continuation-passing-style (CPS) translation to
-the parallel simply-typed lambda calculus (parallel STLC), which is
-similar to STLC with explicit non-determinism.
+the parallel simply-typed lambda calculus (parallel STLC).%
+\footnote{In a first approximation, one can think of parallel STLC as STLC with explicit non-determinism.}
 
 The change of proof strategy begs the question whether the usual
 model-theoretic SN proofs could not work also for
@@ -315,7 +326,8 @@ $\beta\pi$-reduction.  While the saturated sets method applied in
 a similar situation by Joackimski and Matthes
 \cite{joachimskiMatthes:rta00} fails due to non-confluence of $\beta$,
 Girard's RCs do not cover $\pi$.  However, there is a third popular
-method, \emph{biorthogonals}, that have been successfully applied by
+method, \emph{(bi)orthogonals}, that have been developed to prove SN for classical lambda-calculi which are essentially non-confluent.\footnote{Early applications of orthgonality can be found in the works of Parigot \cite{parigot:jsl97,parigot:lamsym} and Barbanera and Berardi \cite{barbanera:lamsym}.}
+Biorthogonals have been successfully applied by
 Lindley and Stark \cite{lindleyStark:tlca05} to prove SN for Moggi's
 ``monadic metalanguage'', that is STLC with introduction, elimination,
 and permutation rules for the monad.  We show in \Cref{sec:biortho} that
@@ -324,7 +336,7 @@ attention, can show SN for $\beta\pi$ of ITTND.
 
 While we limit our presentation on the implicational fragment of ITTND
 for didactical purposes and convenience of exposition, our techniques
-scale immeditately to the general case.
+scale immediately to the general case.
 
 \paragraph*{Overview}
 %
@@ -371,28 +383,34 @@ operands $A$ become premises $\Gamma.A \vdash A \to B$ and $1$-valued
 (or \emph{positive}) operands $B$ become premises $\Gamma \vdash B$.
 Lines like the third where $A \to B$ is false become elimination rules
 with a conclusion $\Gamma \vdash C$ for an arbitrary formula $C$.
-Besides the principal premise $\Gamma \vdash A \to B$, the $1$-valued
-operands $A$ become premises $\Gamma \vdash A$, and the $0$-valued
-operands $B$ premises $\Gamma.B \vdash D$.  This yields the following
-four rules:%
+The premises of this elimination rule are,
+besides the principal premise $\Gamma \vdash A \to B$,
+a premise $\Gamma \vdash A$ for each $1$-valued operand $A$, and
+a premise $\Gamma.B \vdash C$ for each $0$-valued operand $B$.
+This yields the following four rules:%
 %
 \footnote{%
 %\setlength{\leftskip}{0pt} %NO EFFECT
+Additional information for the reader unfamiliar with natural deduction and proof terms:
+\par
 Natural deduction asserts the truth of a proposition $A$
-  under a list of assumed propositions $\Gamma$, a context, via the
-  judgement $\Gamma \vdash A$.  Derivations of such a judgement using
-  proof rules form proof trees where nodes are labeled by the name of
-  the applied rule and the ordered subtrees correspond to the premises
-  of the rule.  Leaves are either applications of a rule that has no
+  under a list of assumed propositions $\Gamma$, a \emph{context}, via the
+  judgement $\Gamma \vdash A$.  Derivations of such judgements
+  %% using proof rules
+  form proof trees where nodes are labeled by the name of
+  the applied proof rule and the ordered subtrees correspond to the premises
+  of that rule.  Leaves are either applications of a rule that has no
   premises or references to one of the hypotheses in $\Gamma$.
 \par
   We write $\Ge$ for empty lists.
   The list $\Gamma$ can be extended on the right by a proposition $A$
   using the notation $\Gamma.A$.  Following de Bruijn
   \cite{deBruijn:nameless}, we number the hypotheses from the right
-  starting with zero, and a reference to a hypothesis is a
-  non-negative number $i$ smaller than the length of $\Gamma$, a
-  so-called de Bruijn index.  For example, de Bruijn index zero $\x_0$
+  starting with zero.
+  A reference to a hypothesis---a so-called \emph{de Bruijn index}---
+  is a
+  non-negative number $i$ strictly smaller than the length of $\Gamma$.
+  For example, de Bruijn index zero, written $\x_0$,
   refers to proposition $A$ in context $\Gamma.A$.  We write $x :
   \Gamma \vdash A$ to denote a de Bruijn index $x$ pointing to
   proposition $A$ in context $\Gamma$.
@@ -413,15 +431,11 @@ Natural deduction asserts the truth of a proposition $A$
       u : \Gamma.B \vdash A \to B
     }{\inn\to{00}(t,u) : \Gamma \vdash A \to B
     }
-\\[2ex]
+%\\[2ex]
+\qquad
   \ru{t : \Gamma.A \vdash A \to B \qquad
       b : \Gamma \vdash B
     }{\inn\to{01}(t,b) : \Gamma \vdash A \to B
-    }
-\qquad
-  \ru{a : \Gamma \vdash A \qquad
-      b : \Gamma \vdash B
-    }{\inn\to{11}(a,b) : \Gamma \vdash A \to B
     }
 \\[2ex]
   \ru{f : \Gamma \vdash A \to B \qquad
@@ -429,21 +443,31 @@ Natural deduction asserts the truth of a proposition $A$
       t : \Gamma.B \vdash C
     }{f \cdot \el\to{10}(a,t) : \Gamma \vdash C
     }
+\qquad
+  \ru{a : \Gamma \vdash A \qquad
+      b : \Gamma \vdash B
+    }{\inn\to{11}(a,b) : \Gamma \vdash A \to B
+    }
 \end{gather*}
-We preferably use letters $t,u,v$ for terms with a distinguished
-hypothesis (the 0th de Bruijn index)
+As seen from these instances,
+we preferably use letters $t,u,v$ for terms with a distinguished
+hypothesis
+%% (the 0th de Bruijn index)
 and letters $a,b,c,d,e,f$ for terms without such.
-Replacing the distinguished hypothesis in $t$ by a derivation/term $a$
+Replacing the distinguished hypothesis, \ie,
+the 0th de Bruijn index,
+in term $t$ by a term $a$
 is written $t[a]$.  We use letter $I$ for introduction terms, \ie,
-with $\tin$ at the root, and letter $E$ for an elimination in term $f
-\cdot E$, \ie, the $\tel$ part.  Heads $h$ are either variables $x$ or
+such with ``$\tin$'' at the root,
+and letter $E$ for an elimination in term $f \cdot E$,
+\ie, the ``$\tel$'' part.  Heads $h$ are either variables $x$ or
 introductions $I$, and each term can be written in spine form $h \cdot
 E_1 \cdot \dots \cdot E_n$.  This may be written $h \cdot \vec E$.
 
 \emph{Detour} or $\beta$ reductions can fire when an introduction is
 immediately eliminated, \ie, on well-typed subterms of the form $I
 \cdot E$.  For the case of implication, there are three
-introduction rule that can be paired with the only elimination rule.
+introduction rules that can be paired with the only elimination rule.
 There are two ways in which a $\beta$ redex can fire:  Either, a
 positive premise (1) of the introduction matches a negative premise
 (0) of the elimination.  For the case of implication, the second
@@ -485,6 +509,9 @@ present situation.
 \section{Model-theoretic proofs of strong normalization}
 \label{sec:model}
 
+In this section we explain the general format of a model-theoretic
+proof of strong normalization.  We will instantiate this framework to two techniques later: reducibility candidates (\Cref{sec:cr}) and orthogonality (\Cref{sec:ortho}).
+
 \subsection{Preliminaries}
 \label{sec:prelim}
 
@@ -508,41 +535,42 @@ $\inn\to{01}(t,b)\tau = \inn\to{01}(t(\Up\tau),b\tau)$.
 
 Substitutions $\sigma : \Delta \vdash \Gamma$ are defined as lists of
 terms typed by list $\Gamma$ under context $\Delta$.  Parallel
-substitution $a\sigma : \Delta \vdash A$ for $a : \Gamma \vdash A$ be
+substitution $a\sigma : \Delta \vdash A$ for $a : \Gamma \vdash A$ is
 defined as usual.  OPEs $\tau : \Delta \leq \Gamma$ are silently
 coerced to substitutions $\Delta \vdash \Gamma$ consisting only of de
 Bruijn indices.
-Substitutions form a category, and we reuse $\sid$ and %$\_\circ\_$
-juxtaposition for
-identity and substitution.
+Substitutions form a category, and we reuse $\sid$ for
+identity and %$\_\circ\_$
+juxtaposition for substitution.
 Like for OPEs, we have lifting
 $\Up : (\Delta \vdash \Gamma) \to (\Delta.B \vdash \Gamma.B)$ to push
 substitutions under binders.
-
+%
 Single substitution $t[b]$ is
-an instance for parallel substitution $t\sigma$ for substitution
-$\sigma = \sid.b: \Gamma \vdash \Gamma.B$ obtained from $b : \Gamma \vdash B$.
+an instance of parallel substitution $t\sigma$ for substitution
+$\sigma = \sid.b : (\Gamma \vdash \Gamma.B)$ obtained from $b : \Gamma \vdash B$.
 
 \emph{Reduction} $a \red a'$, which is defined using single substitution,
 acts on same-typed terms
 $a,a' : \Gamma \vdash A$ by definition.  It is closed under weakening
 and substitution.  It is even closed under \emph{anti-weakening}, \ie,
 if $a\tau \red a'\tau$ then also $a \red a'$.  (Not so for
-substitution, of course.)
+substitution: it is not closed under anti-substitution, of course.)
 Further, reduction commutes with weakening:  If $a\tau \red b'$ then there is
 $b$ with $a \red b$ and $b' = b\tau$.
 
 Via the parallel substitution operation, the family $\_ \vdash A$ of
-terms of type $A$ is a contravariant functor (\ie, presheaf) into the
-category $\Set$ of sets and functions from the category of
-substitutions, and thus also from its subcategory OPE.  We will work a
+terms of type $A$ is a contravariant functor (\ie, presheaf) targeting the
+category $\Set$ of sets and functions.
+Its source is the category of
+substitutions, and thus also its subcategory OPE.  We will work a
 lot with presheafs of the latter kind, especially with families of
 predicates $P_\Gamma \subseteq (\Gamma \vdash A)$ closed under
 weakening, meaning if $a \in P_\Gamma$ and $\tau : \Delta \leq \Gamma$
 then $a \tau \in P_\Delta$.  We call such predicates \emph{term set
   families}.
 We may simply write $a \in P$ instead of $a \in P_\Gamma$ if $\Gamma$
-is fixed but arbitrary or determined by the context.
+is fixed but arbitrary or can be determined by the context.
 
 Our prime example of a term set family are the strongly normalizing
 terms $\SN$ given inductively by rule
@@ -566,7 +594,7 @@ To work smoothly for open terms, a further requirement on such
 semantic types $\A$ is that they contain the variables, \ie,
 if $x : \Gamma \vdash A$ then $x \in \A_\Gamma$.
 
-To obtains a compositional interpretation of types, each type
+To obtain a compositional interpretation of types, each type
 constructor such as implication $A \to B$ is interpreted by a suitable
 operation $\A \to \B$ on semantic types.
 For pure implicational truth table natural deduction, types are formed
@@ -580,12 +608,13 @@ the following semantic types:
 \end{array}
 \]
 
-The main structure of the normalization proofs then proceeds as follows:
+The main structure of the normalization proof then proceeds as follows:
 Contexts $\Gamma$ are interpreted as families of sets of
 substitutions.
 \[
   \begin{array}{lll}
-\Den \Ge \Delta & = & \Delta \vdash \Ge \\
+\Den \Ge \Delta & = & \Delta \vdash \Ge
+\quad ( {} = \{ \sigma \mid \sigma : \Delta \vdash \Ge \})\\
 \Den{\Gamma.A} \Delta & = & \{ \Gs.a \mid \Gs \in \Den \Gamma \Delta
                             \mbox{ and } a \in \Den A \Delta \}
   \end{array}
@@ -627,7 +656,7 @@ In the next section we identify the necessary properties.
 \subsection{Modelling the inference rules}
 
 To formulate the properties that allow us to prove \Cref{thm:fund} we
-introduce an auxiliary construction $\C[\A]$ %, named \emph{abstraction},
+introduce an auxiliary construction $\C[\A]$, ``\emph{abstraction}'',
 given semantic types $\A$ and $\C$, where $\A$ classifies terms of
 type $A$ and $\C$ terms of type $C$.
 \[
@@ -639,7 +668,8 @@ type $A$ and $\C$ terms of type $C$.
   \}
   .
 \]
-The \emph{abstraction}%
+%The \emph{abstraction}%
+The abstraction%
 \footnote{Matthes \cite[Sec.~6.2]{matthes:intersection} uses the
   notation $\mathsf{S}_x(\A,\C)$ for abstraction (in a setting with
   named variables $x$).}
@@ -655,9 +685,16 @@ lifted OPE:
   \tau\tau'.a$ this follows by definition of $t \in \C[\A]_\Gamma$.
 \end{proof}
 
-Using abstraction, the properties of the semantic implication $\A \to
-\B$ can be mechanically obtained from the inference rules connected to
-implication.
+Using abstraction, the properties of the semantic connective can be
+mechanically obtained from the inference rules for the syntactic
+connective.  In the formulation of these properties, a judgement $a :
+\Gamma \vdash A$ turns into statement $a \in \A_\Gamma$ and a
+judgement $t : \Gamma.A \vdash C$ into $t \in \C[\A]_\Gamma$.
+In case of semantic implication $\A \to \B$, we obtain the following
+four requirements, one for each rule:
+%% Using abstraction, the properties of the semantic implication $\A \to
+%% \B$ can be mechanically obtained from the inference rules connected to
+%% implication.
 \begin{itemize}%[leftmargin=3em] %enumitem
 \setlength{\itemindent}{2.7em}
 
@@ -695,36 +732,48 @@ semantic types model the inference rules:
     }{\inn\to{01}(t,b) : \Gamma \vdash A \to B
     }
   \]
-  By induction hypothesis $b\sigma \in \Den B \Delta$ and
-  for all $\tau : \Phi \leq \Delta$ and $a \in \Den A \Phi$
-  further $t(\sigma\tau.a) \in \Den{A \to B}\Phi$,
-  since $\sigma\tau \in \Den\Gamma\Phi$.
+  By induction hypothesis (2) $b\sigma \in \Den B \Delta$ and
+  (1) $t(\sigma\tau.a) \in \Den{A \to B}\Phi$
+  for arbitrary $\tau : \Phi \leq \Delta$ and $a \in \Den A \Phi$,
+  since then $\sigma\tau \in \Den\Gamma\Phi$.
   Hence,
-  $t(\Up\sigma) \in (\den{A \to B})[\den A]_\Delta$.  By property
-  \ref{it:in01}, if follows that
+  $t(\Up\sigma) \in (\den{A \to B})[\den A]_\Delta$
+  by definition of abstraction.
+  By property \ref{it:in01}, if follows that
   $\inn\to{01}(t,b)\sigma = \inn\to{01}(t(\Up\sigma),b\sigma) \in \Den{A \to B}\Delta$.
 \end{proof}
+
+This completes the description of our framework for strong normalization proofs.
+We now turn our attention to ways how to instantiate this framework.
 
 \subsection{Flavors of semantic types}
 \label{sec:flavors}
 
-There are three main methods how to construct semantic types for
+We are familiar with three principal methods how to construct semantic types for
 strong normalization proofs.
 \begin{enumerate}
-\item Saturated sets following Tait
+
+\item \emph{Saturated sets} following Tait
   \cite{tait:functionalsFiniteTypeI}, see \eg the exposition by Luo
   \cite{luo:thesis}.
   This technique requires semantic types to be closed under weak head
   expansion and is only known to work for deterministic weak head
-  reduction.  However, truth table natural deduction has
+  reduction.
+  While it has been applied \cite{geuversHurkens:icla17} to the
+  \emph{if-then-else} instance of ITTND with optimized rules,
+  it does not cover the general case of TTND with
   non-deterministic and even non-confluent weak head reduction.
-\item Reducibility candidates following Girard
+
+\item \emph{Reducibility candidates} following Girard
   \cite{girard:thesis,girardLafontTaylor:proofsAndTypes}.  We apply
   this method in \Cref{sec:cr}.
-\item Biorthogonals that have been used in SN proofs for
+  It covers $\beta$-reduction but not $\beta\pi$.
+
+\item \emph{Biorthogonals} that have been used in SN proofs for
   $\lambda$-calculi for classical logic, e.g. by Parigot \cite{parigot:jsl97},
   and in SN proofs for the monadic meta-language by Lindley and Stark
-  \cite{lindleyStark:tlca05}. We shall turn to these in \Cref{sec:biortho}.
+  \cite{lindleyStark:tlca05}.
+  These cover even $\beta\pi$, and we shall turn to these in \Cref{sec:biortho}.
 \end{enumerate}
 
 
@@ -737,7 +786,7 @@ such as reduction in truth-table natural deduction.
 
 When defining the semantic versions of the logical connectives such as
 $\A \to \B$, we have the choice to base the definition either on the
-introduction rules or the elimination rules.
+introduction rules or the elimination rules.%
 \footnote{See Matthes' \cite[Section 6.2]{matthes:intersection}
   systematic exposition of introduction-based vs.\ elimination-based
   definition of semantic types (in the context of the saturated sets method).}
@@ -746,7 +795,7 @@ approaches, but first, we recapitulate the definition of reducibility
 candidates.
 
 Let $\Intro$ be the term set of introductions, \ie, the terms of
-the form $\tin^{\vec b}_c(\vec t)$.  This is clearly closed under
+the form $\tin^{\vec b}_c(\vec t)$.  This set is clearly closed under
 weakening and anti-weakening.
 
 A \emph{reducibility candidate} $\A$ for a type $A$
@@ -787,7 +836,8 @@ Term set abstraction operates on precandidates:
  %  closed under lifted weakening (almost \ref{it:cr0}).
 \end{lemma}
 \begin{proof}
-  \ref{it:cr1} holds by non-emptiness of $\A$.  Given $t \in \C[\A]_\Gamma$ and
+  \ref{it:cr1} holds by non-emptiness of $\A$:
+  Given $t \in \C[\A]_\Gamma$ and
   arbitrary $a \in \A_\Gamma$ we have $t[a] \in \C_\Gamma$.  In
   particular, $t[a] \in \SN$, and thus, $t \in \SN$.
 
@@ -805,7 +855,8 @@ Term set abstraction operates on precandidates:
   may be empty since there may be no variables $x : \Gamma \vdash a$
   of the correct type $a$.  We thus have to be a bit careful when
   carrying over the textbook proofs
-  \cite{girardLafontTaylor:proofsAndTypes}.
+  \cite{girardLafontTaylor:proofsAndTypes}
+  to our intrinsically-typed setting.
 \end{remark}
 
 
@@ -846,7 +897,7 @@ type has to require the closure under all rules \cite{geuversHurkens:types17}.
 Note the impredicative quantification over all reducibility candidates
 $\C$, which requires an impredicative meta-theory to formalize this
 definition.  Such an impredicative quantification is not required in
-the introduction-based approach (see \Cref{sec:introbased}).
+the introduction-based approach that we study in \Cref{sec:introbased}.
 
 The elimination-based approach gives us the soundness of the
 elimination rules for free.
@@ -940,7 +991,8 @@ In their elimination-based SN proof, Geuvers and Hurkens
 \cite[Section~6.1]{geuversHurkens:types17} use for semantic types
 saturated sets with the expansion closure modified to liken
 \ref{it:cr3}.  To explain their approach, let us first introduce weak
-head reduction (called \emph{key reduction} in \loccit),
+head reduction% (called \emph{key reduction} in \loccit),
+\footnote{Weak head reduction is called \emph{key reduction} in \loccit.}
 $I \cdot E \cdot \vec E \whd[\beta] v \cdot \vec E$ where
 $\beta$-redex $I \cdot E$ contracts to $v$ and the elimination
 sequence $\vec E$ is arbitrary (can be empty).  Any SN term that is
@@ -1199,7 +1251,7 @@ For the elimination rule, property \ref{it:el10}, we have to do a bit of work.
   By main induction on $f \in \indp{\A \to \B}{\Gamma}$.
   \begin{caselist}
 
-    \nextcase $f \not\in \Intro$ and $f \red f'$ implies
+    \nextcase (\rexp) $f \not\in \Intro$ and $f \red f'$ implies
     $f' \in \indp{\A \to \B}{\Gamma}$:
     We show $f \cdot E \in \C$ by side induction on $E \in \SN$ via \ref{it:cr3}.
     First, $f \cdot E \not\in\Intro$.
@@ -1309,8 +1361,10 @@ an operation on candidates, using the least fixed-point of the closure
 of the term set generated by the introductions.  Each elimination then
 has to be proven sound in a lemma similar to \Cref{lem:app}.
 
-Geuvers et al.\ also present permutation reductions.  In the next
-section, we study the extension of the normalization argument to
+%Geuvers et al.\ also present permutation reductions.
+This concludes our study of reducibility candidates to show SN for ITTND.
+In the remaining technical
+sections, we study the extension of the normalization argument to
 permutations.
 
 \section{Permutation Reductions}
@@ -1358,8 +1412,9 @@ reduction $\whd[\pi]$ where
  .
 \]
 
-\section{Biorthogonals}
+\section{Orthogonality}
 \label{sec:biortho}
+\label{sec:ortho}
 
 Since the reducibility candidate method does not immediately extend to
 permutations, we turn to a more powerful technique: biorthogonals.
