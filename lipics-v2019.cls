@@ -1,0 +1,1 @@
+lipics/lipics-v2019.cls
