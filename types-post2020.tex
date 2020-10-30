@@ -25,7 +25,11 @@
     % \and \url{http://www.myhomepage.edu}
   }{andreas.abel@gu.se
   }{https://orcid.org/0000-0003-0420-4492
-  }{(Optional) author-specific funding acknowledgements}
+  }{}
+  % Supported by grant
+  % no.~2019-04216 \emph{Modal Dependent Type Theory} of the
+  % Swedish Research Council (Vetenskapsrådet).
+  % }
 %TODO mandatory, please use full name; only 1 author per \author macro; first two parameters are mandatory, other parameters can be empty. Please provide at least the name of the affiliation and the country. The full address is optional
 
 % \author{Joan R. Public\footnote{Optional footnote, e.g. to mark corresponding author}}{Department of Informatics, Dummy College, [optional: Address], Country}{joanrpublic@dummycollege.org}{[orcid]}{[funding]}
@@ -34,9 +38,19 @@
 
 \Copyright{Andreas Abel} %TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
 
-\ccsdesc[100]{\textcolor{red}{Replace ccsdesc macro with valid one}} %TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10003752.10003790.10003792</concept_id>
+<concept_desc>Theory of computation~Proof theory</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
 
-\keywords{Strong normalization} %TODO mandatory; please add comma-separated list of keywords
+\ccsdesc[500]{Theory of computation~Proof theory}
+
+\keywords{Natural deduction, Permutative conversion, Reducibility, Strong normalization, Truth table} %TODO mandatory; please add comma-separated list of keywords
 
 \category{} %optional, e.g. invited paper
 
@@ -47,11 +61,19 @@
 
 %\funding{(Optional) general funding statement \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
 
-\acknowledgements{I want to thank \dots}%optional
+\acknowledgements{Thanks to Herman Geuvers for explaining
+me truth-table natural deduction during a 2018 visit to Nijmegen for
+the purpose of Henning Basold's PhD ceremony.  Thanks to Ralph Matthes
+for some email discussions on the topics of this article.
+%
+This work has been supported by grant no.~2019-04216 \emph{Modal
+  Dependent Type Theory} of the Swedish Research Council
+(Vetenskapsrådet).
+}%optional
 
 %\nolinenumbers %uncomment to disable line numbering
 
-%\hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
+\hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
 
 %Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \EventEditors{John Q. Open and Joan R. Access}
@@ -188,13 +210,16 @@
 
 %TODO mandatory: add short abstract of the document
 \begin{abstract}
-Truth table natural deduction
-\cite{geuversHurkens:icla17,geuversHurkens:types17}
-(which is non-confluent) has been shown
-strongly normalizing using CPS translations to parallel lambda
-calculus \cite{geuversGiessenHurkens:fundinf19}.  We investigate
-standard techniques such as reducibility candidates and
-biorthogonality to that end.
+  Intuitionistic truth table natural deduction (ITTND)
+  \cite{geuversHurkens:icla17,geuversHurkens:types17}, which is
+  inherently non-confluent, has been shown strongly normalizing (SN)
+  using continuation-passing-style translations to parallel lambda
+  calculus \cite{geuversGiessenHurkens:fundinf19}.  We investigate the
+  applicability of standard model-theoretic proof techniques and show
+  (1) SN of detour reduction ($\beta$) using Girard's reducibility
+  candidates, repairing a previous proof attempt
+  \cite{geuversHurkens:types17}, and (2) SN of detour and permutation
+  reduction ($\beta\pi$) using biorthogonals.
 \end{abstract}
 
 \section{Introduction}
@@ -323,10 +348,10 @@ the parallel simply-typed lambda calculus (parallel STLC).%
 The change of proof strategy begs the question whether the usual
 model-theoretic SN proofs could not work also for
 $\beta\pi$-reduction.  While the saturated sets method applied in
-a similar situation by Joackimski and Matthes
+a similar situation by Joachimski and Matthes
 \cite{joachimskiMatthes:rta00} fails due to non-confluence of $\beta$,
 Girard's RCs do not cover $\pi$.  However, there is a third popular
-method, \emph{(bi)orthogonals}, that have been developed to prove SN for classical lambda-calculi which are essentially non-confluent.\footnote{Early applications of orthgonality can be found in the works of Parigot \cite{parigot:jsl97,parigot:lamsym} and Barbanera and Berardi \cite{barbanera:lamsym}.}
+method, \emph{(bi)orthogonals}, that have been developed to prove SN for classical lambda-calculi which are essentially non-confluent.\footnote{Early applications of orthogonality can be found in the works of Parigot \cite{parigot:jsl97,parigot:lamsym} and Barbanera and Berardi \cite{barbanera:lamsym}.}
 Biorthogonals have been successfully applied by
 Lindley and Stark \cite{lindleyStark:tlca05} to prove SN for Moggi's
 ``monadic metalanguage'', that is STLC with introduction, elimination,
@@ -335,13 +360,13 @@ biorthogonals, putting elimination sequences at the center of
 attention, can show SN for $\beta\pi$ of ITTND.
 
 While we limit our presentation on the implicational fragment of ITTND
-for didactical purposes and convenience of exposition, our techniques
+for didactic purposes and convenience of exposition, our techniques
 scale immediately to the general case.
 
 \paragraph*{Overview}
 %
 In \Cref{sec:nd} we recapitulate Geuvers and Hurkens' construction of
-intuitionistic inference rules from truthtables and the associated
+intuitionistic inference rules from truth tables and the associated
 $\beta$-rules.
 %
 In \Cref{sec:model} we present a common structure of model-theoretic
@@ -564,7 +589,7 @@ terms of type $A$ is a contravariant functor (\ie, presheaf) targeting the
 category $\Set$ of sets and functions.
 Its source is the category of
 substitutions, and thus also its subcategory OPE.  We will work a
-lot with presheafs of the latter kind, especially with families of
+lot with presheaves of the latter kind, especially with families of
 predicates $P_\Gamma \subseteq (\Gamma \vdash A)$ closed under
 weakening, meaning if $a \in P_\Gamma$ and $\tau : \Delta \leq \Gamma$
 then $a \tau \in P_\Delta$.  We call such predicates \emph{term set
@@ -848,9 +873,9 @@ Term set abstraction operates on precandidates:
   holds for $\C$.
 \end{proof}
 
-\begin{remark}[On emptyness of RCs]
+\begin{remark}[On emptiness of RCs]
   In untyped presentations of RCs, \ref{it:cr3} guarantees
-  non-emptyness of any $\A \in \CR$, since automatically all variables
+  non-emptiness of any $\A \in \CR$, since automatically all variables
   will inhabit $\A$ by virtue of \ref{it:cr3}.  In our case, $\A_\Gamma$
   may be empty since there may be no variables $x : \Gamma \vdash a$
   of the correct type $a$.  We thus have to be a bit careful when
@@ -932,7 +957,7 @@ Soundness of the introduction rules requires some work.
   If reduction happens in subterm $b\tau$, so $b\tau \red b'$, we can apply
   the induction hypothesis on $b' \in \SN$, since $b' \in \B\indy\Delta$
   by \ref{it:cr2}.  Reduction in one of the other subterms $t,a,u$ of
-  $v$ is treated analgously.
+  $v$ is treated analogously.
 
   It remains to cover the $\beta$-reductions at the root, which are
   $v \red u[b\tau]$ and $v \red t(\tau.a) \cdot \el\to{10}(a,u)$.
@@ -1067,7 +1092,7 @@ definitions instead.
 \subsection{Introduction-based approach}
 \label{sec:introbased}
 
-Instead of the impredicative elimination-based definition of sematic
+Instead of the impredicative elimination-based definition of semantic
 types like $\A \to \B$, we can base the definition on the introduction
 rules.  The rough idea is that elements of $\A \to \B$ can be
 introduced by any of $\inn\to{00}$, $\inn\to{01}$, and
@@ -1281,7 +1306,7 @@ For the elimination rule, property \ref{it:el10}, we have to do a bit of work.
     Given $f \cdot E \red c$, there are four cases.  Either $c = f' \cdot
     E$ with $f \red f'$ or $c = f \cdot E'$ with $E \red E'$ or $c =
     t[a] \cdot E$ or $c = u[b]$.  The first two cases are handled by the side
-    induction hypotheses, the butlast case by main induction hypothesis
+    induction hypotheses, the but-last case by main induction hypothesis
     on $t[a] \in \indp{\A \to \B}{\Gamma}$, and the last case by assumption
     $u \in \C[\B]\ind\Gamma$.
 
@@ -1370,30 +1395,107 @@ permutations.
 \section{Permutation Reductions}
 \label{sec:perm}
 
-Outer eliminations can be shifted into the negative branches of inner
-eliminations.  We write
-$h \cdot E \cdot E' \contract[\pi] h \cdot E\{E'\}$ for a permutation
-contraction.  The composition $E\{E'\}$ of eliminations moves a weakened
+% In this section, we formally define $\pi$-reduction.
+
+In previous sections, we have studied the reduction $\beta$ of detours
+$I \cdot E$
+stemming from an elimination $E$ of a via $I$ just introduced connective.
+%
+In ITTND, even an elimination $E$ followed by another elimination
+$E'$, thus, a term of the form $f \cdot E \cdot E'$ constitutes a
+detour and can be $\pi$-reduced.
+
+For the sake of defining and studying $\pi$-reduction, let us
+introduce eliminations $E$ and evaluation contexts $\vec E$, aka
+\emph{spines}, as syntactic classes separate from terms.  Eliminations
+$E$ from type $A$ into type $C$ are typed by judgement
+$E : \Gamma \mid A \vdash C$.  In the case of implication, we have:
+\[
+  \ru{a : \Gamma \vdash A \qquad u : \Gamma.B \vdash C
+    }{\el\to{10}(a,u) : \Gamma \mid A \to B \vdash C}
+\]
+Sequences of eliminations form spines $\vec E$, where we
+denote the empty spine as $\tid$ and spine construction by a
+centered dot.
+\[
+  \ru{}{\tid : \Gamma \mid A \vdash A}
+\qquad
+  \ru{E : \Gamma \mid A \vdash B \qquad
+      \vec E : \Gamma \mid B \vdash C
+    }{E \cdot \vec E : \Gamma \mid A \vdash C}
+\]
+Spine construction straightforwardly extends to spine
+concatenation $\vec E \cdot \vec E'$.
+Weakening $\vec E \tau$ and substitution $\vec E \sigma$ are defined
+in the obvious way.
+
+Since the target type $C$ of an elimination can be freely chosen, one
+can structure a proof to always eliminate a hypothesis $x : A$
+directly into the goal $C$.
+Thus, a sequence $x \cdot E \cdot E'$ of two eliminations
+$E : \Gamma \mid A \vdash B$ and $E' : \Gamma \mid B \vdash C$, going via an
+intermediate formula $B$, can be considered a detour.
+
+This detour is removed by a permutation contraction
+$E \cdot E' \contract[\pi] E\{E'\}$ that shifts (``permutes'')
+the outer elimination
+$E'$ into the negative branches of the inner elimination $E$.
+The composition $E\{E'\}$ of eliminations moves a weakened
 version of $E'$ to the negative branches of $E$.  In the case of
 implication, we have
-\[
+\begin{equation}
+  \label{eq:elcomp}
   \el\to{10}(a,u) \{ E' \} = \el\to{10}(a,u \cdot E' \up)
-\]
-where $\up : \Gamma.B \leq \Gamma$ and
-$E' \up$ shall denote the weakening of elimination $E'$ by $\up$.
+\end{equation}
+where
+$E' \up$ shall denote the weakening of elimination $E'$ by
+$\up : \Gamma.B \leq \Gamma$.
 In particular, $\el\to{10}(a',u') \up = \el\to{10}(a' \up, u' (\Up\up))$.
 
-If in the above display $u$ is an introduction, it may $\beta$-react with $E'$
-to eliminate further detours.  Thus, $\pi$-reductions can lead to
-significant further normalization.
+\begin{remark}
+  If in \cref{eq:elcomp} term $u$ is an introduction, it may $\beta$-react
+  with $E'$ to eliminate further detours.  Thus, $\pi$-reductions can
+  lead to significant further normalization.
+\end{remark}
 
-Just throwing permutation reductions into the mix and replaying the CR
+Now a one-step \emph{$\pi$-reduction} $t \red[\pi] t'$ shall be a
+$\pi$-contraction in some spine within term $t$.
+%
+Let us further define \emph{spine reduction} $\whd[\pi]$
+as $\pi$-contraction within a spine at the root, \ie, inductively
+by the axiom
+\[
+  \vec E \cdot E_1 \cdot E_2 \cdot \vec E'
+  \whd[\pi]
+ \vec E \cdot E_1\{E_2\} \cdot \vec E'
+ .
+\]
+% A spine reduction $\vec E \whd[\pi] \vec E'$ performs a single
+% $\pi$-contraction in spine $\vec E$.  Since this shortens the length
+Since a spine reduction shortens the length
+of the spine by 1, spine reduction is SN.  For $\pi$-reduction, the
+situation is slightly more complicated since a $\pi$-reduction can
+create new $\pi$-redexes: for instance, if in \cref{eq:elcomp} the
+term $u$ is an elimination.  However, these $\pi$-redexes have moved
+deeper into the term, thus, by ranking $\pi$-redexes by their depth we
+can easily construct a termination order.  Consequently,
+$\pi$-reduction alone is also SN \cite[Thm.~55]{geuversHurkens:types17}.
+%
+Since elimination composition is associative, \ie,
+$(E_1\{E_2\})\{E_3\} = E_1\{E_2\{E_3\}\}$, spine and $\pi$-reduction
+are confluent.
+
+\subsection{Failure of the CR method for $\beta\pi$}
+
+Our goal is now a model-theoretic proof of the SN of $\beta\pi$-reduction.
+Unfortunately,
+just throwing permutation reductions into the mix and replaying the CR
 proof for SN-$\beta$ does not work.  The proof of \Cref{lem:app} relies
 on the fact that if $f \cdot E \red c$ and $f \not\in \Intro$ then
-either $f \red f'$ or $E \red E'$, but the structure of the
+either $f \red f'$ or $E \red E'$, and the structure of the
 elimination $f \cdot E$ is preserved.  However, with permutations, in
 case $f = f_0 \cdot E_0$ it could be that $c = f_0 \cdot E_0\{E\}$.
-This reduction is not covered by any induction hypothesis.
+This reduction is not covered by any of the induction hypotheses.
 
 We cannot arbitrarily tighten the restriction $\_ \not\in \Intro$ in
 the formulation of \ref{it:cr3}, since \ref{it:cr3} is used in \Cref{lem:app} to
@@ -1402,23 +1504,13 @@ into a reducibility candidate $\C$.  Such terms need to satisfy the
 restriction, therefore we cannot exclude $\pi$-redexes in general: a
 priori, $f \cdot E$ could be a $\pi$-redex.
 
-TODO: move definition of elimination typing here (or even further up) and
-prove (recall) strong normalization (and confluence) of $\pi$ spine
-reduction $\whd[\pi]$ where
-\[
-  \vec E \cdot E_1 \cdot E_2 \cdot \vec E'
-  \whd[\pi]
- \vec E \cdot E_1\{E_2\} \cdot \vec E'
- .
-\]
-
 \section{Orthogonality}
 \label{sec:biortho}
 \label{sec:ortho}
 
 Since the reducibility candidate method does not immediately extend to
 permutations, we turn to a more powerful technique: biorthogonals.
-Lindley and Stark \cite{lindleyStark:redComput} have observed that
+Lindley and Stark \cite{lindleyStark:tlca05} have observed that
 biorthogonals (``$\top\top$-lifting'') deal well with the permutation
 reduction for the monadic bind in a strong normalization proof for the
 monadic meta-language.  We shall thus adapt this technique, although
@@ -1435,7 +1527,8 @@ implicitly assume that the family is closed under weakening.
 % to \ref{it:cr0}.
 
 Semantic types $\A$ shall now be context-indexed families of sets of
-evaluation contexts $\vec E$, and we write $a \perp \A_\Gamma$ to
+% evaluation contexts
+spines $\vec E$, and we write $a \perp \A_\Gamma$ to
 characterize a term $a : \Gamma \vdash A$ as classified by semantic
 type $\A$.  The orthogonality relation $\perp$ is defined as
 \[
@@ -1446,23 +1539,28 @@ type $\A$.  The orthogonality relation $\perp$ is defined as
   .
 \]
 
-To formally talk about evaluation contexts, we introduce a judgement
-$E : \Gamma \mid A \vdash C$ to characterize eliminations $E$ from type $A$
-into $C$, and extend it to vectors $\vec E : \Gamma \mid A \vdash C$
-in the usual way:
-\[
-  \ru{}{\tid : \Gamma \mid A \vdash A}
-\qquad
-  \ru{E : \Gamma \mid A \vdash B \qquad
-      \vec E : \Gamma \mid B \vdash C
-    }{E \cdot \vec E : \Gamma \mid A \vdash C}
-\]
-Weakening $\vec E \tau$ and substitution $\vec E \sigma$ are defined
-in the obvious way.
+%% To formally talk about evaluation contexts, we introduce a judgement
+%% $E : \Gamma \mid A \vdash C$ to characterize eliminations $E$ from type $A$
+%% into $C$, and extend it to vectors $\vec E : \Gamma \mid A \vdash C$
+%% in the usual way:
+%% \[
+%%   \ru{}{\tid : \Gamma \mid A \vdash A}
+%% \qquad
+%%   \ru{E : \Gamma \mid A \vdash B \qquad
+%%       \vec E : \Gamma \mid B \vdash C
+%%     }{E \cdot \vec E : \Gamma \mid A \vdash C}
+%% \]
+%% Weakening $\vec E \tau$ and substitution $\vec E \sigma$ are defined
+%% in the obvious way.
 
-We demand of semantic types that they contain the identity evaluation
-context and only contain strongly normalizing evaluation contexts.
-Reductions in contexts can either be in the subterms or can be
+We demand of semantic types that they contain the
+empty spine $\tid$
+% identity evaluation context $\tid$
+and only contain strongly normalizing
+spines.
+% evaluation contexts.
+Reductions $\vec E \red \vec E'$ in spines $\vec E$ can either be
+reductions in the subterms of the eliminations or can be
 $\pi$-contractions along the spine.
 
 More formally, a semantic type $\A_\Gamma$ for syntactic type $A$ at
@@ -1509,7 +1607,7 @@ Symmetrically to $\A^\perp$, given a set of terms $\T_\Gamma \subseteq
   \mbox{ for all } a \in \T_\Gamma \}
   .
 \]
-Taking the orthogonal of a non-empty SN term set is one way to
+Taking the orthogonal $\T^\perp$ of a non-empty SN term set $\T$ is one way to
 construct a semantic type:
 \begin{lemma}[Orthogonals are semantic types]
   \label{lem:orthsem}
@@ -1521,14 +1619,15 @@ construct a semantic type:
   First, $\tid \in \T^\perp$ since $\T \subseteq \SN$.
   Then $\T^\perp \subseteq \SN$ since $\T$ is non-empty.
 \end{proof}
-
-It is well-known that orthogonality gives rise to the Galois
+%
+By definition, orthogonality gives rise to the Galois
 connection
 \[
   \T^\perp \supseteq \A \iff \T \subseteq \A^\perp
 \]
-and biorthogonality is a closure operator both on sets of terms $\T
-\subseteq \T^{\perp\perp}$ and evaluation contexts
+(both sides of $\iff$ expand to the same statement).  As a consequence
+biorthogonality $\_^{\perp\perp}$ is a closure operator both on sets
+of terms, $\T \subseteq \T^{\perp\perp}$, and evaluation contexts,
 $\A \subseteq \A^{\perp\perp}$.
 
 The abstraction type $\X[\A]$ is now defined by
@@ -1579,9 +1678,14 @@ pointwise orthogonal $\F^\perp$ of the operator
 In comparison with the reducibility candidate version in
 \Cref{sec:cr}, the closure operation has been replaced by
 biorthogonality, and we converted $\mu(\F^{\perp\perp})$
-to $(\nu(\F^\perp)^\perp)$.  We dropped the outer orthogonalization since
-we now compute sets of evaluation contexts, but now $\F$ applies
+to $(\nu(\F^\perp))^\perp$.  We dropped the outer orthogonalization since
+we now compute sets of evaluation contexts, but note that $\F$ applies
 orthogonalization on $\X$.
+Due to the double ``negation'', $\F^\perp$ is a non-strictly positive
+operator which has a (greatest) fixpoint thanks to its monotonicity,
+yet, this fixpoint is not directly obtainable in meta-theories that
+only accept \emph{strictly} positive coinductive definitions, such as
+the type theories of Agda \cite{agda:261} and Coq \cite{coq:8120}.
 
 \begin{lemma}[Function space, revisited]
   \label{lem:funrev}
@@ -1615,7 +1719,9 @@ orthogonalization on $\X$.
   $I \perp \F(\A \to \B)^{\perp}_\Gamma = (\A \to \B)_\Gamma$,
   since $\A \to \B$ is a fixed point of $\F^\perp$.
 \end{proof}
-
+%
+It seems now logical to prove the following soundness statement for
+eliminations:
 \begin{lemma}[Function elimination, preliminary]
   \label{lem:appprelim}
   Let $\A,\B,\C$ be semantic types for $A,B,C$, resp.  If
@@ -1626,49 +1732,51 @@ orthogonalization on $\X$.
   % $u \perp \C[\B]_\Gamma$ then $f \cdot E \perp \C$
   % where $E = \el\to{10}(a,u)$.
 \end{lemma}
-\begin{proof}
-  By coinduction, which means that we can use the coinductive
-  hypothesis $E \in (\A \to \B)_\Gamma$ after one step towards the
-  goal.
-  Note that $E \in \SN$ since $a,u \in \SN$.
-  By unfolding of the fixed point, it is sufficient to show $E \in
-  \F(\A \to \B)^\perp_\Gamma$.  This means to show $I \cdot E \in \SN$
-  for any $I \in \F(\A \to \B)_\Gamma$.
-  \begin{caselist}
-
-    \nextcase $I = \inn\to{00}(t,u')$ with
-    $t \perp (\A \to \B)[\A]_\Gamma$ and
-    $u' \perp (\A \to \B)[\B]_\Gamma$.  We proceed by side induction on
-    $t,u',E \in \SN$ and show that all possible reducts of $I \cdot E$
-    are SN.
-    If reduction occurs in $I$ or $E$, we use the side induction
-    hypothesis.
-    Otherwise $I \cdot E \contract[\beta] t[a] \cdot E$.  We have
-    $t[a] \perp (\A \to \B)_\Gamma$ by assumption on $t$ and
-    $E \in (\A \to \B)_\Gamma$ by the coinduction hypothesis.
-    Thus, $t[a] \cdot E \in \SN$.
-
-    \nextcase $I = \inn\to{11}(a,b)$ with $a \perp \A_\Gamma$ and
-    $b \perp \B_\Gamma$.  Again, we proceed by side induction on
-    $a,b,E \in \SN$ and show that all possible reducts of $I \cdot E$
-    are SN.
-    The only interesting reduction is
-    $I \cdot E \contract[\beta] u[b] \perp \C_\Gamma$, thus $u[b] \in
-    \SN$.
-    Coinduction is not needed in this case.
-
-    \nextcase $I = \inn\to{01}(t,b)$.  In this case we have two
-      $\beta$-contractions of $I \cdot E$ which we handle as in the
-      previous cases.
-  \popQED
-  \end{caselist}
-\end{proof}
-
-The previous lemma is not strong enough to justify the implication
+% \begin{proof}
+%   By coinduction, which means that we can use the coinductive
+%   hypothesis $E \in (\A \to \B)_\Gamma$ after one step towards the
+%   goal.
+%   Note that $E \in \SN$ since $a,u \in \SN$.
+%   By unfolding of the fixed point, it is sufficient to show $E \in
+%   \F(\A \to \B)^\perp_\Gamma$.  This means to show $I \cdot E \in \SN$
+%   for any $I \in \F(\A \to \B)_\Gamma$.
+%   \begin{caselist}
+%
+%     \nextcase $I = \inn\to{00}(t,u')$ with
+%     $t \perp (\A \to \B)[\A]_\Gamma$ and
+%     $u' \perp (\A \to \B)[\B]_\Gamma$.  We proceed by side induction on
+%     $t,u',E \in \SN$ and show that all possible reducts of $I \cdot E$
+%     are SN.
+%     If reduction occurs in $I$ or $E$, we use the side induction
+%     hypothesis.
+%     Otherwise $I \cdot E \contract[\beta] t[a] \cdot E$.  We have
+%     $t[a] \perp (\A \to \B)_\Gamma$ by assumption on $t$ and
+%     $E \in (\A \to \B)_\Gamma$ by the coinduction hypothesis.
+%     Thus, $t[a] \cdot E \in \SN$.
+%
+%     \nextcase $I = \inn\to{11}(a,b)$ with $a \perp \A_\Gamma$ and
+%     $b \perp \B_\Gamma$.  Again, we proceed by side induction on
+%     $a,b,E \in \SN$ and show that all possible reducts of $I \cdot E$
+%     are SN.
+%     The only interesting reduction is
+%     $I \cdot E \contract[\beta] u[b] \perp \C_\Gamma$, thus $u[b] \in
+%     \SN$.
+%     Coinduction is not needed in this case.
+%
+%     \nextcase $I = \inn\to{01}(t,b)$.  In this case we have two
+%       $\beta$-contractions of $I \cdot E$ which we handle as in the
+%       previous cases.
+%   \popQED
+%   \end{caselist}
+% \end{proof}
+%
+% The previous lemma
+However, such a lemma
+is not strong enough to justify the implication
 elimination rule, as from $f \perp (\A \to \B)_\Gamma$ and $E \in (\A
 \to \B)_\Gamma$ we only get $f \cdot E \in \SN$, but we need the
 stronger $f \cdot E \in \C_\Gamma$.
-We need the following stronger lemma.
+Thus, we prove the following stronger lemma.
 
 \begin{lemma}[Function elimination, revisited]
   \label{lem:appprev}
@@ -1741,13 +1849,52 @@ We need the following stronger lemma.
   \end{caselist}
 \end{proof}
 
+Plugging these lemmata into the framework of \Cref{sec:model}, we
+obtain a new proof of $\beta\pi$-SN for ITTND.
+
 \section{Conclusion}
 \label{sec:concl}
 
-\paragraph*{Acknowledgements}  Thanks to Herman Geuvers for explaining
-me truth-table natural deduction during a 2018 visit to Nijmegen for
-the purpose of Henning Basold's PhD ceremony.  Thanks to Ralph Matthes
-for some email discussions on the topics of this article.
+We have successfully applied Girard's method, in its original form, to
+prove $\beta$-SN of ITTND, and the orthogonality method to prove
+$\beta\pi$-SN.  The applicability of established methods is reassuring
+that ITTND does not offer a new form of computation asking for new
+theoretical justifications.
+
+Our proof using orthogonality places rather high demands on the
+meta-theory: non-strictly positive coinductive definitions.  Neither
+Coq nor Agda directly support those; in Coq, though, we can always
+fall back to impredicativity to construct the necessary fixed-point in
+the lattice of term or spine sets ordered by inclusion.  In
+Martin-L\"of Type Theory (MLTT) \cite{MartinLoef84}, the basis of
+Agda, such backups do not exist.  This begs the question whether
+non-strictly positive (co)inductive types could be added in some form
+to MLTT without jeopardizing its soundness.
+
+For future work, one should investigate whether the SN-method of
+Joachimski and Matthes \cite{matthes:shortproofs} could be applied to
+ITTND to prove $\beta\pi$-SN without the need for impredicativity nor
+non-strict positivity nor CPS-translation.  Whether even an
+arithmetical proof \`a la David and Nour
+\cite{david:normWithoutRed,davidNour:tlca05} works for unoptimized
+ITTND is unclear, since already the introduction rules for implication
+are recursive and thus make implication semantically an inductive type.
+
+A further question is the computational content of the normalization
+arguments presented here.  The double negation on the meta level
+employed in the biorthogonals superficially resembles the CPS
+translation by Geuvers, van der Giessen, and Hurkens
+\cite{geuversGiessenHurkens:fundinf19}, and perhaps the latter can be
+extracted from our normalization proof.
+
+Finally, the classical version of TTND has been little explored so
+far.  It is unclear whether it has a computational interpretation that
+enjoys the strong normalization property.
+
+% \paragraph*{Acknowledgements}  Thanks to Herman Geuvers for explaining
+% me truth-table natural deduction during a 2018 visit to Nijmegen for
+% the purpose of Henning Basold's PhD ceremony.  Thanks to Ralph Matthes
+% for some email discussions on the topics of this article.
 
 
 %%
