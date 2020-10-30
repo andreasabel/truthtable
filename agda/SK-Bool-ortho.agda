@@ -257,9 +257,6 @@ sn-ε = acc λ()
 
 -- Function elimination preserves SN
 
--- sn-app : SN u → SNₑ (app {a} {b} u)
--- sn-app (acc snu) = acc λ{ (↦app r) → sn-app (snu r) }
-
 sn-app∷ : SN u → SNₛ E → SNₛ (app u ∷ E)
 sn-app∷ (acc snu) snE@(acc snE') = acc
   λ{ (here (↦app r)) → sn-app∷ (snu r) snE
@@ -290,97 +287,71 @@ sn-Stu (acc snt) (acc snu) = acc
 
 -- KtuE is SN
 
-sn-KtuE : SN (t ∘ E) → SN t → SNₑ e → SNₛ E → SN (K ∙ app t ∷ e ∷ E)
-sn-KtuE {t = t} sntE (acc snt) (acc sne) snE@(acc snE') = acc
-  λ{ ↦K                     → sntE
-   ; (↦E (here (↦app r)))   → sn-KtuE (sn-red sntE (∘↦ₗ r)) (snt r) (acc sne) snE
-   ; (↦E (there (here  r))) → sn-KtuE sntE                 (acc snt) (sne r) snE
-   ; (↦E (there (there r))) →
-       sn-KtuE (sn-red sntE (∘↦ᵣ t r)) (acc snt) (acc sne) (snE' r)
-   }
-
-sn-KtuE' : SN (t ∘ E) → SN u → SN (K ∙ app t ∷ app u ∷ E)
-sn-KtuE' {t = t} sntE@(acc h) (acc snu)  = acc
+sn-KtuE : SN (t ∘ E) → SN u → SN (K ∙ app t ∷ app u ∷ E)
+sn-KtuE {t = t} sntE@(acc h) (acc snu)  = acc
   λ{ ↦K                            → sntE
-   ; (↦E (here (↦app r)))          → sn-KtuE' (h (∘↦ₗ r))          (acc snu)
-   ; (↦E (there (here (↦app r))))  → sn-KtuE' sntE                (snu r)
-   ; (↦E (there (there r)))        → sn-KtuE' (h (∘↦ᵣ t r)) (acc snu)
+   ; (↦E (here (↦app r)))          → sn-KtuE (h (∘↦ₗ r))          (acc snu)
+   ; (↦E (there (here (↦app r))))  → sn-KtuE sntE                (snu r)
+   ; (↦E (there (there r)))        → sn-KtuE (h (∘↦ᵣ t r)) (acc snu)
    }
-
--- sn-KtuE' : SN (t ∘ E) → SNₑ e → SN (K ∙ app t ∷ e ∷ E)
--- sn-KtuE' {t = t} sntE@(acc h) (acc sne)  = acc
---   λ{ ↦K                     → sntE
---    ; (↦E (here (↦app r)))   → sn-KtuE' (h (∘↦ₗ r)) (acc sne)
---    ; (↦E (there (here  r))) → sn-KtuE' sntE       (sne r)
---    ; (↦E (there (there r))) →
---        sn-KtuE' (h (∘↦ᵣ t r)) (acc sne)
---    }
 
 -- StuvE is SN
 
-sn-StuvE : SN (t ∘ app v ∷ app (u ∘ app v ∷ ε) ∷ E) → SN t → SN u → SN v → SNₛ E → SN (S ∙ app t ∷ app u ∷ app v ∷ E)
-sn-StuvE {t = t} {u = u} sntvuvE (acc snt) (acc snu) (acc snv) snE@(acc snE') = acc
-  λ{ ↦S →
-       sntvuvE
-
-   ; (↦E (here (↦app r))) →
-       sn-StuvE (sn-red sntvuvE (∘↦ₗ r))
-         (snt r) (acc snu) (acc snv) snE
-
-   ; (↦E (there (here (↦app r)))) →
-       sn-StuvE (sn-red sntvuvE (∘↦ᵣ t (there (here (↦app (∘↦ₗ r))))))
-         (acc snt) (snu r) (acc snv) snE
-
-   ; (↦E (there (there (here (↦app r))))) →
-       sn-StuvE (sn-red
-                  (sn-red sntvuvE  (∘↦ᵣ t (here (↦app r))))
-                  (∘↦ᵣ t (there (here (↦app (∘↦ᵣ u (here (↦app r))))))))
-         (acc snt) (acc snu) (snv r) snE
-
-   ; (↦E (there (there (there r)))) →
-       sn-StuvE (sn-red sntvuvE (∘↦ᵣ t (there (there r))))
-         (acc snt) (acc snu) (acc snv) (snE' r)
-   }
-
-sn-StuvE' : SN⁺ (t ∘ app v ∷ app (u ∘ app v ∷ ε) ∷ E)
+sn-StuvE : SN⁺ (t ∘ app v ∷ app (u ∘ app v ∷ ε) ∷ E)
           → SN (S ∙ app t ∷ app u ∷ app v ∷ E)
-sn-StuvE' {t = t} {u = u} sntvuvE@(acc h) = acc
+sn-StuvE {t = t} {u = u} sntvuvE@(acc h) = acc
   λ{ ↦S →
        wf⁻ sntvuvE
 
    ; (↦E (here (↦app r))) →
-       sn-StuvE' (h (sg (∘↦ₗ r)))
+       sn-StuvE (h (sg (∘↦ₗ r)))
 
    ; (↦E (there (here (↦app r)))) →
-       sn-StuvE' (h (sg (∘↦ᵣ t (there (here (↦app (∘↦ₗ r)))))))
+       sn-StuvE (h (sg (∘↦ᵣ t (there (here (↦app (∘↦ₗ r)))))))
 
    ; (↦E (there (there (here (↦app r))))) →
-       sn-StuvE' (h (∘↦ᵣ t (here (↦app r)) ∷
+       sn-StuvE (h (∘↦ᵣ t (here (↦app r)) ∷
                     sg (∘↦ᵣ t (there (here (↦app (∘↦ᵣ u (here (↦app r)))))))))
 
    ; (↦E (there (there (there r)))) →
-       sn-StuvE' (h (sg (∘↦ᵣ t (there (there r)))))
+       sn-StuvE (h (sg (∘↦ᵣ t (there (there r)))))
    }
+
 
 -- This is the key lemma:
 
-sn-case' : {E : Stack i a c} -- (i : Size)
-          (sntE : SN (t ∘ E))
-          (snuE : SN (u ∘ E))
-          (r : h ∙ case t u ∷ E ↦ v) → SN v
-sn-case' sntE snuE ↦tt = sntE
-sn-case' sntE snuE ↦ff = snuE
-sn-case' (acc sntE) snuE (↦E (here (↦caseₗ r))) = acc (sn-case' (sntE (∘↦ₗ r)) snuE)
-sn-case' sntE (acc snuE) (↦E (here (↦caseᵣ r))) = acc (sn-case' sntE (snuE (∘↦ₗ r)))
-sn-case' {t = t} {u = u} (acc sntE) (acc snuE) (↦E (there r)) = acc
-  (sn-case'
-    (sntE (∘↦ᵣ t r))
-    (snuE (∘↦ᵣ u r))
-  )
-sn-case' {i = .(↑ i)} sntE snuE (↦E (π {i = i})) = acc (sn-case' {i = i} sntE snuE )
+mutual
 
-sn-case : (sntE : SN (t ∘ E)) (snuE : SN (u ∘ E)) → SN (h ∙ case t u ∷ E)
-sn-case sntE snuE = acc (sn-case' sntE snuE)
+  sn-case : {E : Stack i a c} (sntE : SN (t ∘ E)) (snuE : SN (u ∘ E)) → SN (h ∙ case t u ∷ E)
+  sn-case sntE snuE = acc (sn-case' sntE snuE)
+
+  -- Case distinction on reductions of (h ∙ case t u ∷ E)
+
+  sn-case' : {E : Stack i a c}
+            (sntE : SN (t ∘ E))
+            (snuE : SN (u ∘ E))
+            (r : h ∙ case t u ∷ E ↦ v) → SN v
+  sn-case'  sntE snuE ↦tt = sntE
+  sn-case'  sntE snuE ↦ff = snuE
+  sn-case'  (acc sntE) snuE (↦E (here (↦caseₗ r)))  = sn-case (sntE (∘↦ₗ r)) snuE
+  sn-case'  sntE (acc snuE) (↦E (here (↦caseᵣ r)))  = sn-case sntE (snuE (∘↦ₗ r))
+  sn-case'  {t = t} {u = u}
+            (acc sntE) (acc snuE) (↦E (there r))    = sn-case (sntE (∘↦ᵣ t r)) (snuE (∘↦ᵣ u r))
+  sn-case'  {i = .(↑ i)} sntE snuE (↦E (π {i = i})) = sn-case {i = i} sntE snuE
+
+-- -- Internal error with this version (#4929)
+-- sn-case : {E : Stack i a c}
+--           (sntE : SN (t ∘ E))
+--           (snuE : SN (u ∘ E))
+--           → SN (h ∙ case t u ∷ E)
+-- sn-case {i = i} {t = t} {u = u} (acc sntE) (acc snuE) = acc
+--   λ { ↦tt → acc sntE
+--     ; ↦ff → acc snuE
+--     ; (↦E (here (↦caseₗ r)))  → sn-case (sntE (∘↦ₗ r)) (acc snuE)
+--     ; (↦E (here (↦caseᵣ r))) → sn-case (acc sntE) (snuE (∘↦ₗ r))
+--     ; (↦E (there r))         → sn-case (sntE (∘↦ᵣ t r)) (snuE (∘↦ᵣ u r))
+--     ; (↦E (π {i = j}))       → sn-case {i = j} (acc sntE) (acc snuE)
+--     }
 
 -- Semantic types
 ---------------------------------------------------------------------------
@@ -521,7 +492,7 @@ sem-sn {a = a} ⦅t⦆ = Sem-sn ⟨ a ⟩ ⦅t⦆
 ⦅K⦆ : (K ∙ ε) ⊥ ⟦ K-ty a b ⟧
 ⦅K⦆ .run ε                  = sn-Hd
 ⦅K⦆ .run (⦅t⦆ ∷ ε)          = sn-Kt (sem-sn ⦅t⦆)
-⦅K⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅E⦆)  = sn-KtuE' (⦅t⦆ .run ⦅E⦆) (sem-sn ⦅u⦆)
+⦅K⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅E⦆)  = sn-KtuE (⦅t⦆ .run ⦅E⦆) (sem-sn ⦅u⦆)
 -- ⦅K⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅E⦆)  = sn-KtuE (⦅t⦆ .run ⦅E⦆) (sem-sn ⦅t⦆) (sn-app (sem-sn ⦅u⦆)) (sem-snₛ ⦅E⦆)
 
 -- Interpretation of S
@@ -530,7 +501,7 @@ sem-sn {a = a} ⦅t⦆ = Sem-sn ⟨ a ⟩ ⦅t⦆
 ⦅S⦆ .run ε                        = sn-Hd
 ⦅S⦆ .run (⦅t⦆ ∷ ε)                = sn-St (sem-sn ⦅t⦆)
 ⦅S⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ε)          = sn-Stu (sem-sn ⦅t⦆) (sem-sn ⦅u⦆)
-⦅S⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅v⦆ ∷ ⦅E⦆)  = sn-StuvE' (wf⁺ (⦅t⦆ .run (⦅v⦆ ∷ ⦅app⦆ ⦅u⦆ ⦅v⦆ ∷ ⦅E⦆)))
+⦅S⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅v⦆ ∷ ⦅E⦆)  = sn-StuvE (wf⁺ (⦅t⦆ .run (⦅v⦆ ∷ ⦅app⦆ ⦅u⦆ ⦅v⦆ ∷ ⦅E⦆)))
 -- ⦅S⦆ .run (⦅t⦆ ∷ ⦅u⦆ ∷ ⦅v⦆ ∷ ⦅E⦆)  =
 --   sn-StuvE
 --    (⦅t⦆ .run (⦅v⦆ ∷ ⦅app⦆ ⦅u⦆ ⦅v⦆ ∷ ⦅E⦆))

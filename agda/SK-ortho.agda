@@ -2,7 +2,7 @@
 {-# OPTIONS --rewriting #-}
 
 -- Strong normalization for simply-typed combinatory logic
--- using Girard's reducibility candidates.
+-- using orthogonality.
 
 module SK-ortho where
 
