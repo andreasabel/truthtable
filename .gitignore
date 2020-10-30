@@ -8,7 +8,9 @@
 *.log
 *.out
 *.vtc
+*Bug*.agda
 _build
+/lipics/
 /lipics/lipics-v2019-authors-guidelines.pdf
 /lipics/lipics-v2019-sample-article.bib
 /lipics/lipics-v2019-sample-article.pdf
