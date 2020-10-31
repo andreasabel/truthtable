@@ -1,0 +1,265 @@
+\nonstopmode
+%\RequirePackage{unicode-math}
+%\RequirePackage{latex/agda} %xkeyval does not want to be loaded here
+
+\documentclass[a4paper]{scrartcl}
+% \documentclass[a4paper]{article}%{lipics-v2019}
+% %\usepackage{ifthen}
+\usepackage{amsmath}
+\usepackage{cleveref}
+%\documentclass[a4paper,USenglish,cleveref, autoref, thm-restate, preprint]{lipics-v2019}
+%This is a template for producing LIPIcs articles.
+%See lipics-manual.pdf for further information.
+%for A4 paper format use option "a4paper", for US-letter use option "letterpaper"
+%for british hyphenation rules use option "UKenglish", for american hyphenation rules use option "USenglish"
+%for section-numbered lemmas etc., use "numberwithinsect"
+%for enabling cleveref support, use "cleveref"
+%for enabling autoref support, use "autoref"
+%for anonymousing the authors (e.g. for double-blind review), add "anonymous"
+%for enabling thm-restate support, use "thm-restate"
+
+%\graphicspath{{./graphics/}}%helpful if your graphic files are in another directory
+
+\bibliographystyle{plainurl}% the mandatory bibstyle
+
+\title{A Formalized Proof of Strong Normalization of Combinatory
+  Algebra with Permutative Conversions for Conditionals}
+%\titlerunning{SN for CA with Permutations of Conditionals}
+
+\author{Andreas Abel
+  \\ Department of Computer Science,
+    Gothenburg University,
+    Sweden
+  }
+
+% \author{Andreas Abel
+%   }{Department of Computer Science,
+%     Gothenburg University,
+%     Sweden
+%     % \and \url{http://www.myhomepage.edu}
+%   }{andreas.abel@gu.se
+%   }{https://orcid.org/0000-0003-0420-4492
+%   }{(Optional) author-specific funding acknowledgements}
+% %TODO mandatory, please use full name; only 1 author per \author macro; first two parameters are mandatory, other parameters can be empty. Please provide at least the name of the affiliation and the country. The full address is optional
+
+% % \author{Joan R. Public\footnote{Optional footnote, e.g. to mark corresponding author}}{Department of Informatics, Dummy College, [optional: Address], Country}{joanrpublic@dummycollege.org}{[orcid]}{[funding]}
+
+% \authorrunning{A. Abel} %TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
+
+% \Copyright{Andreas Abel} %TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+
+% \ccsdesc[100]{\textcolor{red}{Replace ccsdesc macro with valid one}} %TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm
+
+% \keywords{Strong normalization} %TODO mandatory; please add comma-separated list of keywords
+
+% \category{} %optional, e.g. invited paper
+
+% \relatedversion{} %optional, e.g. full version hosted on arXiv, HAL, or other respository/website
+% %\relatedversion{A full version of the paper is available at \url{...}.}
+
+% \supplement{}%optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
+
+% %\funding{(Optional) general funding statement \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
+
+% \acknowledgements{I want to thank \dots}%optional
+
+% %\nolinenumbers %uncomment to disable line numbering
+
+% %\hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
+
+% %Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \EventEditors{John Q. Open and Joan R. Access}
+% \EventNoEds{2}
+% \EventLongTitle{42nd Conference on Very Important Topics (CVIT 2016)}
+% \EventShortTitle{CVIT 2016}
+% \EventAcronym{CVIT}
+% \EventYear{2016}
+% \EventDate{December 24--27, 2016}
+% \EventLocation{Little Whinging, United Kingdom}
+% \EventLogo{}
+% \SeriesVolume{42}
+% \ArticleNo{23}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \usepackage{xspace}
+% \usepackage{stmaryrd}
+% \usepackage{dsfont} % mathds
+% %\usepackage{enumitem} %% not allowed, but would be needed for leftmargin
+% \usepackage[hang,flushmargin]{footmisc}
+
+% https://texblog.org/2012/03/21/cross-referencing-list-items/
+\makeatletter
+\def\namedlabel#1#2{\begingroup
+    #2%
+    \def\@currentlabel{#2}%
+    \phantomsection\label{#1}\endgroup
+}
+\makeatother
+
+\usepackage{textgreek}
+\usepackage{unicode-math}
+%% \setmathfont{xits-math.otf}
+\setmainfont{XITS}
+\setmathfont{XITS Math}
+% \setmathfont{DejaVu Math TeX Gyre}
+
+\usepackage{latex/agda}
+
+\ifxetexorluatex
+  \renewcommand{\AgdaFontStyle}[1]{\ensuremath{\mathsf{#1}}}
+  \ifthenelse{\equal{\AgdaColourScheme}{bw}}{
+      \renewcommand{\AgdaKeywordFontStyle}[1]{\underline{#1}}
+  }{
+      \renewcommand{\AgdaKeywordFontStyle}[1]{\ensuremath{\mathsf{#1}}}
+  }
+  \renewcommand{\AgdaStringFontStyle}[1]{\ensuremath{\texttt{#1}}}
+  \renewcommand{\AgdaCommentFontStyle}[1]{\ensuremath{\texttt{#1}}}
+  \renewcommand{\AgdaBoundFontStyle}[1]{\ensuremath{\mathit{#1}}}
+\fi
+
+\usepackage{newunicodechar}
+\newunicodechar{λ}{\ensuremath{\mathnormal\lambda}}
+\newunicodechar{ε}{\ensuremath{\mathnormal\varepsilon}}
+
+\newcommand{\bla}{\ensuremath{\mbox{$$}}}
+\newcommand{\ie}{\emph{i.e.}\xspace}
+\newcommand{\eg}{\emph{e.g.}\xspace}
+\newcommand{\Eg}{\emph{E.g.}\xspace}
+\newcommand{\loccit}{\emph{loc.\,cit.}\xspace}
+\newcommand{\cf}{cf.\ }
+\newcommand{\den}[2][]{\llbracket#2\rrbracket^{#1}}
+\newcommand{\dent}[1]{\llparenthesis#1\rrparenthesis}
+\newcommand{\To}{\ensuremath{\Rightarrow}}
+%\newcommand{\todot}{\stackrel\cdot\to}
+\newcommand{\todot}{\mathbin{\dot{\to}}}
+\newcommand{\bN}{\ensuremath{\mathbb{N}}}
+\newcommand{\dom}{\mathop{\mathrm{dom}}\nolimits}
+\newcommand{\Pot}[1]{\mathcal{P}\,#1}
+%\newcommand{\defiff}{:\iff}
+\newcommand{\defiff}{\mathrel{{{:}{\Longleftrightarrow}}}}
+\newcommand{\subst}[3]{#3[#1/#2]}
+\newcommand{\tid}{\mathsf{id}}
+\newcommand{\sid}{\mathds{1}}
+
+\newcommand{\ru}{\dfrac}
+\newcommand{\nru}[3]{#1\;\dfrac{#2}{#3}}
+\newcommand{\rux}[3]{\dfrac{#1}{#2}\;#3}
+\newcommand{\nrux}[4]{#1\;\dfrac{#2}{#3}\;#4}
+
+% proof by cases
+\newenvironment{caselist}{%
+  \begin{list}{{\it Case}}{%
+    %\setlength{\topsep}{2ex}% DOES NOT SEEM TO WORK
+    %\setlength{\itemsep}{2ex}%
+    %\setlength{\itemindent}{-2ex}%
+  }%
+}{\end{list}%
+}
+\newenvironment{subcaselist}{%
+  \begin{list}{{\it Subcase}}{}%
+}{\end{list}%
+}
+\newenvironment{subsubcaselist}{%
+  \begin{list}{{\it Subsubcase}}{}%
+}{\end{list}%
+}
+
+\newcommand{\nextcase}{\item~}
+
+\newcommand{\rulename}[1]{\ensuremath{\mbox{\textsc{#1}}}\xspace}
+\newcommand{\rbeta}[1]{\ensuremath{\beta\mbox{-}\mathord{#1}}\xspace}
+\newcommand{\reta}[1]{\ensuremath{\eta\mbox{-}\mathord{#1}}\xspace}
+\newcommand{\rintro}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{intro}}}\xspace}
+\newcommand{\relim}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{elim}}}\xspace}
+\newcommand{\remb}{\rulename{emb}}
+\newcommand{\rexp}{\rulename{exp}}
+
+\newcommand{\Den}[2]{\den{#1}_{#2}}
+\newcommand{\Denpar}[2]{\Den{#1}{(#2)}}
+
+\newcommand{\bu}{\ensuremath{\bullet}}
+\newcommand{\Ge}{\ensuremath{\varepsilon}}
+\newcommand{\Ga}{\ensuremath{\alpha}}
+\newcommand{\Gd}{\ensuremath{\delta}}
+\newcommand{\Gg}{\ensuremath{\gamma}}
+\newcommand{\Gl}{\ensuremath{\lambda}}
+\newcommand{\Gr}{\ensuremath{\rho}}
+\newcommand{\Gs}{\ensuremath{\sigma}}
+\newcommand{\GG}{\ensuremath{\Gamma}}
+\newcommand{\GS}{\ensuremath{\Sigma}}
+
+\newcommand{\Set}{\mathsf{Set}}
+
+\newcommand{\x}{\mathsf{x}}
+\newcommand{\tin}{\ensuremath{\mathsf{in}}}
+\newcommand{\inn}[2]{\ensuremath{\tin_{#1}^{#2}}}
+\newcommand{\tel}{\mathsf{el}}
+\newcommand{\el}[2]{\ensuremath{\tel_{#1}^{#2}}}
+
+\newcommand{\contract}[1][]{\mapsto_{#1}}
+\newcommand{\whd}[1][]{\rhd_{#1}}
+\newcommand{\red}[1][]{\longrightarrow_{#1}}
+\newcommand{\inner}[1][]{\rightharpoonup_{#1}}
+
+\newcommand{\CR}{\mathsf{CR}}
+\newcommand{\cl}[1]{\overline{#1}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\B}{\mathcal{B}}
+\newcommand{\calC}{\mathcal{C}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\T}{\mathcal{T}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\SN}{\mathsf{SN}}
+\newcommand{\Intro}{\mathsf{Intro}}
+\newcommand{\Up}{\mathop{\Uparrow}}
+\newcommand{\up}{\mathord{\uparrow}}
+\newcommand{\Neut}{\mathsf{Neut}}
+\newcommand{\SAT}{\mathsf{SAT}}
+
+\newcommand{\indy}[1]{_{#1}}
+\newcommand{\indyp}[2]{(#1)_{#2}}
+\newcommand{\ind}[1]{}    % _{#1}
+\newcommand{\indp}[2]{#1} % (#1)_{#2}
+
+\newcommand{\heading}[1]{\subsection{#1}}
+\setlength{\parindent}{0pt}
+\begin{document}
+
+\maketitle
+
+%TODO mandatory: add short abstract of the document
+\begin{abstract}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+\paragraph*{Overview}
+%
+We conclude with a short discussion in \Cref{sec:concl}.
+
+\section{Main Part}
+
+\input{latex/SK-Bool-ortho}
+
+
+\section{Conclusion}
+\label{sec:concl}
+
+%%
+%% Bibliography
+%%
+
+%% Please use bibtex,
+
+\bibliography{medium}
+
+% \appendix
+
+\end{document}
+
+%%% Local Variables:
+%%% coding: utf-8
+%%% mode: latex
+%%% TeX-engine: xetex
+%%% End:

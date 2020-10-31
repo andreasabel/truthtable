@@ -1,5 +1,6 @@
 *_aux
 *.aux
+*.bak
 *.bbl
 *.blg
 *.dvi
@@ -7,6 +8,7 @@
 *.fls
 *.log
 *.out
+*.ptb
 *.vtc
 *Bug*.agda
 _build
