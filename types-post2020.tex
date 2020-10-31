@@ -1402,14 +1402,14 @@ $I \cdot E$
 stemming from an elimination $E$ of a via $I$ just introduced connective.
 %
 In ITTND, even an elimination $E$ followed by another elimination
-$E'$, thus, a term of the form $f \cdot E \cdot E'$ constitutes a
+$E'$, thus, a term of the form $f \cdot E \cdot E'$, constitutes a
 detour and can be $\pi$-reduced.
 
 For the sake of defining and studying $\pi$-reduction, let us
 introduce eliminations $E$ and evaluation contexts $\vec E$, aka
 \emph{spines}, as syntactic classes separate from terms.  Eliminations
 $E$ from type $A$ into type $C$ are typed by judgement
-$E : \Gamma \mid A \vdash C$.  In the case of implication, we have:
+\fbox{$E : \Gamma \mid A \vdash C$}\,.  In the case of implication, we have:
 \[
   \ru{a : \Gamma \vdash A \qquad u : \Gamma.B \vdash C
     }{\el\to{10}(a,u) : \Gamma \mid A \to B \vdash C}
@@ -1437,10 +1437,12 @@ $E : \Gamma \mid A \vdash B$ and $E' : \Gamma \mid B \vdash C$, going via an
 intermediate formula $B$, can be considered a detour.
 
 This detour is removed by a permutation contraction
-$E \cdot E' \contract[\pi] E\{E'\}$ that shifts (``permutes'')
+\fbox{$E \cdot E' \contract[\pi] E\{E'\}$} that shifts (``permutes'')
 the outer elimination
 $E'$ into the negative branches of the inner elimination $E$.
-The composition $E\{E'\}$ of eliminations moves a weakened
+The composition\footnote{The notation $E\{E'\}$ is due to Joachimski
+  and Matthes \cite{joachimskiMatthes:rta00}.}
+\fbox{$E\{E'\}$} of eliminations moves a weakened
 version of $E'$ to the negative branches of $E$.  In the case of
 implication, we have
 \begin{equation}
@@ -1458,10 +1460,10 @@ In particular, $\el\to{10}(a',u') \up = \el\to{10}(a' \up, u' (\Up\up))$.
   lead to significant further normalization.
 \end{remark}
 
-Now a one-step \emph{$\pi$-reduction} $t \red[\pi] t'$ shall be a
+Now a one-step \emph{$\pi$-reduction} \fbox{$t \red[\pi] t'$} shall be a
 $\pi$-contraction in some spine within term $t$.
 %
-Let us further define \emph{spine reduction} $\whd[\pi]$
+Let us further define \emph{spine reduction} \fbox{$\vec E \whd[\pi] \vec E'$}
 as $\pi$-contraction within a spine at the root, \ie, inductively
 by the axiom
 \[
@@ -1494,8 +1496,9 @@ proof for SN-$\beta$ does not work.  The proof of \Cref{lem:app} relies
 on the fact that if $f \cdot E \red c$ and $f \not\in \Intro$ then
 either $f \red f'$ or $E \red E'$, and the structure of the
 elimination $f \cdot E$ is preserved.  However, with permutations, in
-case $f = f_0 \cdot E_0$ it could be that $c = f_0 \cdot E_0\{E\}$.
-This reduction is not covered by any of the induction hypotheses.
+case $f = f_0 \cdot E_0$ it could be that $c = f_0 \cdot E_0\{E\}$,
+changing the structure of the elimination.
+Such reductions are not covered by any of the induction hypotheses.
 
 We cannot arbitrarily tighten the restriction $\_ \not\in \Intro$ in
 the formulation of \ref{it:cr3}, since \ref{it:cr3} is used in \Cref{lem:app} to
@@ -1509,7 +1512,8 @@ priori, $f \cdot E$ could be a $\pi$-redex.
 \label{sec:ortho}
 
 Since the reducibility candidate method does not immediately extend to
-permutations, we turn to a more powerful technique: biorthogonals.
+permutations, we turn to a more powerful technique: (bi)orthogonals
+\cite{birkhoff:latticeTheory,pitts:mscs00,danosKrivine:csl00,girard:locusSolum,vouillonMellies:semanticTypes,abel:PhD}.
 Lindley and Stark \cite{lindleyStark:tlca05} have observed that
 biorthogonals (``$\top\top$-lifting'') deal well with the permutation
 reduction for the monadic bind in a strong normalization proof for the
@@ -1528,12 +1532,12 @@ implicitly assume that the family is closed under weakening.
 
 Semantic types $\A$ shall now be context-indexed families of sets of
 % evaluation contexts
-spines $\vec E$, and we write $a \perp \A_\Gamma$ to
+spines $\vec E$, and we write \fbox{$a \perp \A_\Gamma$} to
 characterize a term $a : \Gamma \vdash A$ as classified by semantic
 type $\A$.  The orthogonality relation $\perp$ is defined as
 \[
   a \perp \A_\Gamma \defiff
-  a \in \A_\Gamma^\perp \defiff
+  \fbox{$a \in \A_\Gamma^\perp$} \defiff
   a \cdot \vec E \in \SN \mbox{ for all } \vec E \in \A_\Gamma
   % \forall \vec E \in \A_\Gamma, a \cdot \vec E \in \SN
   .
@@ -1559,8 +1563,8 @@ empty spine $\tid$
 and only contain strongly normalizing
 spines.
 % evaluation contexts.
-Reductions $\vec E \red \vec E'$ in spines $\vec E$ can either be
-reductions in the subterms of the eliminations or can be
+Reductions \fbox{$\vec E \red \vec E'$} in spines $\vec E$ can either be
+$\beta\pi$-reductions in the subterms of the eliminations or can be
 $\pi$-contractions along the spine.
 
 More formally, a semantic type $\A_\Gamma$ for syntactic type $A$ at
@@ -1622,10 +1626,12 @@ construct a semantic type:
 %
 By definition, orthogonality gives rise to the Galois
 connection
+%\cite{birkhoff:latticeTheory,pitts:mscs00,danosKrivine:csl00,girard:locusSolum,vouillonMellies:semanticTypes}
 \[
   \T^\perp \supseteq \A \iff \T \subseteq \A^\perp
 \]
-(both sides of $\iff$ expand to the same statement).  As a consequence
+(both sides of $\iff$ expand to the same statement $\forall t \in \T,
+\vec E \in \A.\; t \cdot \vec E \in \SN$).  As a consequence,
 biorthogonality $\_^{\perp\perp}$ is a closure operator both on sets
 of terms, $\T \subseteq \T^{\perp\perp}$, and evaluation contexts,
 $\A \subseteq \A^{\perp\perp}$.
@@ -1677,7 +1683,7 @@ pointwise orthogonal $\F^\perp$ of the operator
 \]
 In comparison with the reducibility candidate version in
 \Cref{sec:cr}, the closure operation has been replaced by
-biorthogonality, and we converted $\mu(\F^{\perp\perp})$
+biorthogonalization, and we converted $\mu(\F^{\perp\perp})$
 to $(\nu(\F^\perp))^\perp$.  We dropped the outer orthogonalization since
 we now compute sets of evaluation contexts, but note that $\F$ applies
 orthogonalization on $\X$.
@@ -1872,7 +1878,8 @@ non-strictly positive (co)inductive types could be added in some form
 to MLTT without jeopardizing its soundness.
 
 For future work, one should investigate whether the SN-method of
-Joachimski and Matthes \cite{matthes:shortproofs} could be applied to
+Joachimski and Matthes \cite{matthes:shortproofs,matthes:classlog}
+could be applied to
 ITTND to prove $\beta\pi$-SN without the need for impredicativity nor
 non-strict positivity nor CPS-translation.  Whether even an
 arithmetical proof \`a la David and Nour
