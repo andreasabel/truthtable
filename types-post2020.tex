@@ -412,7 +412,8 @@ The premises of this elimination rule are,
 besides the principal premise $\Gamma \vdash A \to B$,
 a premise $\Gamma \vdash A$ for each $1$-valued operand $A$, and
 a premise $\Gamma.B \vdash C$ for each $0$-valued operand $B$.
-This yields the following four rules:%
+This yields the following four rules of judgement
+\fbox{$t : \Gamma \vdash A$}\,:%
 %
 \footnote{%
 %\setlength{\leftskip}{0pt} %NO EFFECT
@@ -545,12 +546,12 @@ De Bruijn indices are written $\x_n : \Gamma.A.\Delta \vdash A$ where
 $\Delta$ has length $n$.
 Instead of full-fledged renaming, we confine to
 weakening under order-preserving embeddings (OPE)
-$\tau : \Delta \leq \Gamma$.  Here, $\tau$ witnesses that and how
+\fbox{$\tau : \Delta \leq \Gamma$}\,.  Here, $\tau$ witnesses that and how
 $\Gamma$ is a subsequence of $\Delta$.
 Then, $\Up\tau : \Delta.B \leq \Gamma.B$ be the \emph{lifted} OPE.
 Further, $\up : \Gamma.B \leq \Gamma$ is the OPE for weakening by one
 variable, and OPEs form a category with identity $\sid : \Gamma \leq
-\Gamma$ and composition % $\_\circ\_ :
+\Gamma$ and composition %% \_\circ\_ :
 $(\Gamma \leq \Delta) \to (\Delta \leq \Phi) \to (\Gamma \leq \Phi)$
 written as juxtaposition.
 If $a : \Gamma \vdash A$ then
@@ -558,7 +559,7 @@ If $a : \Gamma \vdash A$ then
 In particular, $\Up$ is used to traverse under binders, for instance,
 $\inn\to{01}(t,b)\tau = \inn\to{01}(t(\Up\tau),b\tau)$.
 
-Substitutions $\sigma : \Delta \vdash \Gamma$ are defined as lists of
+Substitutions \fbox{$\sigma : \Delta \vdash \Gamma$} are defined as lists of
 terms typed by list $\Gamma$ under context $\Delta$.  Parallel
 substitution $a\sigma : \Delta \vdash A$ for $a : \Gamma \vdash A$ is
 defined as usual.  OPEs $\tau : \Delta \leq \Gamma$ are silently
@@ -575,7 +576,7 @@ Single substitution $t[b]$ is
 an instance of parallel substitution $t\sigma$ for substitution
 $\sigma = \sid.b : (\Gamma \vdash \Gamma.B)$ obtained from $b : \Gamma \vdash B$.
 
-\emph{Reduction} $a \red a'$, which is defined using single substitution,
+\emph{Reduction} \fbox{$a \red a'$}, which is defined using single substitution,
 acts on same-typed terms
 $a,a' : \Gamma \vdash A$ by definition.  It is closed under weakening
 and substitution.  It is even closed under \emph{anti-weakening}, \ie,
@@ -681,7 +682,7 @@ In the next section we identify the necessary properties.
 \subsection{Modelling the inference rules}
 
 To formulate the properties that allow us to prove \Cref{thm:fund} we
-introduce an auxiliary construction $\C[\A]$, ``\emph{abstraction}'',
+introduce an auxiliary construction \fbox{$\C[\A]$}\,, ``\emph{abstraction}'',
 given semantic types $\A$ and $\C$, where $\A$ classifies terms of
 type $A$ and $\C$ terms of type $C$.
 \[
@@ -848,7 +849,7 @@ with the following properties:
   and $(a \red \_) \subseteq \A\indy\Gamma$, then $a \in \A\indy\Gamma$.
 
 \end{itemize}
-We write $\A \in \CR$ if $\A$ is a term set family satisfying CR1-3.
+We write \fbox{$\A \in \CR$} if $\A$ is a term set family satisfying CR1-3.
 It is easy to see that $\SN \in \CR$.
 If $\A$ satisfies only CR1/2, it shall be called a \emph{precandidate}.
 
@@ -1103,7 +1104,7 @@ they introduce, the construction of a least fixed-point is required.
 Note that the union $\A \cup \B$ of two reducibility candidates $\A$
 and $\B$ preserves CR1/2, but not \ref{it:cr3}.
 However,
-property \ref{it:cr3} can be forced by the following closure operation $\cl\A$
+property \ref{it:cr3} can be forced by the following closure operation \fbox{$\cl\A$}
 on a term set $\A \subseteq (\Gamma \vdash A)$.
 \begin{gather*}
   \nru{\remb
