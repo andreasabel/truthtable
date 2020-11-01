@@ -6,7 +6,10 @@
 % \documentclass[a4paper]{article}%{lipics-v2019}
 % %\usepackage{ifthen}
 \usepackage{amsmath}
-\usepackage{cleveref}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=Red, citecolor=ForestGreen, urlcolor=MidnightBlue}
+\usepackage{cleveref} % must be loaded after hyperref
 %\documentclass[a4paper,USenglish,cleveref, autoref, thm-restate, preprint]{lipics-v2019}
 %This is a template for producing LIPIcs articles.
 %See lipics-manual.pdf for further information.
@@ -232,10 +235,27 @@ using Girard's reducibility candidates formalized in Agda}
 
 %TODO mandatory: add short abstract of the document
 \begin{abstract}
+  This document provides a formal proof of strong normalization for
+  combinatory algebra with the two combinators S and K.  The result
+  follow from a model construction where each type is interpreted as a
+  reducibility candidate à la Girard.  We thus demonstrate Girard's
+  method in the most simple setting.  In particular, since combinatory
+  algebra is a variable-free language, we forgo the need to define
+  substitution.  The proof has been formalized in Agda~2.6.2 and this
+  document reproduces the commented Agda code.
 \end{abstract}
 
 \input{latex/SK-no-bot}
 
+Q.E.D.
+
+\paragraph*{Acknowledgments.}
+This document has been generated from an
+\href{https://github.com/andreasabel/truthtable/blob/master/agda/SK-no-bot.agda
+    }{Agda file}
+using the
+\href{https://andreasabel.github.io/agda2lagda/}{\texttt{agda2lagda}}
+translator and the \href{http://agda-lang.org}{\texttt{agda --latex}} backend.
 % \section{Introduction}
 % \label{sec:intro}
 

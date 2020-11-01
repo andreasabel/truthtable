@@ -36,6 +36,8 @@ default : cr-sk.pdf # main.pdf
 
 all : cr-sk.pdf main.pdf
 
+ship-cr-sk : $(destdir)/agda/cr-sk.pdf
+
 pack : main.zip
 
 main.zip : main.pdf $(files) main.bbl auto-main.bib
@@ -157,6 +159,8 @@ endif
 
 # Templates (reverted back to simple templates)
 
+$(destdir)/agda/% : %
+	cp -p $< $@
 
 talk% : talk%.pdf
 	cp -p $? $(destdir)/;

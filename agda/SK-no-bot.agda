@@ -79,12 +79,12 @@ variable P Q : Pred a
 infix 2 _⊂_
 
 _⊂_ : (P Q : Pred a) → Proposition
-P ⊂ Q = ∀{t} (h : P t) → Q t
+P ⊂ Q = ∀{t} → P t → Q t
 
 -- Strong normalization: a term is SN if all of its reducts are, inductively.
 
 data SN (t : Tm a) : Proposition where
-  acc : (h : t ↦_ ⊂ SN) → SN t
+  acc : t ↦_ ⊂ SN → SN t
 
 -- Reducts of SN terms are SN by definition.
 
@@ -148,7 +148,7 @@ Stu¬ne (napp (napp ()))
 -- Finally, a candidate needs to contain any neutral term of the right type
 -- whose reducts are already in the candidate.
 
-record CR (P : Pred a) : Set where
+record CR (P : Pred a) : Proposition where
   field
     cr1  : P ⊂ SN
     cr2  : P t → (t ↦_) ⊂ P
@@ -157,7 +157,7 @@ open CR
 
 -- The set SN is a reducibility candidate.
 
-sn-cr : ∀{a} → CR (SN {a})
+sn-cr : CR (SN {a})
 sn-cr .cr1 sn   = sn
 sn-cr .cr2 sn   = sn-red sn
 sn-cr .cr3 _ h  = acc h
@@ -169,25 +169,26 @@ sn-cr .cr3 _ h  = acc h
 -- The function space contains any SN term that, applied to a term
 -- in the domain, yields a result in the codomain.
 
-record _⇨_ (P : Pred a) (Q : Pred b) (t : Tm (a ⇒ b)) : Set where
+record _⇨_ (P : Pred a) (Q : Pred b) (t : Tm (a ⇒ b)) : Proposition where
   field
-    sn  : SN t
-    app : ∀ {u} (⦅u⦆ : P u) → Q (t ∙ u)
+    sn   : SN t
+    app  : ∀ {u} (⦅u⦆ : P u) → Q (t ∙ u)
 open _⇨_
 
 -- The function space construction indeed operates on CRs.
 --
+-- CR1 holds by definition.
 -- The proof of CR2 only needs CR2 of the codomain.
 -- The proof of CR3 needs CR3 of the codomain and CR1 and CR2 of the domain.
 
 ⇨-cr : (crP : CR P) (crQ : CR Q) → CR (P ⇨ Q)
-⇨-cr                  crP crQ .cr1 h                    = h .sn
+⇨-cr                  crP crQ .cr1 ⦅t⦆                  = ⦅t⦆ .sn
 ⇨-cr                  crP crQ .cr2 ⦅t⦆ r .sn            = sn-red (⦅t⦆ .sn) r
 ⇨-cr                  crP crQ .cr2 ⦅t⦆ r .app ⦅u⦆       = crQ .cr2 (⦅t⦆ .app ⦅u⦆) (↦l r)
 ⇨-cr                  crP crQ .cr3      n ⦅t⦆ .sn       = acc λ r → ⦅t⦆ r .sn
 ⇨-cr {P = P} {Q = Q}  crP crQ .cr3 {t}  n ⦅t⦆ .app ⦅u⦆  = loop ⦅u⦆ (crP .cr1 ⦅u⦆)
-  -- Side induction on u in SN.
-  -- Uses that P is closed under reduction.
+  -- We perform a side induction on the SN of the function argument,
+  -- exploiting that the domain is closed under reduction.
   where
   loop : ∀{u} → P u → SN u → Q (t ∙ u)
   loop ⦅u⦆ (acc snu) = crQ .cr3 (napp n) λ where
@@ -261,10 +262,9 @@ sem-sn ⦅t⦆ = ty-cr _ .cr1 ⦅t⦆
 ⦅ S {b = b} ⦆ .sn                         = sn-S
 ⦅ S {b = b} ⦆ .app ⦅t⦆ .sn                = sn-St  (⦅t⦆ .sn)
 ⦅ S {b = b} ⦆ .app ⦅t⦆ .app ⦅u⦆ .sn       = sn-Stu (⦅t⦆ .sn) (⦅u⦆ .sn)
-⦅ S {b = b} ⦆ .app ⦅t⦆ .app ⦅u⦆ .app ⦅v⦆  = ⦅S⦆ {b = b}
-  ⦅t⦆ (sem-sn ⦅t⦆)
-  ⦅u⦆ (sem-sn ⦅u⦆)
-  ⦅v⦆ (sem-sn ⦅v⦆)
+⦅ S {b = b} ⦆ .app ⦅t⦆ .app ⦅u⦆ .app ⦅v⦆  = ⦅S⦆ {b = b}  ⦅t⦆ (sem-sn ⦅t⦆)
+                                                         ⦅u⦆ (sem-sn ⦅u⦆)
+                                                         ⦅v⦆ (sem-sn ⦅v⦆)
 ⦅ K ⦆ .sn                                 = sn-K
 ⦅ K ⦆ .app ⦅t⦆ .sn                        = sn-Kt (sem-sn ⦅t⦆)
 ⦅ K ⦆ .app ⦅t⦆ .app ⦅u⦆                   = ⦅K⦆ ⦅t⦆ (sem-sn ⦅t⦆) (sem-sn ⦅u⦆)
