@@ -1,115 +1,140 @@
+{-
 {-# OPTIONS --postfix-projections #-}
 
--- Strong normalization for simply-typed combinatory logic
+-- Strong normalization for simply-typed combinatory algebra
 -- using Girard's reducibility candidates.
 
-module SK-no-bot where
+module SK-no-bot where -}
 
-open import Function using (case_of_)
-open import Level using (suc)
-open import Relation.Nullary using (¬_)
+-- Preliminaries
+------------------------------------------------------------------------
 
--- Logic
+-- We work in type theory with propositions-as types.
 
-¬̇_ : ∀{a} → Set a → Set (suc a)
-¬̇ A = ∀{C : Set _} → A → C
+Proposition = Set
 
--- Types
+-- Negation: A proposition is false if it implies any other proposition.
+
+¬̇_ : Proposition → Set₁
+¬̇ A = ∀{C : Proposition} → A → C
+
+-- Syntax
+------------------------------------------------------------------------
+
+-- Types:
+-- For simplicity, we consider a single base type.
+-- Types are closed under function space formation.
 
 infixr 6 _⇒_
 
 data Ty : Set where
-  o : Ty
-  _⇒_ : (a b : Ty) → Ty
+  o    : Ty
+  _⇒_  : (a b : Ty) → Ty
+
+-- We use small latin letters from the beginning of the alphabet to range over types.
 
 variable a b c : Ty
 
--- Terms
+-- Intrinsically well-typed terms of combinatory algebra (CA):
+-- these are applicative terms over the constants K and S.
 
 infixl 5 _∙_
 
-data Tm : (b : Ty) → Set where
-  S   : ∀{c a b} → Tm ((c ⇒ (a ⇒ b)) ⇒ (c ⇒ a) ⇒ c ⇒ b)
-  K   : Tm (a ⇒ (b ⇒ a))
-  _∙_ : (t : Tm (a ⇒ b)) (u : Tm a) → Tm b
+data Tm : Ty → Set where
+  K    : Tm (a ⇒ (b ⇒ a))
+  S    : Tm ((c ⇒ (a ⇒ b)) ⇒ (c ⇒ a) ⇒ c ⇒ b)
+  _∙_  : (t : Tm (a ⇒ b)) (u : Tm a) → Tm b
+
+-- We use small latin letters t, u and v to range over terms.
 
 variable t t′ u u′ v v′ : Tm a
 
--- Reduction relations
-
-Rel : Ty → Set₁
-Rel a = (t t′ : Tm a) → Set
+-- The reduction relation is given inductively
+-- via axioms for fully applied K and S
+-- and congruence rules for the reduction
+-- in either the function or the argument part
+-- of an application.
 
 infix 4 _↦_
 
--- Full reduction
+data _↦_ : (t t′ : Tm a) → Set where
+  ↦K  : K ∙ t ∙ u      ↦ t
+  ↦S  : S ∙ t ∙ u ∙ v  ↦ t ∙ v ∙ (u ∙ v)
+  ↦l  : t ↦ t′  → t ∙ u ↦ t′ ∙ u
+  f↦  : u ↦ u′  → t ∙ u ↦ t ∙ u′
 
-data _↦_ : Rel a where
-  ↦K : K ∙ t ∙ u     ↦ t
-  ↦S : S ∙ t ∙ u ∙ v ↦ t ∙ v ∙ (u ∙ v)
-  ↦l : t ↦ t′ → t ∙ u ↦ t′ ∙ u
-  f↦ : u ↦ u′ → t ∙ u ↦ t ∙ u′
+-- Strong normalization
+------------------------------------------------------------------------
 
--- Predicates
+-- Sets of terms of a fixed type are expressed as predicates on
+-- terms of that type.
 
 Pred : Ty → Set₁
-Pred a = (t : Tm a) → Set
+Pred a = (t : Tm a) → Proposition
 
 variable P Q : Pred a
 
+-- The subset relation is implication of predicates.
+
 infix 2 _⊂_
 
-_⊂_ : (P Q : Pred a) → Set
+_⊂_ : (P Q : Pred a) → Proposition
 P ⊂ Q = ∀{t} (h : P t) → Q t
 
--- Strong normalization: t is SN if all of its reducts are, inductively.
+-- Strong normalization: a term is SN if all of its reducts are, inductively.
 
-data SN (t : Tm a) : Set where
+data SN (t : Tm a) : Proposition where
   acc : (h : t ↦_ ⊂ SN) → SN t
 
--- Reducts of SN terms are SN
+-- Reducts of SN terms are SN by definition.
 
 sn-red : SN t → t ↦ t′ → SN t′
 sn-red (acc sn) r = sn r
 
--- Values are SN:
+-- In combinatory algebra, the values are the underapplied functions.
+-- All values formed from SN components are SN.
+-- The proofs proceed by induction on the SN of the arguments,
+-- considering all possible one-step reducts of the values.
 
--- K is SN
+-- K is SN.
 
 sn-K : SN (K {a} {b})
 sn-K = acc λ()
 
--- Kt is SN
+-- K applied to one SN argument is SN.
 
 sn-Kt : SN t → SN (K {a} {b} ∙ t)
 sn-Kt (acc snt) = acc λ{ (f↦ r) → sn-Kt (snt r) }
 
--- S is SN
+-- S is SN.
 
 sn-S : SN (S {c} {a} {b})
 sn-S = acc λ()
 
--- St is SN
+-- S applied to one SN argument is SN.
 
-sn-St : SN t → SN (S {a} {b} ∙ t)
+sn-St : SN t → SN (S ∙ t)
 sn-St (acc snt) = acc λ{ (f↦ r) → sn-St (snt r) }
 
--- Stu is SN
+-- S applied to two SN arguments is SN.
 
-sn-Stu : SN t → SN u → SN (S {a} {b} ∙ t ∙ u)
-sn-Stu (acc snt) (acc snu) = acc
-  λ{ (↦l (f↦ r)) → sn-Stu (snt r) (acc snu)
-   ; (f↦ r)      → sn-Stu (acc snt) (snu r)
-   }
+sn-Stu : SN t → SN u → SN (S ∙ t ∙ u)
+sn-Stu (acc snt) (acc snu) = acc λ where
+  (↦l (f↦ r))  → sn-Stu (snt r) (acc snu)
+  (f↦ r)       → sn-Stu (acc snt) (snu r)
 
--- Neutral a la Girard.  In this case, the weak head redexes are neutral.
+-- Reducibility candidates
+------------------------------------------------------------------------
+
+-- Following Girard, terms which are not introductions are called neutral.
+-- In CA, the weak head redexes are the neutrals.
 
 data Ne : Pred a where
-  Ktu  : Ne (K ∙ t ∙ u)
-  Stuv : Ne (S ∙ t ∙ u ∙ v)
-  napp : (n : Ne t) → Ne (t ∙ u)
+  Ktu   : Ne (K ∙ t ∙ u)
+  Stuv  : Ne (S ∙ t ∙ u ∙ v)
+  napp  : (n : Ne t) → Ne (t ∙ u)
 
--- Partially applied combinators are not neutral
+-- Partially applied combinators, i.e., values, are thus not neutral.
 
 Kt¬ne : ¬̇ Ne (K {a} {b} ∙ t)
 Kt¬ne (napp ())
@@ -117,111 +142,135 @@ Kt¬ne (napp ())
 Stu¬ne : ¬̇ Ne (S ∙ t ∙ u)
 Stu¬ne (napp (napp ()))
 
--- Reducibility candidates
+-- A reducibility candidate (CR) for a type is a set of SN terms of that type
+-- (condition CR1).
+-- Further, the set needs to be closed under reduction (CR2).
+-- Finally, a candidate needs to contain any neutral term of the right type
+-- whose reducts are already in the candidate.
 
 record CR (P : Pred a) : Set where
   field
-    cr1 : P ⊂ SN
-    cr2 : P t → (t ↦_) ⊂ P
-    cr3 : (n : Ne t) (h : t ↦_ ⊂ P) → P t
+    cr1  : P ⊂ SN
+    cr2  : P t → (t ↦_) ⊂ P
+    cr3  : (n : Ne t) (h : t ↦_ ⊂ P) → P t
 open CR
 
--- SN is a reducibility candidate
+-- The set SN is a reducibility candidate.
 
 sn-cr : ∀{a} → CR (SN {a})
-sn-cr .cr1 sn = sn
-sn-cr .cr2 sn = sn-red sn
-sn-cr .cr3 _ h = acc h
+sn-cr .cr1 sn   = sn
+sn-cr .cr2 sn   = sn-red sn
+sn-cr .cr3 _ h  = acc h
 
--- Function space
+-- Given two reducibility candidates, one acting as the domain
+-- and one as the codomain, we form a new reducibility candidate,
+-- the function space.
+--
+-- The function space contains any SN term that, applied to a term
+-- in the domain, yields a result in the codomain.
 
 record _⇨_ (P : Pred a) (Q : Pred b) (t : Tm (a ⇒ b)) : Set where
   field
     sn  : SN t
-    app : ∀ {u} (hu : P u) → Q (t ∙ u)
+    app : ∀ {u} (⦅u⦆ : P u) → Q (t ∙ u)
 open _⇨_
 
--- CRs are closed under function space
+-- The function space construction indeed operates on CRs.
+--
+-- The proof of CR2 only needs CR2 of the codomain.
+-- The proof of CR3 needs CR3 of the codomain and CR1 and CR2 of the domain.
 
 ⇨-cr : (crP : CR P) (crQ : CR Q) → CR (P ⇨ Q)
-⇨-cr                 crP crQ .cr1 h                = h .sn
-⇨-cr                 crP crQ .cr2 ht r .sn         = sn-red (ht .sn) r
-⇨-cr                 crP crQ .cr2 ht r .app hu     = crQ .cr2 (ht .app hu) (↦l r)
-⇨-cr {P = P} {Q = Q} crP crQ .cr3 {t} n ht .sn     = acc (λ r → ht r .sn)
-⇨-cr {P = P} {Q = Q} crP crQ .cr3 {t} n ht .app hu = loop hu (crP .cr1 hu)
-  where
-  -- Side induction on u SN.
+⇨-cr                  crP crQ .cr1 h                    = h .sn
+⇨-cr                  crP crQ .cr2 ⦅t⦆ r .sn            = sn-red (⦅t⦆ .sn) r
+⇨-cr                  crP crQ .cr2 ⦅t⦆ r .app ⦅u⦆       = crQ .cr2 (⦅t⦆ .app ⦅u⦆) (↦l r)
+⇨-cr                  crP crQ .cr3      n ⦅t⦆ .sn       = acc λ r → ⦅t⦆ r .sn
+⇨-cr {P = P} {Q = Q}  crP crQ .cr3 {t}  n ⦅t⦆ .app ⦅u⦆  = loop ⦅u⦆ (crP .cr1 ⦅u⦆)
+  -- Side induction on u in SN.
   -- Uses that P is closed under reduction.
+  where
   loop : ∀{u} → P u → SN u → Q (t ∙ u)
-  loop pu (acc snu) = crQ .cr3 (napp n)
-    λ{ ↦K     → Kt¬ne n
-     ; ↦S     → Stu¬ne n
-     ; (↦l r) → ht r .app pu
-     ; (f↦ r) → loop (crP .cr2 pu r) (snu r)
-     }
-
--- Type interpretation
-
-⟦_⟧ : ∀ a → Pred a
-⟦ o ⟧     = SN
-⟦ a ⇒ b ⟧ = ⟦ a ⟧ ⇨ ⟦ b ⟧
-
--- Types are interpreted as CRs
-
-ty-cr : ∀ a → CR ⟦ a ⟧
-ty-cr o       = sn-cr
-ty-cr (a ⇒ b) = ⇨-cr (ty-cr a) (ty-cr b)
-
-sem-sn : ⟦ a ⟧ t → SN t
-sem-sn ht = ty-cr _ .cr1 ht
+  loop ⦅u⦆ (acc snu) = crQ .cr3 (napp n) λ where
+    ↦K      → Kt¬ne n
+    ↦S      → Stu¬ne n
+    (↦l r)  → ⦅t⦆ r .app ⦅u⦆
+    (f↦ r)  → loop (crP .cr2 ⦅u⦆ r) (snu r)
 
 -- Soundness
+------------------------------------------------------------------------
 
--- Interpretation of S
+-- Interpretation of types as semantic types:
+-- we interpret the base type as the set of all SN terms of that type
+-- and the function type via the function space construction.
 
-⦅S⦆ : ⟦ c ⇒ a ⇒ b ⟧ t → SN t
-   → ⟦ c ⇒ a ⟧ u     → SN u
-   → ⟦ c ⟧ v         → SN v
-   → ⟦ b ⟧ (S ∙ t ∙ u ∙ v)
+⟦_⟧ : ∀ a → Pred a
+⟦ o ⟧      = SN
+⟦ a ⇒ b ⟧  = ⟦ a ⟧ ⇨ ⟦ b ⟧
 
-⦅S⦆ {b = b} ht (acc snt) hu (acc snu) hv (acc snv) = ty-cr b .cr3 Stuv
-  λ{ ↦S                → ht .app hv .app (hu .app hv)
-   ; (↦l (↦l (f↦ rt))) → ⦅S⦆ (ty-cr _ .cr2 ht rt) (snt rt)
-                            hu (acc snu)
-                            hv (acc snv)
-   ; (↦l (f↦ ru))      → ⦅S⦆ ht (acc snt)
-                            (ty-cr _ .cr2 hu ru) (snu ru)
-                            hv (acc snv)
-   ; (f↦ rv)           → ⦅S⦆ ht (acc snt)
-                            hu (acc snu)
-                            (ty-cr _ .cr2 hv rv) (snv rv)
-   }
+-- Types are indeed interpreted as CRs.
 
--- Interpretation of K
+ty-cr : ∀ a → CR ⟦ a ⟧
+ty-cr o        = sn-cr
+ty-cr (a ⇒ b)  = ⇨-cr (ty-cr a) (ty-cr b)
+
+-- Any term in a semantic type is SN.
+
+sem-sn : ⟦ a ⟧ t → SN t
+sem-sn ⦅t⦆ = ty-cr _ .cr1 ⦅t⦆
+
+-- Interpretation of S:
+-- constant S, fully applied to terms inhabiting the respective semantic types,
+-- inhabits the correct semantic type as well.
+--
+-- This lemma is proven by induction on the SN of the subterms,
+-- redundant facts which we add explicitly for the sake of recursion.
+-- The induction hypothesis is applicable thanks to CR2.
+
+⦅S⦆  :  ⟦ c ⇒ a ⇒ b ⟧ t  → SN t
+     →  ⟦ c ⇒ a ⟧ u      → SN u
+     →  ⟦ c ⟧ v          → SN v
+     →  ⟦ b ⟧ (S ∙ t ∙ u ∙ v)
+
+⦅S⦆ {b = b} ⦅t⦆ (acc snt) ⦅u⦆ (acc snu) ⦅v⦆ (acc snv) = ty-cr b .cr3 Stuv λ where
+  ↦S                 → ⦅t⦆ .app ⦅v⦆ .app (⦅u⦆ .app ⦅v⦆)
+  (↦l (↦l (f↦ rt)))  → ⦅S⦆  (ty-cr _ .cr2 ⦅t⦆ rt) (snt rt)
+                            ⦅u⦆ (acc snu)
+                            ⦅v⦆ (acc snv)
+  (↦l (f↦ ru))       → ⦅S⦆  ⦅t⦆ (acc snt)
+                            (ty-cr _ .cr2 ⦅u⦆ ru) (snu ru)
+                            ⦅v⦆ (acc snv)
+  (f↦ rv)            → ⦅S⦆  ⦅t⦆ (acc snt)
+                            ⦅u⦆ (acc snu)
+                            (ty-cr _ .cr2 ⦅v⦆ rv) (snv rv)
+
+
+-- Interpretation of K: analogously.
 
 ⦅K⦆ : ⟦ a ⟧ t → SN t → SN u → ⟦ a ⟧ (K ∙ t ∙ u)
-⦅K⦆ {a} at (acc snt) (acc snu) = ty-cr a .cr3 Ktu
-  λ{ ↦K           → at
-   ; (↦l (f↦ rt)) → ⦅K⦆ (ty-cr a .cr2 at rt) (snt rt) (acc snu)
-   ; (f↦ ru)      → ⦅K⦆ at (acc snt) (snu ru)
-   }
+⦅K⦆ {a} ⦅t⦆ (acc snt) (acc snu) = ty-cr a .cr3 Ktu λ where
+  ↦K            → ⦅t⦆
+  (↦l (f↦ rt))  → ⦅K⦆ (ty-cr a .cr2 ⦅t⦆ rt) (snt rt) (acc snu)
+  (f↦ ru)       → ⦅K⦆ ⦅t⦆ (acc snt) (snu ru)
 
--- Term interpretation (soundness)
+
+-- Term interpretation: each term inhabits its respective semantic type.
+--
+-- Proof by induction on the term.
 
 ⦅_⦆ : (t : Tm a) → ⟦ a ⟧ t
-⦅ S {c} {a} {b} ⦆ .sn                     = sn-S
-⦅ S {c} {a} {b} ⦆ .app ht .sn             = sn-St  (ht .sn)
-⦅ S {c} {a} {b} ⦆ .app ht .app hu .sn     = sn-Stu (ht .sn) (hu .sn)
-⦅ S {c} {a} {b} ⦆ .app ht .app hu .app hv = ⦅S⦆ {c} {a} {b}
-  ht (sem-sn ht)
-  hu (sem-sn hu)
-  hv (sem-sn hv)
-⦅ K {a} ⦆ .sn                             = sn-K
-⦅ K {a} ⦆ .app ht .sn                     = sn-Kt (sem-sn ht)
-⦅ K {a} ⦆ .app ht .app hu                 = ⦅K⦆ ht (sem-sn ht) (sem-sn hu)
+⦅ S {b = b} ⦆ .sn                         = sn-S
+⦅ S {b = b} ⦆ .app ⦅t⦆ .sn                = sn-St  (⦅t⦆ .sn)
+⦅ S {b = b} ⦆ .app ⦅t⦆ .app ⦅u⦆ .sn       = sn-Stu (⦅t⦆ .sn) (⦅u⦆ .sn)
+⦅ S {b = b} ⦆ .app ⦅t⦆ .app ⦅u⦆ .app ⦅v⦆  = ⦅S⦆ {b = b}
+  ⦅t⦆ (sem-sn ⦅t⦆)
+  ⦅u⦆ (sem-sn ⦅u⦆)
+  ⦅v⦆ (sem-sn ⦅v⦆)
+⦅ K ⦆ .sn                                 = sn-K
+⦅ K ⦆ .app ⦅t⦆ .sn                        = sn-Kt (sem-sn ⦅t⦆)
+⦅ K ⦆ .app ⦅t⦆ .app ⦅u⦆                   = ⦅K⦆ ⦅t⦆ (sem-sn ⦅t⦆) (sem-sn ⦅u⦆)
 ⦅ t ∙ u ⦆                                 = ⦅ t ⦆ .app ⦅ u ⦆
 
--- Strong normalization
+-- Strong normalization is now a simple corollary.
 
 thm : (t : Tm a) → SN t
 thm t = sem-sn ⦅ t ⦆

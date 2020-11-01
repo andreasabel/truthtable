@@ -32,9 +32,9 @@ files=lipics-v2019.cls Makefile \
 
 .PRECIOUS : %.dvi %.ps %.gz %.pdf %.tex
 
-default : main.pdf
+default : cr-sk.pdf # main.pdf
 
-all : main.pdf
+all : cr-sk.pdf main.pdf
 
 pack : main.zip
 
@@ -117,6 +117,42 @@ auto-main-long.bib : main-long_aux $(bibliography)
 endif
 endif
 
+
+# cr-sk
+##################################################################
+
+# cr-sk.pdf: cr-sk.tex $(files)
+# 	latexmk -f -pdf cr-sk.tex
+
+# initially, run latex once to create an .aux file
+# mark .aux file as fresh by creating a stamp _aux
+cr-sk_aux : cr-sk.tex latex/SK-no-bot.tex
+	-$(pdflatex) $<;
+	touch $@;
+
+# then, run bibtex
+cr-sk.bbl : cr-sk_aux auto-cr-sk.bib
+	-bibtex cr-sk;
+
+# finally, finish by running latex twice again
+# this will update .aux, but leave the stamp _aux intact
+# (otherwise we would not converge and make would never
+# return a "Nothing to do")
+cr-sk.pdf : cr-sk.bbl
+	-$(pdflatex) cr-sk.tex;
+	$(pdflatex) cr-sk.tex;
+
+# auto-cr-sk.bib is only defined if bibtool is present and all.bib exists
+
+ifneq ($(shell which bibtool),)
+ifneq ($(shell ls $(bibliography)),)
+auto-cr-sk.bib : cr-sk_aux $(bibliography)
+	echo "%%%% WARNING! AUTOMATICALLY CREATED BIBFILE" > $@;
+	echo "%%%% DO NOT EDIT! ALL CHANGES WILL BE LOST!" >> $@ ;
+	echo "" >> $@ ;
+	$(bibtool) -x cr-sk.aux -i $(bibliography) >> $@;
+endif
+endif
 
 
 # Templates (reverted back to simple templates)
