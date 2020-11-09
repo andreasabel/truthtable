@@ -29,6 +29,9 @@ files=lipics-v2019.cls Makefile \
 
 .PRECIOUS : %.dvi %.ps %.gz %.pdf %.tex
 
+sat.pdf : types-post2020.pdf Makefile
+	pdfjam -o $@ $< 18-
+
 default : types-post2020.pdf
 
 all : types-post2020.pdf

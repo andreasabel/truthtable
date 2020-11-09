@@ -1,0 +1,378 @@
+\section{Saturated Sets}
+\label{sec:sat}
+
+\subsection{Saturated Sets for Computation Reductions}
+
+In the following, we adapt Tait's method of saturated sets to show $\beta$-SN
+for ITTND.  This is a variation of the proof by Geuvers and Hurkens
+\cite{geuversHurkens:types17}.
+
+We first observe that the set $\SN$ contains a weak-head
+redex already when (1) all of its reducts are SN and (2) its \emph{lost terms}
+are SN, where a lost term is a subterm that could get dropped by all of the
+weak-head reductions.
+This fact is made precise by the following lemma:
+\begin{lemma}
+  \label{lem:clos-sn}
+  The following implications, written as rules, are valid closure
+  properties of $\SN$:
+\begin{gather*}
+  \ru{t_1[a] \cdot \el\to{10}(a,u) \cdot \vec E \in \SN
+      \qquad
+      t_2 \in \SN
+    }{\inn\to{00}(t_1,t_2) \cdot \el\to{10}(a,u) \cdot \vec E \in \SN}
+\\[2ex]
+  \ru{t[a] \cdot \el\to{10}(a,u) \cdot \vec E \in \SN
+      \qquad
+      u[b] \cdot \vec E \in \SN
+      \qquad
+      b \in \SN
+    }{\inn\to{01}(t,b) \cdot \el\to{10}(a,u) \cdot \vec E \in \SN}
+\qquad
+  \ru{u[b] \cdot \vec E \in \SN
+      \qquad
+      a_1,a_2,b \in \SN
+    }{\inn\to{11}(a_1,b) \cdot \el\to{10}(a_2,u) \cdot \vec E \in \SN}
+\end{gather*}
+(Spine $\vec E$ may be empty in all cases.)
+\end{lemma}
+\begin{proof}
+  Each of these implications is proven by induction on the premises,
+  establishing that the possible reducts of the term in the conclusion
+  are SN.
+  The weak-head reduct(s) are covered by the premises in each case.
+  % Reductions in $\vec E$ are
+  % covered by a side induction on $\vec E \in \SN$.
+  Reductions in lost terms are covered by the extra SN hypotheses.
+  Reductions in preserved terms are covered by the main SN hypotheses.
+  (This includes reductions in the spine $\vec E$.)
+
+
+  For example, consider the case for $\inn\to{00}$:
+  By induction on $t_1[a] \cdot \el\to{10}(a,u) \cdot \vec E \in \SN$
+  and $t_2 \in \SN$ show $t' \in \SN$ given
+  $\inn\to{00}(t_1,t_2) \cdot \el\to{10}(a,u) \cdot \vec E \red t'$.
+  \begin{caselist}
+
+  \nextcase
+  $t' = t_1[a] \cdot \el\to{10}(a,u) \cdot \vec E$.
+  Then $t' \in \SN$ by assumption.
+
+  \nextcase
+  $t' = \inn\to{00}(t_1,t_2') \cdot \el\to{10}(a,u) \cdot \vec E$
+  where $t_2 \red t_2'$.
+  Then $t' \in \SN$ by induction hypothesis $t_2' \in \SN$.
+
+  \nextcase
+  $t' = \inn\to{00}(t_1',t_2) \cdot \el\to{10}(a',u') \cdot \vec E'$
+  where $(t_1,a,u,\vec E) \red (t_1',a',u',\vec E')$ (a single
+  reduction in one of these subterms).
+  Then $t_1[a] \cdot \el\to{10}(a,u) \cdot \vec E \red^+
+  t_1'[a'] \cdot \el\to{10}(a',u') \cdot \vec E'$ (several steps
+  possible, \eg, if reduction was in $a$ and $t_1$ mentions the 0th
+  de~Bruijn index).
+  Thus, $t' \in \SN$ by induction hypothesis on
+  $t_1'[a'] \cdot \el\to{10}(a',u') \cdot \vec E' \in \SN$.
+  \popQED
+  \end{caselist}
+\end{proof}
+
+% A term set shall be called \emph{saturated} if it is closed under weak
+% head expansion.
+
+Mimicking \Cref{lem:clos-sn},
+the \emph{saturation} $\cl\A$ of a term set is---in the case of the
+implicational fragment of ITTND--- defined inductively as follows:
+\begin{gather*}
+  \ru{t \in \A_\Gamma
+    }{t \in \cl\A_\Gamma}
+\qquad
+  \ru{t_1[a] \cdot \el\to{10}(a,u) \cdot \vec E \in \cl\A_\Gamma
+      \qquad
+      t_2 \in \SN
+    }{\inn\to{00}(t_1,t_2) \cdot \el\to{10}(a,u) \cdot \vec E \in \cl\A_\Gamma}
+\\[2ex]
+  \ru{t[a] \cdot \el\to{10}(a,u) \cdot \vec E \in \cl\A_\Gamma
+      \qquad
+      u[b] \cdot \vec E \in \cl\A_\Gamma
+      \qquad
+      b \in \SN
+    }{\inn\to{01}(t,b) \cdot \el\to{10}(a,u) \cdot \vec E \in \cl\A_\Gamma}
+\qquad
+  \ru{u[b] \cdot \vec E \in \cl\A_\Gamma
+      \qquad
+      a_1,a_2,b \in \SN
+    }{\inn\to{11}(a_1,b) \cdot \el\to{10}(a_2,u) \cdot \vec E \in \cl\A_\Gamma}
+\end{gather*}
+%(Spine $\vec E$ may be empty in all cases.)
+
+
+\begin{lemma}
+  \label{lem:sat-preserves-sn}
+  $\cl\SN \subseteq \SN$.
+\end{lemma}
+\begin{proof}
+  We show $t \in \SN$ by induction on $t \in \cl\SN$, using \Cref{lem:clos-sn}.
+\end{proof}
+% The design principle is that the closure operation adds a weak-head
+% redex to a term set when (1) all of its reducts are already in the set or
+% have been added in the closure process, and (2) its \emph{lost terms}
+% are SN.  A lost term is a subterm that gets dropped by a reduction.
+% Without requirement (2), the closure operation would not preserve SN, but
+% now it does:
+
+% \begin{lemma}
+%   \label{lem:sat-preserves-sn}
+%   $\cl\SN \subseteq \SN$.
+% \end{lemma}
+% \begin{proof}
+%   We show by induction on $t \in \cl\SN$ that all reducts of $t$ are
+%   SN.  By design of the closure operation, the weak-head reducts are
+%   covered by the induction hypothesis.
+%   % Reductions in $\vec E$ are
+%   % covered by a side induction on $\vec E \in \SN$.
+%   Reductions in lost terms are covered by the extra SN hypotheses.
+%   Reductions in preserved terms are covered by induction on SN
+%   obtained from the main hypotheses.  This includes reductions in the
+%   spine $\vec E$.
+
+%   For example, consider the case for $\inn\to{00}$:
+%   \[
+%     \ru{t_1[a] \cdot \el\to{10}(a,u) \cdot \vec E \in \cl\SN
+%         \qquad
+%         t_2 \in \SN
+%       }{\inn\to{00}(t_1,t_2) \cdot \el\to{10}(a,u) \cdot \vec E \in \cl\SN}
+%   \]
+%   We locally induct on $t_2 \in \SN$ and
+%   $t_1[a] \cdot \el\to{10}(a,u) \cdot \vec E \in \cl\SN$
+%   (where the latter is the main induction hypothesis)
+%   to show that each reduct of
+%   $\inn\to{00}(t_1,t_2) \cdot \el\to{10}(a,u) \cdot \vec E$ is SN.
+%   \begin{caselist}
+
+%   \nextcase
+%   $\inn\to{00}(t_1,t_2) \cdot \el\to{10}(a,u) \cdot \vec E \red
+%    t_1[a] \cdot \el\to{10}(a,u) \cdot \vec E \in \SN$ by main
+%    induction hypothesis.
+%   \nextcase
+%   $\inn\to{00}(t_1,t_2) \cdot \el\to{10}(a,u) \cdot \vec E \red
+%    \inn\to{00}(t_1,t_2') \cdot \el\to{10}(a,u) \cdot \vec E$
+%   where $t_2 \red t_2'$
+%   \end{caselist}
+
+% \end{proof}
+
+\begin{corollary}
+  \label{cor:sat-preserves-sn}
+  If $\A \subseteq \SN$ then $\cl\A \subseteq \SN$.
+\end{corollary}
+\begin{proof}
+  Since closure is a monotone operator, we have $\cl\A \subseteq
+  \cl\SN \subseteq \SN$ by \Cref{lem:sat-preserves-sn}.
+\end{proof}
+
+A \emph{saturated set} $\A \in \SAT$ must fulfill the following three
+properties:
+\begin{itemize}%[leftmargin=3em]
+\setlength{\itemindent}{2.7em}
+
+\item[\namedlabel{it:sat1}{SAT1}]
+$\A \subseteq \SN$ (contains only SN terms).
+
+\item[\namedlabel{it:sat2}{SAT2}]
+If $\vec E \in \SN$ then $x \cdot \vec E \in \A$ (contains SN
+neutrals).
+
+\item[\namedlabel{it:sat3}{SAT3}]
+$\cl\A \subseteq \A$ (closed under SN weak-head expansion).
+
+\end{itemize}
+
+Semantic implication can now be defined as:
+\[
+  f \in (\A \to \B)_\Gamma
+  \iff
+  f \in \SN \mbox{ and }
+  \forall \C \in \SAT, \,
+  \tau : \Delta \leq \Gamma, \,
+  a \in \A_\Delta, \,
+  t \in \C[\B]_\Delta.\
+  f\tau \cdot \el\to{10}(a,t) \in \C_\Delta .
+\]
+
+\begin{lemma}[Function space on $\SAT$]
+  \label{lem:fun-sat}
+  If $\A \subseteq \SN$ and $\B \in \SAT$, then $\A \to \B \in \SAT$.
+\end{lemma}
+\begin{proof}
+  \ref{it:sat1} holds by definition.
+  \ref{it:sat2} holds by \ref{it:sat2} of $\B$.
+  \ref{it:sat3} holds by \ref{it:sat3} of $\B$.
+\end{proof}
+
+The introductions rules for implication are indeed modeled for the
+$\SAT$ variant of semantic function space.  For instance, $\inn\to{01}$:
+\begin{lemma}[Introduction \ref{it:in01}]
+  \label{lem:intro-sat}
+  If $t \in (\A \to \B)[\A]\indy\Gamma$
+  and $b \in \B\indy\Gamma$ then
+  $\inn\to{01}(t,b) \in \indyp{\A \to \B}{\Gamma}$.
+\end{lemma}
+\begin{proof}
+  Assume
+  $\C \in \SAT$ and
+  $\tau : \Delta \leq \Gamma$ and
+  $a \in \A\indy\Delta$ and $u \in \C[\B]\indy\Delta$ and
+  show
+  $\inn\to{01}(t,b)\tau \cdot \el\to{10}(a,u) \in \C\indy\Delta$.
+  Using \ref{it:sat3} on $\C$, it is sufficient to show that
+  (1) $t(\tau.a) \cdot \el\to{10}(a,u) \in \C\indy\Delta$ and
+  (2) $u[b\tau] \in \C\indy\Delta$ and
+  (3) $b\tau \in \SN$.
+  Subgoals (2) and (3) follow since $b\tau \in \B\indy\Delta$,
+  and (1) holds since $t(\tau.a) \in (\A \to \B)\indy\Delta$.
+\end{proof}
+
+
+\subsection{On Permutation Reductions}
+\label{sec:sat-perm}
+
+Ralph Matthes' \cite{matthes:classlog} formulation of saturated sets in
+the context of $\pi$-reductions can be adapted to ITTND.
+
+First, we observe that \Cref{lem:clos-sn} still holds if
+$\pi$-reductions are taken into account.  This is because any
+reduction in the spine of a conclusion can be simulated in the spine
+of at least one of the premises.
+
+Thus, \ref{it:sat3} can remain in place, only \ref{it:sat2} needs to
+be reformulated, since a neutral $x \cdot \vec E$ can be subject to a
+$\beta$-reduction after a $\pi$-reduction in $\vec E$ has created a
+new $\beta$-redex.  Towards a reformulation of \ref{it:sat2}, we
+observe the following closure properties of SN by neutral terms:
+\begin{lemma}[Neutral closure of $\SN$]
+  \label{lem:clos-ne}
+  The following implications, written as rules, are valid closure
+  properties of $\SN$:
+\begin{gather*}
+  \ru{}{x \in \SN}
+\qquad
+  \ru{a \in \SN \qquad u \in \SN
+    }{x \cdot \el\to{10}(a,u) \in \SN}
+\qquad
+  \ru{x \cdot E_1\{E_2\} \cdot \vec E \in \SN \qquad
+      E_2 \cdot \vec E \in \SN
+    }{x \cdot E_1 \cdot E_2 \cdot \vec E \in \SN}
+\end{gather*}
+\end{lemma}
+The extra assumption $E_2 \cdot \vec E \in \SN$ in the third
+implication is equivalent to $y \cdot E_2 \cdot \vec E \in \SN$ for
+some variable $y$.
+In the implicational fragment, this assumption is
+redundant since the composition $\el\to{10}(a,u)\{E_2\} =
+\el\to{10}(a,u \cdot E_2\up)$ does not lose $E_2$.
+In particular, any reduction in $E_2 \cdot \vec E$ can be replayed in
+$x \cdot E_1\{E_2\} \cdot \vec E$.
+However, in general there can be eliminations with only
+positive premises, such as $\el\neg{1}(a)$ for negation, where composition
+$\el\neg{1}(a)\{E_2\} = \el\neg{1}(a)$ simply drops $E_2$.
+This means that reductions in part $E_2 \cdot \vec E$ of
+$x \cdot E_1 \cdot E_2 \cdot \vec E$ cannot necessarily be simulated
+in $x \cdot E_1\{E_2\} \cdot \vec E$.  In particular, a reduction $E_2
+\cdot E_3 \red[\pi] E_2\{E_3\}$ could lead to new $\beta$-redexes which
+have no correspondence in $E_1\{E_2\} \cdot E_3$.
+
+\newcommand{\rvar}{\rulename{var}}
+\newcommand{\rel}{\rulename{el}}
+\newcommand{\rpi}{\rulename{pi}}
+
+Mimicking \Cref{lem:clos-ne},
+we extend the definition of saturation $\cl\C$ of a semantic type $\C$
+for $C$ by the following three clauses:
+\begin{gather*}
+  \nru{\rvar}{x : \Gamma \vdash C}{x \in \cl\C_\Gamma}
+\qquad
+  \nru{\rel
+    }{x : \Gamma \vdash A \to B \qquad
+      a \in \SN(\Gamma \vdash A) \qquad
+      u \in \cl\C_{\Gamma.B}
+    }{x \cdot \el\to{10}(a,u) \in \cl\C_\Gamma}
+\\[2ex]
+  \nrul{\rpi
+    }{x : \Gamma \vdash A \qquad
+      E_1 : \Gamma \mid A \vdash B \qquad
+      x \cdot E_1\{E_2\} \cdot \vec E \in \cl\C_\Gamma \\
+      \tau : \Delta \leq \Gamma \qquad
+      y : \Delta \vdash B \qquad
+      y \cdot (E_2 \cdot \vec E)\tau \in \cl\C_{\Delta}
+      % \x_0 \cdot E_2\up \cdot \vec E\up \in \cl\C_{\Gamma.B}
+    }{x \cdot E_1 \cdot E_2 \cdot \vec E \in \cl\C_\Gamma}
+\end{gather*}
+Note that a premise such as $y \cdot (E_2 \cdot \vec E)\tau \in \SN$ would
+be too weak to show that semantic function space is saturated.
+
+We revise the definition of $\SAT$ such that \ref{it:sat3} uses the
+extended definition of closure, replacing \ref{it:sat2}.
+
+
+\begin{lemma}[Function space on $\SAT$]
+  \label{lem:fun-sat-pi}
+  If $\A \subseteq \SN$ and $\B \in \SAT$, then $\A \to \B \in \SAT$.
+\end{lemma}
+\begin{proof}
+  We shall focus on the new closure conditions for $\SAT$:
+\begin{itemize}
+\item[\rvar] Show $x \in (\A \to \B)_\Gamma$.  Clearly $x \in \SN$.
+  %
+  Now assume $\C \in \SAT$ and $\tau : \Delta \leq \Gamma$ and
+  $a \in \A_\Delta$ and $u \in \C[\B]_\Delta$ and show
+  $x\tau \cdot \el\to{10}(a,u) \in \C_\Delta$.
+  %
+  By \rel, it is sufficient that $a \in \SN$ and
+  $u \in \C_{\Delta.B}$.
+  By \rvar we have $\x_0 \in \B_{\Delta.B}$,
+  thus $u(\up.\x_0) = u \in \C_{\Delta.B}$.
+
+\item[\rel] Assume $x : \Gamma \vdash A_0 \to B_0$ and
+  $a_0 \in \SN(\Gamma \vdash A_0)$ and
+  $u_0 \in \cl{\A \to \B}_{\Gamma.B_0}$ and show
+  $x \cdot \el\to{10}(a_0,u_0) \in \cl{\A \to \B}_\Gamma$.
+  First, $x \cdot \el\to{10}(a_0,u_0) \in \SN$.
+
+  Further, assume $\C \in \SAT$ and $\tau : \Delta \leq \Gamma$
+  and $a \in \A_\Delta$ and $u \in \C[\B]_\Delta$ and show
+  $(x \cdot \el\to{10}(a_0,u_0))\tau \cdot \el\to{10}(a,u) \in \C_\Delta$.
+  Using \rpi, we first discharge the last subgoal $\x_0 \cdot
+  \el\to{10}(a,u)\up \in \C_{\Delta.(A \to B)}$ by \rel for $\C$ with
+  $a\up \in \A_{\Delta.(A \to B)}$ and $u(\Up\up) \in \C_{\Delta.(A\to
+    B).B}$.
+
+  It remains to show that $x\tau \cdot \el\to{10}(a_0\tau, u_0(\Up\tau) \cdot
+  \el\to{10}(a,u)\up) \in \C_\Delta$.  Again, we use \rel for $\C$.
+  Clearly $a_0\tau \in \SN$, so it remains to show that
+  $u_0(\Up\tau) \cdot \el\to{10}(a\up,u(\Up\up)) \in \C_{\Delta.B_0}$.
+  Since $u_0(\Up\tau) \in (\A \to \B)_{\Delta.B_0}$
+  and $a\up \in \A_{\Delta.B_0}$ and $u(\Up\up) \in
+  \C[\B]_{\Delta.B_0}$,
+  this is the case by definition of $\A \to \B$.
+
+\item[\rpi]
+  The case \rpi for $\A \to \B$ is shown by $\rpi$ for $\C$ (what $\C$
+  refers to, see the previous cases).  This part is a bit tedious to
+  spell out, but completely uninteresting, since just $\vec E$ is extended
+  by another $\el\to{10}$-elimination at the end.
+%
+\popQED
+\end{itemize}
+\end{proof}
+
+The soundness of the introductions carries over from the previous
+section (\Cref{lem:intro-sat}) since the saturated sets are still
+closed by weak head expansion.
+
+This concludes the $\beta\pi$-SN proof for ITTND using saturated sets.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "types-post2020"
+%%% End:
