@@ -62,16 +62,16 @@ variable t t′ u u′ v v′ : Tm a
 infix 4 _↦_
 
 data _↦_ : (t t′ : Tm a) → Set where
-  ↦K   : K ∙ t ∙ u        ↦ t
-  ↦S   : S ∙ t ∙ u ∙ v    ↦ t ∙ v ∙ (u ∙ v)
-  ↦∙l  : t ↦ t′  → t ∙ u  ↦ t′ ∙ u
-  ↦∙r  : u ↦ u′  → t ∙ u  ↦ t ∙ u′
+  ↦K   : K ∙ t ∙ u         ↦ t
+  ↦S   : S ∙ t ∙ u ∙ v     ↦ t ∙ v ∙ (u ∙ v)
+  ↦∙l  : t ↦ t′  →  t ∙ u  ↦ t′ ∙ u
+  ↦∙r  : u ↦ u′  →  t ∙ u  ↦ t ∙ u′
 
 -- Reduction rules for non-determinism.
-  ↦l   : t ⊕ u            ↦ t
-  ↦r   : t ⊕ u            ↦ u
-  ↦⊕l  : t ↦ t′  → t ⊕ u  ↦ t′ ⊕ u
-  ↦⊕r  : u ↦ u′  → t ⊕ u  ↦ t ⊕ u′
+  ↦l   :            t ⊕ u  ↦ t
+  ↦r   :            t ⊕ u  ↦ u
+  ↦⊕l  : t ↦ t′  →  t ⊕ u  ↦ t′ ⊕ u
+  ↦⊕r  : u ↦ u′  →  t ⊕ u  ↦ t ⊕ u′
 
 -- Strong normalization
 ------------------------------------------------------------------------
@@ -282,15 +282,15 @@ sem-sn ⦅t⦆ = ty-cr _ .cr1 ⦅t⦆
 ⦅ S {b = b} ⦆ .sn                         = sn-S
 ⦅ S {b = b} ⦆ .app ⦅t⦆ .sn                = sn-St  (⦅t⦆ .sn)
 ⦅ S {b = b} ⦆ .app ⦅t⦆ .app ⦅u⦆ .sn       = sn-Stu (⦅t⦆ .sn) (⦅u⦆ .sn)
-⦅ S {b = b} ⦆ .app ⦅t⦆ .app ⦅u⦆ .app ⦅v⦆  = ⦅S⦆ {b = b}  ⦅t⦆ (sem-sn ⦅t⦆)
-                                                         ⦅u⦆ (sem-sn ⦅u⦆)
-                                                         ⦅v⦆ (sem-sn ⦅v⦆)
+⦅ S {b = b} ⦆ .app ⦅t⦆ .app ⦅u⦆ .app ⦅v⦆  = ⦅S⦆ {b = b}  ⦅t⦆  (sem-sn ⦅t⦆)
+                                                         ⦅u⦆  (sem-sn ⦅u⦆)
+                                                         ⦅v⦆  (sem-sn ⦅v⦆)
 ⦅ K ⦆ .sn                                 = sn-K
 ⦅ K ⦆ .app ⦅t⦆ .sn                        = sn-Kt (sem-sn ⦅t⦆)
 ⦅ K ⦆ .app ⦅t⦆ .app ⦅u⦆                   = ⦅K⦆ ⦅t⦆ (sem-sn ⦅t⦆) (sem-sn ⦅u⦆)
 ⦅ t ∙ u ⦆                                 = ⦅ t ⦆ .app ⦅ u ⦆
 ⦅ t ⊕ u ⦆                                 = ⦅⊕⦆ ⦅t⦆ (sem-sn ⦅t⦆) ⦅u⦆ (sem-sn ⦅u⦆)
-                                         where ⦅t⦆ = ⦅ t ⦆; ⦅u⦆ = ⦅ u ⦆
+                                          where ⦅t⦆ = ⦅ t ⦆; ⦅u⦆ = ⦅ u ⦆
 
 
 -- Strong normalization is now a simple corollary.

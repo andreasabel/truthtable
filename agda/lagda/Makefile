@@ -1,4 +1,8 @@
-# Makefile for ICFP 20
+# Makefile for agda2lagda generated pdfs
+
+# Disable built-in rules
+MAKEFLAGS += --no-builtin-rules
+.SUFFIXES:
 
 destdir=$(HOME)/public_html
 
@@ -30,13 +34,17 @@ files=lipics-v2019.cls Makefile \
 
 .PHONY : default add all pack ship debugMake html
 
-.PRECIOUS : %.dvi %.ps %.gz %.pdf %.tex
+.PRECIOUS : %.pdf %.tex # %.dvi %.ps %.gz
 
-default : cr-sk.pdf # main.pdf
+default : sk-nondet.pdf # cr-sk.pdf # main.pdf
 
-all : cr-sk.pdf main.pdf
+all : sk-nondet.pdf cr-sk.pdf main.pdf
 
-ship-cr-sk : $(destdir)/agda/cr-sk.pdf
+ship-sk-nondet : $(destdir)/agda/sk-nondet.pdf
+
+# The generic rule does somehow not work
+.PHONY: ship-%
+ship-% : $(destdir)/agda/%.pdf
 
 pack : main.zip
 
@@ -44,7 +52,6 @@ main.zip : main.pdf $(files) main.bbl auto-main.bib
 	zip $@ $^
 
 %.lagda.tex : ../%.agda
-#	agda2lagda -o $@ $<
 	agda2lagda --force -o $@ $<
 
 latex/%.tex : %.lagda.tex
@@ -132,32 +139,92 @@ cr-sk_aux : cr-sk.tex latex/SK-no-bot.tex
 	-$(pdflatex) $<;
 	touch $@;
 
-# then, run bibtex
-cr-sk.bbl : cr-sk_aux auto-cr-sk.bib
-	-bibtex cr-sk;
+# # then, run bibtex
+# cr-sk.bbl : cr-sk_aux auto-cr-sk.bib
+# 	-bibtex cr-sk;
+
+# # finally, finish by running latex twice again
+# # this will update .aux, but leave the stamp _aux intact
+# # (otherwise we would not converge and make would never
+# # return a "Nothing to do")
+# cr-sk.pdf : cr-sk.bbl
+# 	-$(pdflatex) cr-sk.tex;
+# 	$(pdflatex) cr-sk.tex;
+
+# # auto-cr-sk.bib is only defined if bibtool is present and all.bib exists
+
+# ifneq ($(shell which bibtool),)
+# ifneq ($(shell ls $(bibliography)),)
+# auto-cr-sk.bib : cr-sk_aux $(bibliography)
+# 	echo "%%%% WARNING! AUTOMATICALLY CREATED BIBFILE" > $@;
+# 	echo "%%%% DO NOT EDIT! ALL CHANGES WILL BE LOST!" >> $@ ;
+# 	echo "" >> $@ ;
+# 	$(bibtool) -x cr-sk.aux -i $(bibliography) >> $@;
+# endif
+# endif
+
+# sk-nondet
+##################################################################
+
+# sk-nondet.pdf: sk-nondet.tex $(files)
+# 	latexmk -f -pdf sk-nondet.tex
+
+# initially, run latex once to create an .aux file
+# mark .aux file as fresh by creating a stamp _aux
+sk-nondet_aux : sk-nondet.tex template.tex latex/SK-nondet.tex
+	-$(pdflatex) $<;
+	touch $@;
+
+# # then, run bibtex
+# sk-nondet.bbl : sk-nondet_aux auto-sk-nondet.bib
+# 	-bibtex sk-nondet;
 
 # finally, finish by running latex twice again
 # this will update .aux, but leave the stamp _aux intact
 # (otherwise we would not converge and make would never
 # return a "Nothing to do")
-cr-sk.pdf : cr-sk.bbl
-	-$(pdflatex) cr-sk.tex;
-	$(pdflatex) cr-sk.tex;
+# sk-nondet.pdf : sk-nondet.bbl
+# 	-$(pdflatex) sk-nondet.tex;
+# 	$(pdflatex) sk-nondet.tex;
 
-# auto-cr-sk.bib is only defined if bibtool is present and all.bib exists
+# auto-sk-nondet.bib is only defined if bibtool is present and all.bib exists
 
+# ifneq ($(shell which bibtool),)
+# ifneq ($(shell ls $(bibliography)),)
+# auto-sk-nondet.bib : sk-nondet_aux $(bibliography)
+# 	echo "%%%% WARNING! AUTOMATICALLY CREATED BIBFILE" > $@;
+# 	echo "%%%% DO NOT EDIT! ALL CHANGES WILL BE LOST!" >> $@ ;
+# 	echo "" >> $@ ;
+# 	$(bibtool) -x sk-nondet.aux -i $(bibliography) >> $@;
+# endif
+# endif
+
+# Templates for the LaTeX build
+
+# then, run bibtex
+%.bbl : %_aux auto-%.bib
+	-bibtex $*;
+
+# finally, finish by running latex twice again
+# this will update .aux, but leave the stamp _aux intact
+# (otherwise we would not converge and make would never
+# return a "Nothing to do")
+%.pdf : %.bbl
+	-$(pdflatex) $*.tex;
+	$(pdflatex) $*.tex;
+
+# auto-%.bib is only defined if bibtool is present and $(bibliography) exists
 ifneq ($(shell which bibtool),)
 ifneq ($(shell ls $(bibliography)),)
-auto-cr-sk.bib : cr-sk_aux $(bibliography)
+auto-%.bib : %_aux $(bibliography)
 	echo "%%%% WARNING! AUTOMATICALLY CREATED BIBFILE" > $@;
 	echo "%%%% DO NOT EDIT! ALL CHANGES WILL BE LOST!" >> $@ ;
 	echo "" >> $@ ;
-	$(bibtool) -x cr-sk.aux -i $(bibliography) >> $@;
+	$(bibtool) -x $*.aux -i $(bibliography) >> $@;
 endif
 endif
 
-
-# Templates (reverted back to simple templates)
+# Templates
 
 $(destdir)/agda/% : %
 	cp -p $< $@
@@ -169,23 +236,22 @@ talk% : talk%.pdf
 talk%.pdf : talk%.tex
 	pdflatex $<;
 
+# %.tex : %.lhs
+# 	lhs2TeX --poly -i lhs2TeX.fmt $< > $@
+# # /usr/local/share/lhs2tex-1.13/
 
-%.tex : %.lhs
-	lhs2TeX --poly -i lhs2TeX.fmt $< > $@
-# /usr/local/share/lhs2tex-1.13/
-
-% :  %.pdf # %.dvi %.ps.gz # %.tar.gz
+% : %.pdf # %.dvi %.ps.gz # %.tar.gz
 	cp -p $? $(destdir)/;
 	touch $@;
 
-%.pdf : %.dvi
-	pdflatex $*.tex;
+# %.pdf : %.dvi
+# 	pdflatex $*.tex;
 
-%.ps  : %.dvi
-	dvips -o $@ $<;
+# %.ps  : %.dvi
+# 	dvips -o $@ $<;
 
-%.gz : %
-	cat $< | gzip > $@
+# %.gz : %
+# 	cat $< | gzip > $@
 
 ## does not work since $ is evaluated before %
 #%.tar : %.cfg $(shell cat %.cfg)
