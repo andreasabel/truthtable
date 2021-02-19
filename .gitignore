@@ -12,6 +12,7 @@
 *.ptb
 *.vtc
 *Bug*.agda
+trash-*
 _build
 /lipics/
 /lipics/lipics-v2019-authors-guidelines.pdf

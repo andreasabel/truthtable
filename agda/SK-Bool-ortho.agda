@@ -156,32 +156,38 @@ mutual
 
   data _↦ₛ_ : (E E′ : Stack i a c) → Set where
     π      : {E : Stack i a c} → (case u v ∷ e ∷ E) ↦ₛ (case (u ∘ e ∷ ε) (v ∘ e ∷ ε) ∷ E)
-    here   : (r : e ↦ₑ e′)  → e ∷ E ↦ₛ e′ ∷ E
-    there  : (r : E ↦ₛ E′)  → e ∷ E ↦ₛ e  ∷ E′
+    here   : (r : e ↦ₑ e′)     → e ∷ E              ↦ₛ e′ ∷ E
+    there  : (r : E ↦ₛ E′)     → e ∷ E              ↦ₛ e  ∷ E′
 
 -- Closure properties of one-step reduction
 
 -- Concatenation ++ is a congruence
 
-++↦ₗ : E ↦ₛ E′ → E ++ E₁ ↦ₛ E′ ++ E₁
+++↦ₗ  :  E ↦ₛ E′
+     →  E ++ E₁ ↦ₛ E′ ++ E₁
 ++↦ₗ π          = π
 ++↦ₗ (here  r)  = here r
 ++↦ₗ (there r)  = there (++↦ₗ r)
 
-++↦ᵣ : ∀ (E : Stack i a b) → E₁ ↦ₛ E₂ → E ++ E₁ ↦ₛ E ++ E₂
+++↦ᵣ  :  ∀ (E : Stack i a b)
+      →  E₁ ↦ₛ E₂
+      →  E ++ E₁ ↦ₛ E ++ E₂
 ++↦ᵣ ε       r = r
 ++↦ᵣ(u ∷ E)  r = there (++↦ᵣ E r)
 
 -- Application ∘ is a congruence
 
-∘↦ₗ : t ↦ t′ → t ∘ E ↦ t′ ∘ E
+∘↦ₗ  :  t ↦ t′
+    →  t ∘ E ↦ t′ ∘ E
 ∘↦ₗ ↦K      = ↦K  -- rewrite app-app
 ∘↦ₗ ↦S      = ↦S
 ∘↦ₗ ↦tt     = ↦tt
 ∘↦ₗ ↦ff     = ↦ff
 ∘↦ₗ (↦E r)  = ↦E (++↦ₗ r)
 
-∘↦ᵣ : ∀ (t : Tm a) → E ↦ₛ E′ → t ∘ E ↦ t ∘ E′
+∘↦ᵣ  :  ∀ (t : Tm a)
+     →  E ↦ₛ E′
+     →  t ∘ E ↦ t ∘ E′
 ∘↦ᵣ (_∙_ h E) r = ↦E (++↦ᵣ E r)
 
 -- Transitive closure
@@ -218,13 +224,13 @@ wf⁻ (acc h) = acc λ r → wf⁻ (h (sg r))
 -- If a relation is well-founded, so is its transitive closure.
 
 wf⁺ : {A : Set} {R : A → A → Set} → Acc R ⊂ Acc (R ⁺)
-wf⁺ {R = R} hR = acc (loop hR)
+wf⁺ {R = R} h₀ = acc (loop h₀)
   where
   loop : ∀{t} → Acc R t → (R ⁺) t ⊂ Acc (R ⁺)
   loop (acc h) (sg r)    = wf⁺ (h r)
   loop (acc h) (r ∷ rs)  = loop (h r) rs
 
--- Reducts of SN things are SN things
+-- Reducts of SN things are SN things.
 
 sn-red : {A : Set} {R : A → A → Set}{t t′ : A} → Acc R t → R t t′ → Acc R t′
 sn-red (acc sn) r = sn r
@@ -241,52 +247,52 @@ SNₑ = Acc _↦ₑ_
 SNₛ : Stack i a c → Set
 SNₛ = Acc _↦ₛ_
 
--- Deconstruction of SN t
+-- Deconstruction of SN t.
 
 sn-spine : SN (h ∙ E) → SNₛ E
 sn-spine (acc sntE) = acc λ r → sn-spine (sntE (↦E r))
 
--- Constants are SN
+-- Constants are SN.
 
--- Heads are SN
+-- Heads are SN.
 
 sn-Hd : SN (h ∙ ε)
 sn-Hd = acc λ{ (↦E ()) }
 
--- The empty stack is SN
+-- The empty stack is SN.
 
 sn-ε : SNₛ (ε {c = a})
 sn-ε = acc λ()
 
--- Function elimination preserves SN
+-- Function elimination preserves SN.
 
 sn-app∷ : SN u → SNₛ E → SNₛ (app u ∷ E)
 sn-app∷ (acc snu) snE@(acc snE') = acc λ where
    (here (↦app r))  → sn-app∷ (snu r)    snE
    (there r)        → sn-app∷ (acc snu)  (snE' r)
 
--- Underapplied functions are SN
+-- Underapplied functions are SN.
 
--- Kt is SN
+-- Kt is SN.
 
 sn-Kt : SN t → SN (K {a} {b} ∙ app t ∷ ε)
 sn-Kt (acc snt) = acc λ{ (↦E (here (↦app r))) → sn-Kt (snt r) }
 
--- St is SN
+-- St is SN.
 
 sn-St : SN t → SN (S {a} {b} ∙ app t ∷ ε)
 sn-St (acc snt) = acc λ{ (↦E (here (↦app r))) → sn-St (snt r) }
 
--- Stu is SN
+-- Stu is SN.
 
 sn-Stu : SN t → SN u → SN (S {a} {b} ∙ app t ∷ app u ∷ ε)
 sn-Stu (acc snt) (acc snu) = acc λ where
    (↦E (here (↦app r)))          → sn-Stu (snt r)    (acc snu)
    (↦E (there (here (↦app r))))  → sn-Stu (acc snt)  (snu r)
 
--- Redexes are SN
+-- Redexes are SN.
 
--- KtuE is SN
+-- KtuE is SN.
 
 sn-KtuE : SN (t ∘ E) → SN u → SN (K ∙ app t ∷ app u ∷ E)
 sn-KtuE {t = t} sntE@(acc h) (acc snu)  = acc λ where
@@ -295,7 +301,7 @@ sn-KtuE {t = t} sntE@(acc h) (acc snu)  = acc λ where
    (↦E (there (here (↦app r))))  → sn-KtuE sntE           (snu r)
    (↦E (there (there r)))        → sn-KtuE (h (∘↦ᵣ t r))  (acc snu)
 
--- StuvE is SN
+-- StuvE is SN.
 
 sn-StuvE : SN⁺ (t ∘ app v ∷ app (u ∘ app v ∷ ε) ∷ E)
           → SN (S ∙ app t ∷ app u ∷ app v ∷ E)
@@ -324,7 +330,7 @@ mutual
   sn-case : {E : Stack i a c} (sntE : SN (t ∘ E)) (snuE : SN (u ∘ E)) → SN (h ∙ case t u ∷ E)
   sn-case sntE snuE = acc (sn-case' sntE snuE)
 
-  -- Case distinction on reductions of (h ∙ case t u ∷ E)
+  -- Case distinction on reductions of (h ∙ case t u ∷ E):
 
   sn-case' : {E : Stack i a c}
             (sntE : SN (t ∘ E))
@@ -412,7 +418,10 @@ open ⟦bool⟧
 
 -- Interpretation of case
 
-⦅case⦆ : (⦅t⦆ : t ⊥ A) (⦅u⦆ : u ⊥ A) (⦅E⦆ : E ∈ A) → case t u ∷ E ∈ ⟦bool⟧
+⦅case⦆  :  (⦅t⦆ : t ⊥ A)
+           (⦅u⦆ : u ⊥ A)
+           (⦅E⦆ : E ∈ A)
+        →  case t u ∷ E ∈ ⟦bool⟧
 ⦅case⦆ ⦅t⦆ ⦅u⦆ ⦅E⦆ .br h = sn-case (⦅t⦆ .run ⦅E⦆) (⦅u⦆ .run ⦅E⦆)
 
 -- Function space on semantic types
@@ -423,7 +432,9 @@ data _⟦→⟧_ (A : Predₛ a) (B : Predₛ b) : Predₛ (a ⇒ b) where
 
 -- Application
 
-⦅app⦆ : (⦅t⦆ : t ⊥ (A ⟦→⟧ B)) (⦅u⦆ : u ⊥ A) → (t ∘ app u ∷ ε) ⊥ B
+⦅app⦆  :  (⦅t⦆ : t ⊥ (A ⟦→⟧ B))
+          (⦅u⦆ : u ⊥ A)
+       →  (t ∘ app u ∷ ε) ⊥ B
 ⦅app⦆ ⦅t⦆ ⦅u⦆ .run ⦅E⦆ = ⦅t⦆ .run (⦅u⦆ ∷ ⦅E⦆)
 
 -- Semantic Types

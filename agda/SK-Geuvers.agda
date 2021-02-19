@@ -1,6 +1,6 @@
 {-# OPTIONS --postfix-projections #-}
 
-module SK where
+module SK-Geuvers where
 
 open import Relation.Nullary using (¬_)
 open import Function

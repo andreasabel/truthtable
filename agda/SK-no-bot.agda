@@ -146,7 +146,7 @@ Stu¬ne (napp (napp ()))
 -- (condition CR1).
 -- Further, the set needs to be closed under reduction (CR2).
 -- Finally, a candidate needs to contain any neutral term of the right type
--- whose reducts are already in the candidate.
+-- whose reducts are already in the candidate (CR3).
 
 record CR (P : Pred a) : Proposition where
   field
