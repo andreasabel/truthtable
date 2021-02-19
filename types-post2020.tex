@@ -19,7 +19,7 @@
 \titlerunning{SN for Truth-Table ND} %TODO optional, please use if title is longer than one line
 
 \author{Andreas Abel
-  }{Department of Computer Science,
+  }{Department of Computer Science and Engineering,
     Gothenburg University,
     Sweden
     % \and \url{http://www.myhomepage.edu}
@@ -63,7 +63,8 @@
 
 \acknowledgements{Thanks to Herman Geuvers for explaining
 me truth-table natural deduction during a 2018 visit to Nijmegen for
-the purpose of Henning Basold's PhD ceremony.  Thanks to Ralph Matthes
+the purpose of Henning Basold's PhD ceremony.  Thanks to Ralph
+Matthes, Herman Geuvers
 and Tonny Hurkens
 for some email discussions on the topics of this article.
 %
@@ -77,18 +78,21 @@ This work has been supported by grant no.~2019-04216 \emph{Modal
 \hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
 
 %Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\EventEditors{John Q. Open and Joan R. Access}
-\EventNoEds{2}
-\EventLongTitle{42nd Conference on Very Important Topics (CVIT 2016)}
-\EventShortTitle{CVIT 2016}
-\EventAcronym{CVIT}
-\EventYear{2016}
-\EventDate{December 24--27, 2016}
-\EventLocation{Little Whinging, United Kingdom}
+\EventEditors{Thorsten Altenkirch, Stefano Berardi and Ugo de’Liguoro}
+\EventNoEds{3}
+\EventLongTitle{42nd Conference on Very Important Topics (TYPES 2020)}
+\EventShortTitle{TYPES 2020}
+\EventAcronym{TYPES}
+\EventYear{2020}
+\EventDate{Cancelled due to COVID-19}
+\EventLocation{University of Torino, Italy}
 \EventLogo{}
-\SeriesVolume{42}
-\ArticleNo{23}
+\SeriesVolume{123}
+\ArticleNo{456}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[textsize=tiny]{todonotes}  %% DRAFT only
+\setuptodonotes{noline}
 
 \usepackage{xspace}
 \usepackage{stmaryrd}
@@ -308,10 +312,10 @@ In subsequent work \cite{geuversHurkens:types17}, the authors attack
 SN for full ITTND with non-confluent $\beta$-reduction, introducing
 elements of Girard's technique of \emph{reducibility candidates} (RCs)
 \cite{girard:thesis,girardLafontTaylor:proofsAndTypes}.  However, this
-innovative mix of Tait and Girard seems to have problems, as we shall
-investigate in \Cref{sec:gap}.  We show how to remedy the problems by
+innovative mix of Tait and Girard is not without pitfalls, as we shall
+investigate in \Cref{sec:gap}.  We tread on safer grounds by
 returning to Girard's original definition of RCs in \Cref{sec:cr}.
-The repaired proof in \Cref{sec:elimbased} relies on impredicativity
+Our proof in \Cref{sec:elimbased} relies on impredicativity
 and could not be formalized in a predicative metatheory such as
 Martin-Löf Type Theory \cite{MartinLoef84}.  We thus give in
 \Cref{sec:introbased} a variant that
@@ -319,10 +323,9 @@ replaces the use of impredicativity by inductive definitions.
 
 However, $\beta$-reduction is not the only form of proof optimization in ITTND.
 The schematic elimination rules of ITTND have the flavor of
-disjunction elimination or, more general, of the left rules of
-intuitionistic sequent calculus.  Those left rules do not pose any
+disjunction elimination which does not pose any
 restriction on the formula on the right.  Likewise, eliminations in
-ITTND have an arbitrary target.  In such settings, one eliminate a hypothesis to directly prove the desired conclusion.
+ITTND have an arbitrary target.  In such settings, one eliminates a hypothesis to directly prove the desired conclusion.
 Eliminating into an intermediate conclusion which is then eliminated
 again is thus considered a detour.
 Joachimski and Matthes \cite{joachimskiMatthes:rta00}
@@ -353,7 +356,11 @@ $\beta\pi$-reduction.  While the saturated sets method applied in
 a similar situation by Joachimski and Matthes
 \cite{joachimskiMatthes:rta00} fails due to non-confluence of $\beta$,
 Girard's RCs do not cover $\pi$.  However, there is a third popular
-method, \emph{(bi)orthogonals}, that have been developed to prove SN for classical lambda-calculi which are essentially non-confluent.\footnote{Early applications of orthogonality can be found in the works of Parigot \cite{parigot:jsl97,parigot:lamsym} and Barbanera and Berardi \cite{barbanera:lamsym}.}
+method, \emph{(bi)orthogonals}, that has been developed to prove SN
+for classical lambda-calculi which are essentially non-confluent.
+\footnote{Early applications of orthogonality can be found in the
+  works of Parigot \cite{parigot:jsl97,parigot:lamsym} and Barbanera
+  and Berardi \cite{barbanera:lamsym}.}
 Biorthogonals have been successfully applied by
 Lindley and Stark \cite{lindleyStark:tlca05} to prove SN for Moggi's
 ``monadic metalanguage'', that is STLC with introduction, elimination,
@@ -562,7 +569,8 @@ In particular, $\Up$ is used to traverse under binders, for instance,
 $\inn\to{01}(t,b)\tau = \inn\to{01}(t(\Up\tau),b\tau)$.
 
 Substitutions \fbox{$\sigma : \Delta \vdash \Gamma$} are defined as lists of
-terms typed by list $\Gamma$ under context $\Delta$.  Parallel
+terms $\sigma = \Ge.b_1.\cdots.b_{|\Gamma|}$
+typed by list $\Gamma$ under context $\Delta$.  Parallel
 substitution $a\sigma : \Delta \vdash A$ for $a : \Gamma \vdash A$ is
 defined as usual.  OPEs $\tau : \Delta \leq \Gamma$ are silently
 coerced to substitutions $\Delta \vdash \Gamma$ consisting only of de
@@ -767,7 +775,7 @@ semantic types model the inference rules:
   Hence,
   $t(\Up\sigma) \in (\den{A \to B})[\den A]_\Delta$
   by definition of abstraction.
-  By property \ref{it:in01}, if follows that
+  By property \ref{it:in01}, it follows that
   $\inn\to{01}(t,b)\sigma = \inn\to{01}(t(\Up\sigma),b\sigma) \in \Den{A \to B}\Delta$.
 \end{proof}
 
@@ -880,8 +888,8 @@ Term set abstraction operates on precandidates:
   In untyped presentations of RCs, \ref{it:cr3} guarantees
   non-emptiness of any $\A \in \CR$, since automatically all variables
   will inhabit $\A$ by virtue of \ref{it:cr3}.  In our case, $\A_\Gamma$
-  may be empty since there may be no variables $x : \Gamma \vdash a$
-  of the correct type $a$.  We thus have to be a bit careful when
+  may be empty since there may be no variables $x : \Gamma \vdash A$
+  of the correct type $A$.  We thus have to be a bit careful when
   carrying over the textbook proofs
   \cite{girardLafontTaylor:proofsAndTypes}
   to our intrinsically-typed setting.
@@ -907,7 +915,7 @@ In case of implication, % \fbox{$f \in (\A \to \B)_\Gamma$} iff
 \]
 Due to our intrinsic typing,
 in contrast to Geuvers and Hurkens \cite{geuversHurkens:types17},
-we need \emph{Kripke-style functions space}, \ie,
+we need \emph{Kripke-style function space}, \ie,
 quantify over all extensions $\Delta$ of $\Gamma$ with
 their respective embeddings $\tau : \Delta \leq \Gamma$.
 Still, this definition can be mechanically derived from the elimination rules
@@ -1012,7 +1020,7 @@ candidate.
 
 Strong normalization now follows according to \Cref{sec:model}.
 
-\subsection{A gap in the proof by Geuvers and Hurkens}
+\subsection{A gap in the original proof by Geuvers and Hurkens, and its fix}
 \label{sec:gap}
 
 In their elimination-based SN proof, Geuvers and Hurkens
@@ -1024,7 +1032,8 @@ head reduction% (called \emph{key reduction} in \loccit),
 $I \cdot E \cdot \vec E \whd[\beta] v \cdot \vec E$ where
 $\beta$-redex $I \cdot E$ contracts to $v$ and the elimination
 sequence $\vec E$ is arbitrary (can be empty).  Any SN term that is
-not an introduction nor a $\whd[\beta]$-redex is called neutral (set $\Neut$).
+neither an introduction nor a $\whd[\beta]$-redex is called neutral
+(set $\Neut$).
 
 In Def.~57.3 \cite{geuversHurkens:types17}
 a set of terms $\X$ is defined to be saturated ($\X \in
@@ -1085,18 +1094,50 @@ is employed in the proof sketch
 \cite[Lemma~58.c]{geuversHurkens:types17}, not matching the new
 requirement \ref{it:sat3}.
 
-At the moment, we do not see an easy fix for the arguably more elegant
-$\SAT$ method, and have to confine to the more pedestrian $\CR$ method
-as laid out in \Cref{sec:elimbased}.  However, we can get rid of the
+Pointed to the gaps in their argument Geuvers and Hurkens published a
+revision \cite{geuversHurkens:addendumTypes17} with two amendments to
+the definitions:
+\begin{enumerate}
+\item Closure condition \ref{it:sat3} now applies only to \emph{weak
+    head redexes} $t$.  Only strongly normalizing weak head redexes
+  $t$ whose weak head reducts are in saturated set $\X$ are forced
+  into $\X$.  The thus relativized \ref{it:sat3} no longer subsumes
+  \ref{it:sat2} which forces \emph{neutrals} into $\X$.
+\item The semantic connectives are relativized to SN terms.  \Eg, $f
+  \in (\A \to \B)$ stipulates also $f \in \SN$.
+\end{enumerate}
+The second amendment fixes a problem with connectives that have no
+eliminations, like \emph{truth}, but does not add anything for
+connectives with at least one elimination, like $\A \to \B$.
+
+Yet the first amendment allows us now to analyse the reducts of
+$f \cdot E$ in the proof of \ref{it:sat3} for $\A \to \B$.  Since $f$
+is not an introduction, the only weak head redexes of $f \cdot E$ are
+of the form $f' \cdot E$ with $f \whd[\beta] f'$.  To show $(f \cdot E
+\whd[\beta] \_) \subseteq \C$, we can thus utilize the assumption
+$(f \whd[\beta] \_) \subseteq \A \to \B$.
+
+% At the moment, we do not see an easy fix for the arguably more elegant
+% $\SAT$ method, and have to confine to the more pedestrian $\CR$ method
+% as laid out in \Cref{sec:elimbased}.  However, we can get rid of the
+% impredicative definition of $\A \to \B$ and use an inductive
+% definitions instead.
+
+In the following section, we can get rid of the
 impredicative definition of $\A \to \B$ and use an inductive
-definitions instead.
+definition instead.
+We study this introduction-based approach to type interpretation in
+the context of Girard's method, but conjecture that it could be
+utilized in the arguably more structured method of Geuvers and Hurkens as
+well.
+
 
 
 \subsection{Introduction-based approach}
 \label{sec:introbased}
 
-Instead of the impredicative elimination-based definition of semantic
-types like $\A \to \B$, we can base the definition on the introduction
+Instead of the impredicative \emph{elimination}-based definition of semantic
+types like $\A \to \B$, we can base their definition on the \emph{introduction}
 rules.  The rough idea is that elements of $\A \to \B$ can be
 introduced by any of $\inn\to{00}$, $\inn\to{01}$, and
 $\inn\to{11}$---this is a union of reducibility candidates.
@@ -1145,8 +1186,8 @@ $\A_\Gamma \subseteq \Gamma \vdash A$ of term sets.
 \begin{proof}
   \ref{it:cr3} is forced by the closure operation.
   Closure under reduction (\ref{it:cr2}) and preservation of SN
-  (\ref{it:cr1}) are proven by induction on $t \in \cl\A$,
-  the latter using that $t \in \SN$ when all its reducts are.
+  (\ref{it:cr1}) are proven by induction on $a \in \cl\A$,
+  the latter using that $a \in \SN$ when all of $a$'s reducts are.
   % and preservation of \ref{it:cr1} and
   % \ref{it:cr2} is immediate.
   % \ref{it:cr0} follows again from anti-weakening of reduction, and that being
