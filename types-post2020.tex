@@ -115,6 +115,7 @@ This work has been supported by grant no.~2019-04216 \emph{Modal
 \newcommand{\Eg}{\emph{E.g.}\xspace}
 \newcommand{\loccit}{\emph{loc.\,cit.}\xspace}
 \newcommand{\cf}{cf.\ }
+\newcommand{\wrt}{w.r.t.\xspace}
 \newcommand{\den}[2][]{\llbracket#2\rrbracket^{#1}}
 \newcommand{\dent}[1]{\llparenthesis#1\rrparenthesis}
 \newcommand{\To}{\ensuremath{\Rightarrow}}
@@ -1530,6 +1531,69 @@ $\pi$-reduction alone is also SN \cite[Thm.~55]{geuversHurkens:types17}.
 Since elimination composition is associative, \ie,
 $(E_1\{E_2\})\{E_3\} = E_1\{E_2\{E_3\}\}$, spine and $\pi$-reduction
 are confluent.
+
+\subsection{Permutations are harmless}
+
+For $\beta$-reduction alone, we have the following closure property of
+SN:  If all proper sub-terms and all $\whd[\beta]$-reducts of a term
+are $\beta$-SN, so is the term itself.  This is Lemma~2.3. of Geuvers and
+Hurkens' addendum \cite{geuversHurkens:addendumTypes17}.  We reprove
+it here for $\beta\pi$-SN, so the addition of permutation reduction is
+``harmless''.  Note that the requirements are not extended to
+$\whd[\pi]$-reducts!
+From now, let ``reduction'' be $\beta\pi$-reduction and SN be
+understood \wrt\ this reduction.
+
+\begin{lemma}[Weak head expansion]
+  \label{lem:whexp}
+  Assume $a,b,t,u,a',u' \in \SN$, where mentioned.
+  Let $E = \el\to{10}(a',u')$.
+  \begin{enumerate}
+  \item \label{it:zerozero}
+    If $t[a'] \cdot E \cdot \vec E \in \SN$ then
+    $\inn\to{00}(t,u) \cdot E \cdot \vec E \in \SN$.
+  \item \label{it:zeroone}
+    If $t[a'] \cdot E \cdot \vec E \in \SN$
+    and $u'[b] \cdot \vec E \in \SN$
+    then $\inn\to{01}(t,b) \cdot E \cdot \vec E \in \SN$.
+  \item \label{it:oneone}
+    If  $u'[b] \cdot \vec E \in \SN$
+    then $\inn\to{11}(a,b) \cdot E \cdot \vec E \in \SN$.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  We demonstrate \ref{it:zeroone} in detail, the others are simpler.
+  For $\inn\to{01}(t,b) \cdot \el\to{10}(a',u') \cdot \vec E \in \SN$,
+  we show that all its one-step reducts are SN.
+  To this end, we induct on the length of $\vec E$ and side induct on
+  our two main hypotheses (i) and (ii).
+  The side induction on (i)
+  $t[a'] \cdot E \cdot \vec E \in \SN$ immediately covers
+  reductions in $t$, $E$, and $\vec E$,
+  and the side induction on (ii)
+  $u'[b] \cdot \vec E \in \SN$ covers the remaining inner
+  reductions, namely in $b$.  (Alternatively, we could induct on
+  $b,t,a',u',\vec E \in \SN$, of course, but having only two induction
+  hypotheses is more economical, since we anyway have to simulate
+  reduction of one of the ``bits'' $b,t,a',u',\vec E$ in our two
+  main hypotheses.)
+  Our final induction is on the length of $\vec E$.
+
+  Besides inner reductions, we have two $\whd[\beta]$-reductions, by they
+  are covered by our two main hypotheses.  It remains to show that the
+  $\pi$-reduction of $E \cdot \vec E$ is also benign, meaning $I \cdot
+  E' \cdot \vec E' \in \SN$,
+  where $I = \inn\to{01}(t,b)$ and
+  $E' = \el\to{10}(a', u' \cdot E_1\uparrow)$ and
+  $\vec E = E_1 \cdot \vec E'$.
+  We tackle this by our main induction hypotheses, but to apply it we
+  need to show the two new main hypotheses, which are now
+  (i') $t[a'] \cdot E' \cdot \vec E' \in \SN$ and
+  (ii') $(u' \cdot E_1\uparrow)[b] \cdot \vec E' \in \SN$.
+  But (i') just is a $\pi$-reduct of (i), and (ii') is identical to
+  (ii), once we distribute the substitution $[b]$.
+
+\end{proof}
 
 \subsection{Failure of the CR method for $\beta\pi$}
 
