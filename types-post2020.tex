@@ -1536,13 +1536,13 @@ are confluent.
 
 For $\beta$-reduction alone, we have the following closure property of
 SN:  If all proper sub-terms and all $\whd[\beta]$-reducts of a term
-are $\beta$-SN, so is the term itself.  This is Lemma~2.3. of Geuvers and
+are $\beta$-SN, so is the term itself.  This is Lemma~2.3.\ of Geuvers and
 Hurkens' addendum \cite{geuversHurkens:addendumTypes17}.  We reprove
 it here for $\beta\pi$-SN, so the addition of permutation reduction is
 ``harmless''.  Note that the requirements are not extended to
-$\whd[\pi]$-reducts!
+include the $\whd[\pi]$-reducts!
 From now, let ``reduction'' be $\beta\pi$-reduction and SN be
-understood \wrt\ this reduction.
+understood \wrt\ this reduction relation.
 
 \begin{lemma}[Weak head expansion]
   \label{lem:whexp}
@@ -1562,45 +1562,58 @@ understood \wrt\ this reduction.
   \end{enumerate}
 \end{lemma}
 \begin{proof}
-  We demonstrate \ref{it:zeroone} in detail, the others are simpler.
+  We demonstrate statment~\ref{it:zeroone} in detail, the others are similar.
   For $\inn\to{01}(t,b) \cdot \el\to{10}(a',u') \cdot \vec E \in \SN$,
   we show that all its one-step reducts are SN.
-  To this end, we induct on the length of $\vec E$ and side induct on
+  To this end, we induct on
   our two main hypotheses (i) and (ii).
-  The side induction on (i)
+  The induction on (i)
   $t[a'] \cdot E \cdot \vec E \in \SN$ immediately covers
   reductions in $t$, $E$, and $\vec E$,
-  and the side induction on (ii)
+  and the induction on (ii)
   $u'[b] \cdot \vec E \in \SN$ covers the remaining inner
-  reductions, namely in $b$.  (Alternatively, we could induct on
-  $b,t,a',u',\vec E \in \SN$, of course, but having only two induction
-  hypotheses is more economical, since we anyway have to simulate
-  reduction of one of the ``bits'' $b,t,a',u',\vec E$ in our two
-  main hypotheses.)
-  Our final induction is on the length of $\vec E$.
+  reductions, namely in $b$.
+  % (Alternatively, we could induct on
+  % $b,t,a',u',\vec E \in \SN$, of course, but having only two induction
+  % hypotheses is more economical, since we anyway have to simulate
+  % reduction of one of the ``bits'' $b,t,a',u',\vec E$ in our two
+  % main hypotheses.)
 
   Besides inner reductions, we have two $\whd[\beta]$-reductions, by they
-  are covered by our two main hypotheses.  It remains to show that the
-  $\pi$-reduction of $E \cdot \vec E$ is also benign, meaning $I \cdot
+  are directly implied by our two main hypotheses.  It remains to show that the
+  $\pi$-contraction of $E \cdot \vec E$ is also benign, meaning $I \cdot
   E' \cdot \vec E' \in \SN$,
   where $I = \inn\to{01}(t,b)$ and
   $E' = \el\to{10}(a', u' \cdot E_1\uparrow)$ and
   $\vec E = E_1 \cdot \vec E'$.
-  We tackle this by our main induction hypotheses, but to apply it we
+  To tackle this by induction hypothesis, we
   need to show the two new main hypotheses, which are now
   (i') $t[a'] \cdot E' \cdot \vec E' \in \SN$ and
   (ii') $(u' \cdot E_1\uparrow)[b] \cdot \vec E' \in \SN$.
   But (i') just is a $\pi$-reduct of (i), and (ii') is identical to
   (ii), once we distribute the substitution $[b]$.
+  The inductive step is thus justified by the first induction
+  hypothesis.
 
+  Statement~\ref{it:zerozero} is very similar, only that the second
+  induction is on $(u,u') \in \SN$, to cover reductions in $u$ and
+  $u'$.
+
+  Statement~\ref{it:oneone} needs a main induction on the length of
+  $\vec E$ to cover the case of $\whd[\pi]$-reduction.  Further side
+  inductions are needed on $a,a' \in \SN$.
 \end{proof}
+Similar arguments to \Cref{lem:whexp} can be found in the work of
+Joachimski and Matthes \cite[Sect.~5 and 6]{matthes:shortproofs}.
 
 \subsection{Failure of the CR method for $\beta\pi$}
 
 Our goal is now a model-theoretic proof of the SN of $\beta\pi$-reduction.
 Unfortunately,
 just throwing permutation reductions into the mix and replaying the CR
-proof for SN-$\beta$ does not work.  The proof of \Cref{lem:app} relies
+proof for SN-$\beta$ does not work,
+despite the ``harmless'' character of permutations.
+The proof of \Cref{lem:app} relies
 on the fact that if $f \cdot E \red c$ and $f \not\in \Intro$ then
 either $f \red f'$ or $E \red E'$, and the structure of the
 elimination $f \cdot E$ is preserved.  However, with permutations, in
@@ -1714,7 +1727,7 @@ Symmetrically to $\A^\perp$, given a set of terms $\T_\Gamma \subseteq
 (\Gamma \vdash A)$ we define
 \[
   \T_\Gamma^\perp =
-  \{ (C, \vec E : \Gamma \mid A \vdash C) \mid
+  \{ (C, (\vec E : \Gamma \mid A \vdash C)) \mid
   a \cdot \vec E \in \SN(\Gamma \vdash C)
   \mbox{ for all } a \in \T_\Gamma \}
   .
