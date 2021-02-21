@@ -1916,6 +1916,40 @@ Thus, we prove the following stronger lemma.
   % $u \perp \C[\B]_\Gamma$ then $f \cdot E \perp \C$
   % where $E = \el\to{10}(a,u)$.
 \end{lemma}
+
+\begin{proof}
+  Let $\X_\Gamma = \{ E \cdot \vec E \mid E = \el\to{10}(a,u)
+  \mbox{ for some } a \perp \A_\Gamma \mbox{ and } u \perp \C[\B]_\Gamma,
+  \mbox{ and } \vec E \in \C_\Gamma \}$.
+  To show $\X \subseteq \A \to \B$, by coinduction
+  it is sufficient that $\X$ is a post-fixpoint of $\F^\perp$.  So
+  assume $E \cdot \vec E \in \X$ and $I \in \F(\X)$ and show
+  $v := I \cdot E \cdot \vec E \in \SN$
+  by \Cref{lem:whexp}.  To this end, we have to show that all
+  $\whd[\beta]$-redexes of $v$ are SN.
+  We distinguish the different introduction forms $I$.
+  \begin{caselist}
+
+    \nextcase $I = \inn\to{00}(t,u')$ with
+    $t \perp \X[\A]_\Gamma$ and
+    $u' \perp \X[\B]_\Gamma$.
+    We have
+    $t[a] \perp \X_\Gamma$ by assumption on $t$ and
+    $E \cdot \vec E \in \X_\Gamma$,
+    thus, $t[a] \cdot E \cdot \vec E \in \SN$.
+
+    \nextcase $I = \inn\to{11}(a,b)$ with $a \perp \A_\Gamma$ and
+    $b \perp \B_\Gamma$.
+    We have
+    $u[b] \perp \C_\Gamma$ and $\vec E \in \C_\Gamma$,
+    thus $u[b] \cdot \vec E \in \SN$.
+
+    \nextcase $I = \inn\to{01}(t,b)$.  In this case we have two
+      weak head $\beta$-redexes which we handle as in the
+      previous cases.
+  \popQED
+  \end{caselist}
+\end{proof}
 \begin{proof}
   By coinduction, which means that we can use the coinductive
   hypothesis $E \in (\A \to \B)_\Gamma$ after one step towards the
