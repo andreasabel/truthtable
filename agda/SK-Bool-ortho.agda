@@ -164,7 +164,7 @@ mutual
 -- Concatenation ++ is a congruence
 
 ++↦ₗ  :  E ↦ₛ E′
-     →  E ++ E₁ ↦ₛ E′ ++ E₁
+      →  E ++ E₁ ↦ₛ E′ ++ E₁
 ++↦ₗ π          = π
 ++↦ₗ (here  r)  = here r
 ++↦ₗ (there r)  = there (++↦ₗ r)
@@ -178,7 +178,7 @@ mutual
 -- Application ∘ is a congruence
 
 ∘↦ₗ  :  t ↦ t′
-    →  t ∘ E ↦ t′ ∘ E
+     →  t ∘ E ↦ t′ ∘ E
 ∘↦ₗ ↦K      = ↦K  -- rewrite app-app
 ∘↦ₗ ↦S      = ↦S
 ∘↦ₗ ↦tt     = ↦tt
@@ -344,7 +344,9 @@ mutual
             (acc sntE) (acc snuE) (↦E (there r))     = sn-case (sntE (∘↦ᵣ t r)) (snuE (∘↦ᵣ u r))
   sn-case'  {i = .(↑ i)} sntE snuE (↦E (π {i = i}))  = sn-case {i = i} sntE snuE
 
-{- -- Internal error with this version (#4929)
+{-
+-- WAS: Internal error with this version (#4929)
+-- NOW: Termination error
 sn-case : {E : Stack i a c}
           (sntE : SN (t ∘ E))
           (snuE : SN (u ∘ E))

@@ -36,7 +36,7 @@ files=lipics-v2019.cls Makefile \
 
 .PRECIOUS : %.pdf %.tex # %.dvi %.ps %.gz
 
-default : sk-nondet.pdf # cr-sk.pdf # main.pdf
+default : main.pdf # sk-nondet.pdf # cr-sk.pdf #
 
 all : sk-nondet.pdf cr-sk.pdf main.pdf
 

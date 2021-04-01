@@ -412,7 +412,9 @@ mutual
   sn-case'  {i = .(↑ i)} sntE snuE (↦E (π {i = i}))  = sn-case {i = i} sntE snuE
 \end{code}
 
-%% -- Internal error with this version (#4929)
+%% 
+%% -- WAS: Internal error with this version (#4929)
+%% -- NOW: Termination error
 %% sn-case : {E : Stack i a c}
 %%           (sntE : SN (t ∘ E))
 %%           (snuE : SN (u ∘ E))
