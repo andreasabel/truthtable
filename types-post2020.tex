@@ -1538,9 +1538,10 @@ For $\beta$-reduction alone, we have the following closure property of
 SN:  If all proper sub-terms and all $\whd[\beta]$-reducts of a term
 are $\beta$-SN, so is the term itself.  This is Lemma~2.3.\ of Geuvers and
 Hurkens' addendum \cite{geuversHurkens:addendumTypes17}.  We reprove
-it here for $\beta\pi$-SN, so the addition of permutation reduction is
-``harmless''.  Note that the requirements are not extended to
+it here for $\beta\pi$-SN.  Note that the requirements are not extended to
 include the $\whd[\pi]$-reducts!
+So, the addition of permutation reduction is actually ``harmless''.
+
 From now, let ``reduction'' be $\beta\pi$-reduction and SN be
 understood \wrt\ this reduction relation.
 
@@ -1579,7 +1580,7 @@ understood \wrt\ this reduction relation.
   % reduction of one of the ``bits'' $b,t,a',u',\vec E$ in our two
   % main hypotheses.)
 
-  Besides inner reductions, we have two $\whd[\beta]$-reductions, by they
+  Besides inner reductions, we have two $\whd[\beta]$-reductions, yet they
   are directly implied by our two main hypotheses.  It remains to show that the
   $\pi$-contraction of $E \cdot \vec E$ is also benign, meaning $I \cdot
   E' \cdot \vec E' \in \SN$,
@@ -1590,7 +1591,7 @@ understood \wrt\ this reduction relation.
   need to show the two new main hypotheses, which are now
   (i') $t[a'] \cdot E' \cdot \vec E' \in \SN$ and
   (ii') $(u' \cdot E_1\uparrow)[b] \cdot \vec E' \in \SN$.
-  But (i') just is a $\pi$-reduct of (i), and (ii') is identical to
+  But (i') is just a $\pi$-reduct of (i), and (ii') is identical to
   (ii), once we distribute the substitution $[b]$.
   The inductive step is thus justified by the first induction
   hypothesis.
@@ -1605,6 +1606,8 @@ understood \wrt\ this reduction relation.
 \end{proof}
 Similar arguments to \Cref{lem:whexp} can be found in the work of
 Joachimski and Matthes \cite[Sect.~5 and 6]{matthes:shortproofs}.
+I have also formalized that argument in Agda, albeit for a simpler
+case: simply-typed combinatory algebra with conditionals.
 
 \subsection{Failure of the CR method for $\beta\pi$}
 
@@ -1950,65 +1953,6 @@ Thus, we prove the following stronger lemma.
   \popQED
   \end{caselist}
 \end{proof}
-\begin{proof}
-  By coinduction, which means that we can use the coinductive
-  hypothesis $E \in (\A \to \B)_\Gamma$ after one step towards the
-  goal.  Note that $E \in \SN$ since $a,u \in \SN$.  By unfolding of
-  the fixed point, it is sufficient to show
-  $E \cdot \vec E \in \F(\A \to \B)^\perp_\Gamma$.  This means to show
-  $I \cdot E \cdot \vec E \in \SN$ for any
-  $I \in \F(\A \to \B)_\Gamma$.
-  We do this by proving that all one-step reducts of $I \cdot E \cdot
-  \vec E$ are SN.
-  We know that $\pi$ spine reduction $\whd[\pi]$ is strongly
-  normalizing, thus we side induct on
-  $E \cdot \vec E \in \SN(\whd[\pi])$. This side induction hypothesis
-  covers the case that $E \cdot \vec E \whd[\pi] \vec E'$.
-  We further side induction on $I,E,\vec E \in \SN$.  By these side
-  induction hypotheses, we cover the case of inner reductions, i.e., that reduction occurs in
-  $I$, $E$ or $\vec E$.
-  It remains to treat the cases of $I \cdot E \contract[\beta] \_$
-  by distinguishing the different introduction forms $I$.
-  \begin{caselist}
-
-    \nextcase $I = \inn\to{00}(t,u')$ with
-    $t \perp (\A \to \B)[\A]_\Gamma$ and
-    $u' \perp (\A \to \B)[\B]_\Gamma$.
-
-    % We proceed by a second side induction on
-    % $t,u',E, \vec E \in \SN$ and show that all possible reducts of $I
-    % \cdot E \cdot \vec E$
-    % are SN.
-    % If reduction occurs in $I$ or $E$, we use the second side induction
-    % hypothesis.
-
-    % If $E \cdot \vec E \whd[\pi] \vec E'$ we use the first side
-    % induction hypothesis.
-
-    %Otherwise
-    The reduction is $I \cdot E \contract[\beta] t[a] \cdot E$.  We have
-    $t[a] \perp (\A \to \B)_\Gamma$ by assumption on $t$ and
-    $E \cdot \vec E \in (\A \to \B)_\Gamma$ by the coinduction hypothesis.
-    Thus, $t[a] \cdot E \cdot \vec E \in \SN$.
-
-    \nextcase $I = \inn\to{11}(a,b)$ with $a \perp \A_\Gamma$ and
-    $b \perp \B_\Gamma$.
-    % Again, we proceed by side induction on
-    % $a,b,E, \vec E \in \SN$ and show that all possible reducts of $I
-    % \cdot E \cdot \vec E$
-    % are SN.
-    % The only interesting reduction is
-    The reduction is
-    $I \cdot E \contract[\beta] u[b] \perp \C_\Gamma$, thus $u[b]
-    \cdot \vec E \in \SN$.
-    Coinduction is not needed in this case.
-
-    \nextcase $I = \inn\to{01}(t,b)$.  In this case we have two
-      $\beta$-contractions of $I \cdot E$ which we handle as in the
-      previous cases.
-  \popQED
-  \end{caselist}
-\end{proof}
 
 Plugging these lemmata into the framework of \Cref{sec:model}, we
 obtain a new proof of $\beta\pi$-SN for ITTND.
@@ -2032,7 +1976,8 @@ Agda, such backups do not exist.  This begs the question whether
 non-strictly positive (co)inductive types could be added in some form
 to MLTT without jeopardizing its soundness.
 
-For future work, one should investigate whether the SN-method of
+In the appendix (\Cref{sec:sat}), we investigate how
+the SN-method of
 Joachimski and Matthes \cite{matthes:shortproofs,matthes:classlog}
 could be applied to
 ITTND to prove $\beta\pi$-SN without the need for impredicativity nor
