@@ -1,0 +1,398 @@
+\nonstopmode
+\RequirePackage[dvipsnames]{xcolor}
+
+\documentclass[a4paper]{easychair}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{xspace}
+%\usepackage{dsmath}
+%\usepackage{bbm}
+\usepackage{bbold}
+\usepackage[utf8x]{inputenc}
+
+\usepackage{natbib}
+\usepackage{hyperref}
+\urlstyle{sf} % less wide than tt
+% \usepackage{agda} % colors
+
+\usepackage{wrapfig}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\definecolor{DeepJungleGreen}{rgb}{0.0, 0.29, 0.29}
+\definecolor{DarkSpringGreen}{rgb}{0.09, 0.45, 0.27}
+\definecolor{ForestGreenTraditional}{rgb}{0.0, 0.27, 0.13}
+\definecolor{GreenPigment}{rgb}{0.0, 0.65, 0.31}
+\definecolor{CalPolyPomonaGreen}{rgb}{0.12, 0.3, 0.17}
+\definecolor{CSSGreen}{rgb}{0.0, 0.5, 0.0}
+\definecolor{DarkCerulean}{rgb}{0.03, 0.27, 0.49}
+\definecolor{DarkRaspberry}{rgb}{0.53, 0.15, 0.34}
+
+\colorlet{DarkBlue}{MidnightBlue!80!black}
+\definecolor{HanBlue}{rgb}{0.27, 0.42, 0.81}
+\definecolor{FrenchBlue}{rgb}{0.0, 0.45, 0.73}
+\definecolor{EgyptianBlue}{rgb}{0.06, 0.2, 0.65}
+
+\hypersetup{colorlinks=true,
+  linkcolor=Red,
+  citecolor=DarkRaspberry,%DarkPurple,%DarkCerulean,%CSSGreen,%CalPolyPomonaGreen,%GreenPigment,%ForestGreenTraditional,%DarkSpringGreen,%DeepJungleGreen,%ForestGreen,
+  urlcolor=MidnightBlue}
+
+\makeatletter
+\renewcommand\bibsection{%
+  \section*{\large{\refname}}%
+}%
+\makeatother
+
+% less space between entries in bibliography
+\let\OLDthebibliography\thebibliography
+\renewcommand\thebibliography[1]{
+  \OLDthebibliography{#1}
+  \setlength{\parskip}{0pt}
+  \setlength{\itemsep}{0.2ex plus 0.3ex}
+}
+
+%% Macros
+\newcommand{\bla}{\ensuremath{\mbox{$$}}}
+\newcommand{\ie}{\emph{i.e.}\xspace}
+\newcommand{\eg}{\emph{e.g.}\xspace}
+\newcommand{\Eg}{\emph{E.g.}\xspace}
+\newcommand{\loccit}{\emph{loc.\,cit.}\xspace}
+\newcommand{\cf}{cf.\ }
+\newcommand{\wrt}{w.r.t.\xspace}
+\newcommand{\den}[2][]{\llbracket#2\rrbracket^{#1}}
+\newcommand{\dent}[1]{\llparenthesis#1\rrparenthesis}
+\newcommand{\To}{\ensuremath{\Rightarrow}}
+%\newcommand{\todot}{\stackrel\cdot\to}
+\newcommand{\todot}{\mathbin{\dot{\to}}}
+\newcommand{\bN}{\ensuremath{\mathbb{N}}}
+\newcommand{\dom}{\mathop{\mathrm{dom}}\nolimits}
+\newcommand{\Pot}[1]{\mathcal{P}\,#1}
+%\newcommand{\defiff}{:\iff}
+\newcommand{\defiff}{\mathrel{{{:}{\Longleftrightarrow}}}}
+\newcommand{\subst}[3]{#3[#1/#2]}
+\newcommand{\tid}{\mathsf{id}}
+\newcommand{\tcomp}{\mathsf{comp}}
+\newcommand{\telim}{\mathsf{elim}}
+\newcommand{\tvar}{\mathsf{var}}
+\newcommand{\sid}{\mathds{1}}
+
+\newcommand{\ru}{\dfrac}
+\newcommand{\nrul}[3]{#1\;\dfrac{\begin{array}{l}#2\end{array}}{#3}}
+\newcommand{\nru}[3]{#1\;\dfrac{#2}{#3}}
+\newcommand{\rux}[3]{\dfrac{#1}{#2}\;#3}
+\newcommand{\nrux}[4]{#1\;\dfrac{#2}{#3}\;#4}
+
+
+\newcommand{\rulename}[1]{\ensuremath{\mbox{\textsc{#1}}}\xspace}
+\newcommand{\rbeta}[1]{\ensuremath{\beta\mbox{-}\mathord{#1}}\xspace}
+\newcommand{\reta}[1]{\ensuremath{\eta\mbox{-}\mathord{#1}}\xspace}
+\newcommand{\rintro}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{intro}}}\xspace}
+\newcommand{\relim}[1]{\ensuremath{\mathord{#1}\mbox{-\rulename{elim}}}\xspace}
+\newcommand{\remb}{\rulename{emb}}
+\newcommand{\rexp}{\rulename{exp}}
+
+\newcommand{\Den}[2]{\den{#1}_{#2}}
+\newcommand{\Denpar}[2]{\Den{#1}{(#2)}}
+
+\newcommand{\bu}{\ensuremath{\bullet}}
+\newcommand{\Ge}{\ensuremath{\varepsilon}}
+\newcommand{\Ga}{\ensuremath{\alpha}}
+\newcommand{\Gd}{\ensuremath{\delta}}
+\newcommand{\Gg}{\ensuremath{\gamma}}
+\newcommand{\Gl}{\ensuremath{\lambda}}
+\newcommand{\Gr}{\ensuremath{\rho}}
+\newcommand{\Gs}{\ensuremath{\sigma}}
+\newcommand{\GG}{\ensuremath{\Gamma}}
+\newcommand{\GS}{\ensuremath{\Sigma}}
+
+\newcommand{\Set}{\mathsf{Set}}
+
+\newcommand{\x}{\mathsf{x}}
+\newcommand{\tin}{\ensuremath{\mathsf{in}}}
+\newcommand{\inn}[2]{\ensuremath{\tin_{#1}^{#2}}}
+\newcommand{\tel}{\mathsf{el}}
+\newcommand{\el}[2]{\ensuremath{\tel_{#1}^{#2}}}
+
+\newcommand{\contract}[1][]{\mapsto_{#1}}
+\newcommand{\whd}[1][]{\rhd_{#1}}
+\newcommand{\red}[1][]{\longrightarrow_{#1}}
+\newcommand{\inner}[1][]{\rightharpoonup_{#1}}
+
+\newcommand{\CR}{\mathsf{CR}}
+\newcommand{\cl}[1]{\overline{#1}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\B}{\mathcal{B}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\T}{\mathcal{T}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\SN}{\mathsf{SN}}
+\newcommand{\Intro}{\mathsf{Intro}}
+\newcommand{\Up}{\mathop{\Uparrow}}
+\newcommand{\up}{\mathord{\uparrow}}
+\newcommand{\Neut}{\mathsf{Neut}}
+\newcommand{\SAT}{\mathsf{SAT}}
+
+\newcommand{\indy}[1]{_{#1}}
+\newcommand{\indyp}[2]{(#1)_{#2}}
+\newcommand{\ind}[1]{}    % _{#1}
+\newcommand{\indp}[2]{#1} % (#1)_{#2}
+
+\begin{document}
+
+\title{On Model-Theoretic Strong Normalization for \\ Truth-Table Natural Deduction}
+\titlerunning{Strong Normalization for Truth-Table Natural Deduction}
+\authorrunning{A. Abel}
+\author{Andreas Abel\thanks{Supported by VR grant 2019-04216.}}
+\institute{
+  Department of Computer Science and Engineering,
+  Gothenburg University
+}
+
+% Keywords:
+% Agda, Dependent types, Indexed data types, Typed Assembly, Verified compilation
+
+\maketitle
+
+% \begin{abstract}
+% Intuitionistic truth table natural deduction (ITTND), which is
+% inherently non-confluent, has been shown strongly normalizing (SN)
+% using continuation-passing-style translations to parallel lambda
+% calculus.  We investigate the applicability of standard
+% model-theoretic proof techniques and show (1) SN of detour reduction
+% ($\beta$) using Girard's reducibility candidates, repairing a previous proof
+% attempt, and (2) SN of detour and permutation reduction ($\beta\pi$) using
+% biorthogonals.
+% \end{abstract}
+
+\noindent
+
+% \begin{wrapfigure}
+% [number of narrow lines]
+% {placement}
+% {overhang}
+% {width} %% 0pt: automatic
+
+\newcommand{\wraptt}{%
+\begin{wrapfigure}[7]{r}[0pt]{0pt}%
+%  \begin{figure}[h]
+%    \centering
+\(\begin{array}{cc|c}
+  A & B & A \to B \\
+\hline
+  0 & 0 & 1 \\
+  0 & 1 & 1 \\
+  1 & 0 & 0 \\
+  1 & 1 & 1 \\
+\end{array}\)%
+%    \caption{Implication table.}
+%    \label{tab:impl}
+%  \end{figure}
+\end{wrapfigure}%
+}
+
+Geuvers and Hurkens \citeyearpar{geuversHurkens:icla17} introduced a method to derive natural
+deduction proof rules from truth tables of logical connectives.
+
+\wraptt
+For instance, consider the truth table for implication.
+For each line where $A \to B$ holds, \eg, the second line, an
+introduction rule is created where $0$-valued (or \emph{negative})
+operands $A$ become premises $\Gamma.A \vdash A \to B$ and $1$-valued
+(or \emph{positive}) operands $B$ become premises $\Gamma \vdash B$.
+Lines like the third where $A \to B$ is false become eliminations
+with a conclusion $\Gamma \vdash C$ for an arbitrary formula $C$.
+The premises of this eliminations are
+a premise $\Gamma \vdash A$ for each $1$-valued operand $A$, and
+a premise $\Gamma.B \vdash C$ for each $0$-valued operand $B$.
+This yields the following four rules for judgements
+$\Gamma \vdash A$ and $\Gamma \mid A \vdash C$, which we complement by
+the standard administrative rules for natural deduction in spine form:
+\begin{gather*}
+  \nru{\inn\to{00}
+     }{\Gamma.A \vdash A \to B \qquad
+       \Gamma.B \vdash A \to B
+     }{\Gamma \vdash A \to B
+     }
+%\\[2ex]
+\qquad
+  \nru{\inn\to{01}
+     }{\Gamma.A \vdash A \to B \qquad
+       \Gamma \vdash B
+    }{\Gamma \vdash A \to B
+    }
+\\[2ex]
+  \nru{\el\to{10}
+     }{\Gamma \vdash A \qquad
+       \Gamma.B \vdash C
+     }{\Gamma \mid A \to B \vdash C
+     }
+\qquad
+  \nru{\inn\to{11}
+     }{\Gamma \vdash A \qquad
+       \Gamma \vdash B
+     }{\Gamma \vdash A \to B
+     }
+\\[2ex]
+% \end{gather*}
+% \begin{gather*}
+  \nru{\tvar
+     }{A \in \Gamma
+     }{\Gamma \vdash A}
+\qquad
+  \nru{\telim
+     }{\Gamma \vdash A \qquad
+       \Gamma \mid A \vdash C
+     }{\Gamma \vdash C}
+\quad
+%\\[2ex]
+  \nru{\tid
+     }{
+     }{\Gamma \mid A \vdash A}
+\qquad
+  \nru{\tcomp
+     }{\Gamma \mid A \vdash B \qquad
+       \Gamma \mid B \vdash C
+     }{\Gamma \mid A \vdash C}
+\end{gather*}
+
+The rule names serve as the constructors for proof terms $a,b,c,f,t,u : \Gamma
+\vdash A$.  Exceptions are
+$\telim$ and $\tcomp$ which we write infix as centered dot $f \cdot
+\vec E$ and $E \cdot \vec E$, and
+$\tvar$ which we omit, treating an index $x : A \in \Gamma$ directly
+as proof term.  Further, we consider eliminations $\vec E : \Gamma
+\mid A \vdash C$ up to
+associativity of composition with identity $\tid$.
+Substitution of the last hypothesis in $t : \Gamma.A \vdash C$ by $a :
+\Gamma \vdash A$ is written $t[a] : \Gamma \vdash C$.
+
+Proof terms allow us to express the reduction rules concisely.  A
+\emph{detour} or $\beta$-reduction can fire on the elimination $I
+\cdot E$ of an introduction $I$.
+\begin{itemize}
+\item
+Either, a
+positive premise (1) of the introduction matches a negative premise
+(0) of the elimination.  E.g., the second
+premise of the elimination $\el\to{10}$
+is negative, and it can react with the
+positive second premise of $\inn\to{01}$ and $\inn\to{11}$:
+\[
+\begin{array}{lll}
+  \inn\to{\_1}(\_,b) \cdot \el\to{10}(\_,t)
+    & \contract[\beta] &
+  t[b]
+\end{array}
+\]
+
+\item
+Or a negative premise of the introduction, e.g., $\inn\to{00}$ or
+$\inn\to{01}$, reacts with
+a matching positive premise of the elimination, $\el\to{10}$.
+In this case, the
+elimination persists, but the introduction is replaced with an
+instantiation of its respective negative premise.
+\[
+\begin{array}{lll}
+  \inn\to{0\_}(u,\_) \cdot \el\to{10}(a,t)
+    & \contract[\beta] &
+  u[a] \cdot \el\to{10}(a,t)
+\\
+\end{array}
+\]
+\end{itemize}
+Reduction is inherently non-confluent: the reducts of
+$\inn\to{01}(u,b) \cdot \el\to{10}(a,t)$ form the critical pair
+of $t[b]$ and  $u[a] \cdot \el\to{10}(a,t)$ which can in general not be
+joined.
+
+\emph{Permutation} or $\pi$-reductions allow us to combine sequences
+of eliminations $E_1 \cdot E_2$ into a single elimination
+$E_1\{E_2\}$, permuting elimination $E_2$ into the negative branches
+of $E_1$.  For implication $A \to B$, we have $\el\to{10}(a,u) \{ E_2 \} =
+\el\to{10}(a,u \cdot E_2 \up)$ where $\up$ lifts $E_2 : \Gamma \mid C
+\to C' \vdash D$ under the extra hypothesis $B$ of $u : \Gamma.B \vdash
+C \to C'$.
+
+Geuvers, van der Giessen, and Hurkens
+\citeyearpar{geuversGiessenHurkens:fundinf19} prove strong normalization (SN)
+of $\beta\pi$-reduction by a translation to simply-typed parallel
+lambda-calculus.  In a forth-coming article \citep{abel:types20post}
+in the TYPES 2020
+post-proceedings I obtain this result by adapting established
+model-theoretic SN proofs.
+
+In the adaptation of the (bi)orthogonality method I model types $A$ as
+sets $\A$ of eliminations $\vec E$ of type $A$ containing $\tid$.
+Terms $a$ of type $A$ are then shown to be \emph{orthgonal} to $\A$,
+where $a \perp \A$ means that $a \cdot \vec E$ is SN for all $\vec E
+\in \A$.  With notation $\vec E \in \X[\A]$ whenever $\vec E : \Gamma.A
+\mid X \vdash C$ and $\vec E[a] \in \X$ for all $a \perp \A$, we can
+construct $\A \to \B$ as the greatest fixpoint $\nu \F^\perp$ of the
+pointwise orthogonal $\F^\perp$ of the operator
+\[
+  \F(\X)_\Gamma =
+  \{
+    \inn\to{00}(t,u),
+    \inn\to{01}(t,b),
+    \inn\to{11}(a,b) \mid
+      a \perp \A_\Gamma,
+      b \perp \B_\Gamma,
+      t \perp \X[\A]_\Gamma,
+      u \perp \X[\B]_\Gamma
+  \}
+  .
+\]
+While $\F^\perp$ is monotone, it is not strictly positive, so we
+cannot directly implement this construction in Agda or predicative
+Coq, that only support \emph{strictly} positive coinductive types.
+
+An adaptation of Tait's saturated sets method however allows for a
+predicate proof using strictly positive inductive types only.  The
+saturation condition for a set $\C$ of SN terms
+is a mix of conditions presented by Geuvers and
+Hurkens \citeyearpar{geuversHurkens:types17,geuversHurkens:addendumTypes17} and Matthes
+\citeyearpar{matthes:classlog}:
+\begin{enumerate}
+\tightlist
+\item $\C$ contains any SN weak head $\beta$-redex whose reducts it
+  already contains.
+\item $\C$ contains the variables $x$.
+\item $\C$ contains a SN neutral $x \cdot \el\to{10}(a,u)$ whenever it
+  contains $u$.
+\item $\C$ contains neutral $x \cdot E_1 \cdot E_2 \cdot \vec E$
+  whenever it contains its $\pi$-reduct $x \cdot E_1\{E_2\} \cdot \vec
+  E$ and $y \cdot E_2 \cdot \vec E$ for some variable $y$.
+\end{enumerate}
+The closure operator derived from these conditions is strictly
+positive, so we can define semantics types like $\A \to \B$
+in a predicative way, by
+their introductions and the inductive closure generated from the
+above conditions.
+
+Having explained the interpretation of types $A$ as SN term set $\A$,
+the rest of the SN proof is routine.
+
+
+
+% \paragraph*{Acknowledgments.}
+% %Thanks to the anonymous referees, who helped improving the quality of
+% %this abstract through their feedback.
+% This work was supported by
+% Vetenskapsr\aa{}det under Grant
+%   No.~621-2014-4864 \emph{Termination Certificates
+%   for Dependently-Typed Programs and Proofs via Refinement Types}
+% and by the EU Cost Action CA15123 \emph{Types for programming and verification}.
+
+%\begin{footnotesize}
+
+\bibliographystyle{abbrvnat}
+%\bibliographystyle{abbrvurl}
+%\bibliographystyle{plainurl} % no author-year cit.
+\bibliography{auto-types21}
+
+%\end{footnotesize}
+\end{document}

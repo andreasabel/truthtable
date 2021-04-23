@@ -1,0 +1,16 @@
+
+Intuitionistic truth table natural deduction (ITTND), which is
+inherently non-confluent, has been shown strongly normalizing (SN)
+using continuation-passing-style translations to parallel lambda
+calculus.  We investigate the applicability of standard
+model-theoretic proof techniques and show SN of detour and permutation
+reduction (βπ) using (1) biorthogonals and (2) saturated sets.
+
+Keywords:
+
+Natural deduction
+Orthogonality
+Permutative conversion
+Saturated set
+Strong normalization
+Truth table
