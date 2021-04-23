@@ -22,15 +22,13 @@ latex=latex
 pdflatex=pdflatex
 bibliography=medium.bib
 
-files=lipics-v2019.cls Makefile \
-  cc-by.pdf lipics-logo-bw.pdf orcid.pdf
+files=lipics-v2021.cls Makefile \
+  cc-by.pdf lipics-logo-bw.pdf orcid.pdf \
+  types-post2020.tex sat.tex
 
 .PHONY : default add all pack ship debugMake html
 
 .PRECIOUS : %.dvi %.ps %.gz %.pdf %.tex
-
-sat.pdf : types-post2020.pdf Makefile
-	pdfjam -o $@ $< 18-
 
 default : types-post2020.pdf
 
@@ -40,6 +38,9 @@ pack : types-post2020.zip
 
 types-post2020.zip : types-post2020.pdf $(files) types-post2020.bbl auto-types-post2020.bib
 	zip $@ $^
+
+sat.pdf : types-post2020.pdf Makefile
+	pdfjam -o $@ $< 18-
 
 # types-post2020
 ##################################################################

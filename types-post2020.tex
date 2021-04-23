@@ -1,5 +1,5 @@
 
-\documentclass[a4paper,USenglish,cleveref, autoref, thm-restate]{lipics-v2019}
+\documentclass[a4paper,USenglish,cleveref, autoref, thm-restate]{lipics-v2021}
 %This is a template for producing LIPIcs articles.
 %See lipics-manual.pdf for further information.
 %for A4 paper format use option "a4paper", for US-letter use option "letterpaper"
@@ -20,7 +20,7 @@
 
 \author{Andreas Abel
   }{Department of Computer Science and Engineering,
-    Gothenburg University,
+    Chalmers and Gothenburg University,
     Sweden
     % \and \url{http://www.myhomepage.edu}
   }{andreas.abel@gu.se
@@ -36,7 +36,7 @@
 
 \authorrunning{A. Abel} %TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
 
-\Copyright{Andreas Abel} %TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+\Copyright{Andreas Martin Abel} %TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
 
 \begin{CCSXML}
 <ccs2012>
@@ -52,14 +52,16 @@
 
 \keywords{Natural deduction, Permutative conversion, Reducibility, Strong normalization, Truth table} %TODO mandatory; please add comma-separated list of keywords
 
-\category{} %optional, e.g. invited paper
+%\category{} %optional, e.g. invited paper
 
 \relatedversion{} %optional, e.g. full version hosted on arXiv, HAL, or other respository/website
 %\relatedversion{A full version of the paper is available at \url{...}.}
 
-\supplement{}%optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
+\supplement{\url{https://github.com/andreasabel/truthtable}}%optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
 
-%\funding{(Optional) general funding statement \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
+\funding{This work has been supported by grant no.~2019-04216 \emph{Modal
+  Dependent Type Theory} of the Swedish Research Council
+(Vetenskapsrådet).}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
 
 \acknowledgements{Thanks to Herman Geuvers for explaining
 me truth-table natural deduction during a 2018 visit to Nijmegen for
@@ -67,29 +69,39 @@ the purpose of Henning Basold's PhD ceremony.  Thanks to Ralph
 Matthes, Herman Geuvers
 and Tonny Hurkens
 for some email discussions on the topics of this article.
-%
-This work has been supported by grant no.~2019-04216 \emph{Modal
-  Dependent Type Theory} of the Swedish Research Council
-(Vetenskapsrådet).
+I am also grateful for the feedback of the reviewer that led to a
+substantial clarification of the proof using orthogonality.
 }%optional
 
-%\nolinenumbers %uncomment to disable line numbering
+\nolinenumbers %uncomment to disable line numbering
 
-\hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
+% \hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
 
-%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\EventEditors{Thorsten Altenkirch, Stefano Berardi and Ugo de’Liguoro}
+\EventEditors{Ugo de'Liguoro, Stefano Berardi, and Thorsten Altenkirch}
 \EventNoEds{3}
-\EventLongTitle{42nd Conference on Very Important Topics (TYPES 2020)}
+\EventLongTitle{26th International Conference on Types for Proofs and Programs (TYPES 2020)}
 \EventShortTitle{TYPES 2020}
 \EventAcronym{TYPES}
 \EventYear{2020}
-\EventDate{Cancelled due to COVID-19}
-\EventLocation{University of Torino, Italy}
+\EventDate{March 2--5, 2020}
+\EventLocation{University of Turin, Italy}
 \EventLogo{}
-\SeriesVolume{123}
-\ArticleNo{456}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\SeriesVolume{188}
+\ArticleNo{4}
+
+% %Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \EventEditors{Thorsten Altenkirch, Stefano Berardi and Ugo de’Liguoro}
+% \EventNoEds{3}
+% \EventLongTitle{42nd Conference on Very Important Topics (TYPES 2020)}
+% \EventShortTitle{TYPES 2020}
+% \EventAcronym{TYPES}
+% \EventYear{2020}
+% \EventDate{Cancelled due to COVID-19}
+% \EventLocation{University of Torino, Italy}
+% \EventLogo{}
+% \SeriesVolume{123}
+% \ArticleNo{456}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage[textsize=tiny]{todonotes}  %% DRAFT only
 \setuptodonotes{noline}
@@ -98,7 +110,7 @@ This work has been supported by grant no.~2019-04216 \emph{Modal
 \usepackage{stmaryrd}
 \usepackage{dsfont} % mathds
 %\usepackage{enumitem} %% not allowed, but would be needed for leftmargin
-\usepackage[hang,flushmargin]{footmisc}
+%\usepackage[hang,flushmargin]{footmisc}
 
 % https://texblog.org/2012/03/21/cross-referencing-list-items/
 \makeatletter
@@ -218,15 +230,22 @@ This work has been supported by grant no.~2019-04216 \emph{Modal
 %TODO mandatory: add short abstract of the document
 \begin{abstract}
   Intuitionistic truth table natural deduction (ITTND)
-  \cite{geuversHurkens:icla17,geuversHurkens:types17}, which is
+  by Geuvers and Hurkens (2017)%
+  % \cite{geuversHurkens:icla17,geuversHurkens:types17}
+  , which is
   inherently non-confluent, has been shown strongly normalizing (SN)
   using continuation-passing-style translations to parallel lambda
-  calculus \cite{geuversGiessenHurkens:fundinf19}.  We investigate the
+  calculus by Geuvers, van der Giessen, and Hurkens (2019)%
+  % \cite{geuversGiessenHurkens:fundinf19}
+  .  We investigate the
   applicability of standard model-theoretic proof techniques and show
   (1) SN of detour reduction ($\beta$) using Girard's reducibility
-  candidates, repairing a previous proof attempt
-  \cite{geuversHurkens:types17}, and (2) SN of detour and permutation
+  candidates,
+  %\cite{geuversHurkens:types17},
+  and (2) SN of detour and permutation
   reduction ($\beta\pi$) using biorthogonals.
+  In the appendix, we adapt Tait's method of saturated sets to
+  $\beta$, clarifying the original proof of 2017, and extend it to $\beta\pi$.
 \end{abstract}
 
 \section{Introduction}
@@ -355,7 +374,7 @@ The change of proof strategy begs the question whether the usual
 model-theoretic SN proofs could not work also for
 $\beta\pi$-reduction.  While the saturated sets method applied in
 a similar situation by Joachimski and Matthes
-\cite{joachimskiMatthes:rta00} fails due to non-confluence of $\beta$,
+\cite{joachimskiMatthes:rta00} seems not applicable due to non-confluence of $\beta$,
 Girard's RCs do not cover $\pi$.  However, there is a third popular
 method, \emph{(bi)orthogonals}, that has been developed to prove SN
 for classical lambda-calculi which are essentially non-confluent.
@@ -368,6 +387,8 @@ Lindley and Stark \cite{lindleyStark:tlca05} to prove SN for Moggi's
 and permutation rules for the monad.  We show in \Cref{sec:biortho} that
 biorthogonals, putting elimination sequences at the center of
 attention, can show SN for $\beta\pi$ of ITTND.
+Finally, in the \Cref{sec:sat}, we demonstrate how the the saturated sets
+method can also be adapted.
 
 While we limit our presentation on the implicational fragment of ITTND
 for didactic purposes and convenience of exposition, our techniques
@@ -1041,11 +1062,11 @@ a set of terms $\X$ is defined to be saturated ($\X \in
 \SAT$) if
 \begin{enumerate}[a.]
 
-\item (\namedlabel{it:sat1}{SAT1}) $\X \subseteq \SN$,
+\item (\namedlabel{it:hsat1}{SAT1}) $\X \subseteq \SN$,
 
-\item (\namedlabel{it:sat2}{SAT2}) $\Neut \subseteq \X$, and
+\item (\namedlabel{it:hsat2}{SAT2}) $\Neut \subseteq \X$, and
 
-\item (\namedlabel{it:sat3}{SAT3$'$}) $\X$ is closed under
+\item (\namedlabel{it:hsat3}{SAT3$'$}) $\X$ is closed under
   $\whd[\beta]$-expansion, namely if $t \in \SN$ and
   $(t \whd[\beta]\_) \subseteq \X$ (*) then $t \in \X$.
 
@@ -1056,13 +1077,13 @@ the requirement (*) is that $(t \whd[\beta]\_) \cap \X$ is inhabited,
 meaning that $t$ is the weak-head expansion of some term that is already
 in $\X$.  In the new formulation the requirement is that all
 weak-head reducts of $t$ are in $\X$.  It is easy to see that now
-\ref{it:sat2} is subsumed under \ref{it:sat3}, since neutrals have
+\ref{it:hsat2} is subsumed under \ref{it:hsat3}, since neutrals have
 no weak-head reducts, and the condition (*) is trivially satisfied.
-The modification of SAT3 towards CR3-style \ref{it:sat3} was perhaps
+The modification of SAT3 towards CR3-style \ref{it:hsat3} was perhaps
 undertaken to account for the non-determinism of $\whd[\beta]$ in
 ITTND.
 
-Unfortunately, with \ref{it:sat3} it is not clear how to show the equivalent of
+Unfortunately, with \ref{it:hsat3} it is not clear how to show the equivalent of
 \Cref{lem:funcr}, $(\A \to \B) \in \SAT$ \cite[Lemma~58]{geuversHurkens:types17}.
 In the formulation based on untyped terms, $\A \to \B$ is defined by
 \[
@@ -1073,11 +1094,11 @@ In the formulation based on untyped terms, $\A \to \B$ is defined by
   t \in \C[\B].\
   f \cdot \el\to{10}(a,t) \in \C .
 \]
-To attempt to show \ref{it:sat3} for $\A \to \B$, assume $f \in \SN$ with
+To attempt to show \ref{it:hsat3} for $\A \to \B$, assume $f \in \SN$ with
 $(f \whd[\beta]\_) \subseteq \A \to \B$ and derive $f \in \A \to \B$.
 To this end, assume $\C \in \SAT$ and $a \in \A$ and $t \in \C[\B]$
 and show $f \cdot E \in \C$ with $E = \el\to{10}(a,t)$.  Since $\C$ is
-arbitrary, we have to rely on \ref{it:sat3} to introduce elements into
+arbitrary, we have to rely on \ref{it:hsat3} to introduce elements into
 $\C$.  Thus, we need to show (1) $f \cdot E \in \SN$ and (2)
 $t' \in \C$ whenever $f \cdot E \whd[\beta] t'$.  For both goals we need to
 analyze the reducts of $f \cdot E$.  The problem is that $f$ could be
@@ -1093,17 +1114,17 @@ reduction under elimination, namely if $f \whd[\beta] f'$
 then $f \cdot E \whd[\beta] f' \cdot E$.  It seems that this direction
 is employed in the proof sketch
 \cite[Lemma~58.c]{geuversHurkens:types17}, not matching the new
-requirement \ref{it:sat3}.
+requirement \ref{it:hsat3}.
 
 Pointed to the gaps in their argument Geuvers and Hurkens published a
 revision \cite{geuversHurkens:addendumTypes17} with two amendments to
 the definitions:
 \begin{enumerate}
-\item Closure condition \ref{it:sat3} now applies only to \emph{weak
+\item Closure condition \ref{it:hsat3} now applies only to \emph{weak
     head redexes} $t$.  Only strongly normalizing weak head redexes
   $t$ whose weak head reducts are in saturated set $\X$ are forced
-  into $\X$.  The thus relativized \ref{it:sat3} no longer subsumes
-  \ref{it:sat2} which forces \emph{neutrals} into $\X$.
+  into $\X$.  The thus relativized \ref{it:hsat3} no longer subsumes
+  \ref{it:hsat2} which forces \emph{neutrals} into $\X$.
 \item The semantic connectives are relativized to SN terms.  \Eg, $f
   \in (\A \to \B)$ stipulates also $f \in \SN$.
 \end{enumerate}
@@ -1112,11 +1133,13 @@ eliminations, like \emph{truth}, but does not add anything for
 connectives with at least one elimination, like $\A \to \B$.
 
 Yet the first amendment allows us now to analyse the reducts of
-$f \cdot E$ in the proof of \ref{it:sat3} for $\A \to \B$.  Since $f$
+$f \cdot E$ in the proof of \ref{it:hsat3} for $\A \to \B$.  Since $f$
 is not an introduction, the only weak head redexes of $f \cdot E$ are
 of the form $f' \cdot E$ with $f \whd[\beta] f'$.  To show $(f \cdot E
 \whd[\beta] \_) \subseteq \C$, we can thus utilize the assumption
 $(f \whd[\beta] \_) \subseteq \A \to \B$.
+This repairs the proof; in \Cref{sec:satbeta} we will see a variant of
+the amended proof be spelled out in detail.
 
 % At the moment, we do not see an easy fix for the arguably more elegant
 % $\SAT$ method, and have to confine to the more pedestrian $\CR$ method
@@ -1607,7 +1630,7 @@ understood \wrt\ this reduction relation.
 Similar arguments to \Cref{lem:whexp} can be found in the work of
 Joachimski and Matthes \cite[Sect.~5 and 6]{matthes:shortproofs}.
 I have also formalized that argument in Agda, albeit for a simpler
-case: simply-typed combinatory algebra with conditionals.
+case: simply-typed combinatory algebra with conditionals.\footnote{\url{https://github.com/andreasabel/truthtable/blob/1a7a01fd28ffb327e9c91a3722e49b467d05a79d/agda/SK-Bool-ortho.agda}}
 
 \subsection{Failure of the CR method for $\beta\pi$}
 
@@ -1979,7 +2002,7 @@ to MLTT without jeopardizing its soundness.
 In the appendix (\Cref{sec:sat}), we investigate how
 the SN-method of
 Joachimski and Matthes \cite{matthes:shortproofs,matthes:classlog}
-could be applied to
+can be applied to
 ITTND to prove $\beta\pi$-SN without the need for impredicativity nor
 non-strict positivity nor CPS-translation.  Whether even an
 arithmetical proof \`a la David and Nour

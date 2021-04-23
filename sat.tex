@@ -1,7 +1,12 @@
 \section{Saturated Sets}
 \label{sec:sat}
 
+In this appendix, we show how to adapt the original \emph{saturated
+  sets} method to IITND, first just for $\beta$-SN, then including
+$\pi$-reductions.
+
 \subsection{Saturated Sets for Computation Reductions}
+\label{sec:satbeta}
 
 In the following, we adapt Tait's method of saturated sets to show $\beta$-SN
 for ITTND.  This is a variation of the proof by Geuvers and Hurkens
@@ -238,7 +243,7 @@ $\SAT$ variant of semantic function space.  For instance, $\inn\to{01}$:
 \label{sec:sat-perm}
 
 Ralph Matthes' \cite{matthes:classlog} formulation of saturated sets in
-the context of $\pi$-reductions can be adapted to ITTND.
+the context of $\pi$-reductions can also be adapted to ITTND.
 
 First, we observe that \Cref{lem:clos-sn} still holds if
 $\pi$-reductions are taken into account.  This is because any
@@ -322,7 +327,7 @@ extended definition of closure, obsoleting \ref{it:sat2}.
 \begin{proof}
   We shall focus on the new closure conditions for $\SAT$:
 \begin{itemize}
-\item[\rvar] Show $x \in (\A \to \B)_\Gamma$.  Clearly $x \in \SN$.
+\item \rvar: Show $x \in (\A \to \B)_\Gamma$.  Clearly $x \in \SN$.
   %
   Now assume $\C \in \SAT$ and $\tau : \Delta \leq \Gamma$ and
   $a \in \A_\Delta$ and $u \in \C[\B]_\Delta$ and show
@@ -333,7 +338,7 @@ extended definition of closure, obsoleting \ref{it:sat2}.
   By \rvar we have $\x_0 \in \B_{\Delta.B}$,
   thus $u(\up.\x_0) = u \in \C_{\Delta.B}$.
 
-\item[\rel] Assume $x : \Gamma \vdash A_0 \to B_0$ and
+\item \rel: Assume $x : \Gamma \vdash A_0 \to B_0$ and
   $a_0 \in \SN(\Gamma \vdash A_0)$ and
   $u_0 \in \cl{\A \to \B}_{\Gamma.B_0}$ and show
   $x \cdot \el\to{10}(a_0,u_0) \in \cl{\A \to \B}_\Gamma$.
@@ -356,7 +361,7 @@ extended definition of closure, obsoleting \ref{it:sat2}.
   \C[\B]_{\Delta.B_0}$,
   this is the case by definition of $\A \to \B$.
 
-\item[\rpi]
+\item \rpi:
   The case \rpi for $\A \to \B$ is shown by $\rpi$ for $\C$ (what $\C$
   refers to, see the previous cases).  This part is a bit tedious to
   spell out, but completely uninteresting, since just $\vec E$ is extended
