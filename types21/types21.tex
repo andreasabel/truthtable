@@ -145,7 +145,7 @@
 \title{On Model-Theoretic Strong Normalization for \\ Truth-Table Natural Deduction}
 \titlerunning{Strong Normalization for Truth-Table Natural Deduction}
 \authorrunning{A. Abel}
-\author{Andreas Abel\thanks{Supported by VR grant 2019-04216.}}
+\author{Andreas Abel}%\thanks{Supported by VR grant 2019-04216.}}
 \institute{
   Department of Computer Science and Engineering,
   Gothenburg University
@@ -209,7 +209,20 @@ a premise $\Gamma \vdash A$ for each $1$-valued operand $A$, and
 a premise $\Gamma.B \vdash C$ for each $0$-valued operand $B$.
 This yields the following four rules for judgements
 $\Gamma \vdash A$ and $\Gamma \mid A \vdash C$, which we complement by
-the standard administrative rules for natural deduction in spine form:
+the standard administrative rules for natural deduction in spine
+form:%
+%
+\footnote{Geuvers and Hurkens describe the rules in conventional
+  natural deduction format where the elimination rule has the
+  eliminatee as premise.  In contrast, we introduce a separate
+  syntactic class $E : \Gamma \mid A \vdash C$ of eliminations that is
+  often associated with sequent calculus.  However, with its focus on
+  eliminatee $A$ this is rather a variant of natural deduction where
+  subsequent eliminations can be grouped together.  For us, this
+  is more of a convenience of notation and presentation than a deviation
+  from Geuvers and Hurkens.  Our arguments all hold also with the
+  original natural deduction rules.}
+%
 \begin{gather*}
   \nru{\inn\to{00}
      }{\Gamma.A \vdash A \to B \qquad
@@ -374,17 +387,21 @@ their introductions and the inductive closure generated from the
 above conditions.
 
 Having explained the interpretation of types $A$ as SN term set $\A$,
-the rest of the SN proof is routine.
+the rest of the SN proof is routine.  For pedagogical purposes, we
+have only spelled out rules, reductions, and semantics for
+\emph{implication}, which is almost the general case---with the
+exception that it has only one elimination.  Rules and reductions for
+other connectives can be obtained according to the described schema,
+and the construction of their semantics can be mechanically derived
+from the inference rules.
 
 
-
-% \paragraph*{Acknowledgments.}
-% %Thanks to the anonymous referees, who helped improving the quality of
+\paragraph*{Acknowledgments.}
+Thanks to the anonymous referees for their feedback on this abstract.
+% , who helped improving the quality of
 % %this abstract through their feedback.
-% This work was supported by
-% Vetenskapsr\aa{}det under Grant
-%   No.~621-2014-4864 \emph{Termination Certificates
-%   for Dependently-Typed Programs and Proofs via Refinement Types}
+This work was supported by Vetenskapsr\aa{}det under Grant
+No.~2019-04216 \emph{Model Dependent Type Theory}.
 % and by the EU Cost Action CA15123 \emph{Types for programming and verification}.
 
 %\begin{footnotesize}

@@ -1,0 +1,101 @@
+
+
+Dear Andreas,
+
+I am glad to inform you that your submission has been accepted for a regular presentation. Instructions on how to prepare the video will be provided. Thank you very much for your contribution!
+
+Below you may find the reviews for your submission.
+
+Best,
+Henning
+
+SUBMISSION: 35
+TITLE: On Model-Theoretic Strong Normalization for Truth-Table Natural Deduction
+
+
+----------------------- REVIEW 1 ---------------------
+SUBMISSION: 35
+TITLE: On Model-Theoretic Strong Normalization for Truth-Table Natural Deduction
+AUTHORS: Andreas Abel
+
+----------- Overall evaluation -----------
+SCORE: 3 (strong accept)
+----- TEXT:
+
+In the paper the method to derive natural deduction rules from
+truth-tables of logical connectives introduced by Geuvers and Hurkens
+is considered. The author studies beta-reduction and beta pi-reduction
+for this system, where pi-reductions (permutation reductions) allow to
+combine sequences of eliminations into a single elimination. The
+strong normalization of beta pi-reduction is proved by adapting the
+(bi)orthogonality method.
+
+
+The submission is very suitable for TYPES 2021.
+
+
+
+----------------------- REVIEW 2 ---------------------
+SUBMISSION: 35
+TITLE: On Model-Theoretic Strong Normalization for Truth-Table Natural Deduction
+AUTHORS: Andreas Abel
+
+----------- Overall evaluation -----------
+SCORE: 3 (strong accept)
+----- TEXT:
+
+This presentation reports on recently submitted work (to the Types
+2020 proceedings) on proving strong normalization for the
+constructive "natural deuction from truth tables" calculus by
+Geuvers and Hurkens. This calculus is actually a family of
+calculi: for a set of connectives, each defined by a truth table,
+one derives the constructive natural deduction rules for these
+connectives following a general pattern which also yields notions
+of detour (beta-reduction) and permutation detour on natural
+deductions. It has been shown that detour reduction is strongly
+normalizing, using a translation to a parallel version of simply
+type lambda calculus. The present paper (presentation) gives
+direct proof, generalizing the model-theoretic (Tait saturated
+sets style) proof from proposition logic. This is non-trivial,
+because of the general shape of the connectives, but also because
+detour reduction is not confluent.
+
+This is very interesting solid work, fitting very well with the
+Types conference and contributing to our understanding of the
+general nature of constructive connectives and reduction of
+constructive proofs.
+
+As the abstract does not give a general presentation of the method,
+for arbitrary connectives, one is left wondering whether the approach
+of the author really works in full generality. I would like to
+see that explained in the talk.
+
+
+
+----------------------- REVIEW 3 ---------------------
+SUBMISSION: 35
+TITLE: On Model-Theoretic Strong Normalization for Truth-Table Natural Deduction
+AUTHORS: Andreas Abel
+
+----------- Overall evaluation -----------
+SCORE: 2 (accept)
+----- TEXT:
+
+This abstract is about a paper accepted for the TYPES'20
+proceedings. Therefore, the contents has already been fully validated
+for TYPES.
+
+A question that arises when reading this abstract is whether the
+proposed model-theoretic proof works for any truth-table: the text
+only illustrates the case of implication.
+
+A second question is about natural deduction. Geuvers and co-authors
+always speak about "natural deduction" and their inference rules have
+the form of generalized introduction/elimination rules. If we accept
+that such generalized rules are still natural deduction rules, we
+understand the terminology. But here, the author speaks of "natural
+deduction in spine form", and the adopted "elimination" rule is the
+left introduction rule. Now left introduction and the spine form is
+about sequent calculus (cf Herbelin and Cervesato-Pfenning). Is it so
+unimportant, the precision in the terminology? Is it important for the
+model-theoretic proof, the adoption of the sequent calculus format?
