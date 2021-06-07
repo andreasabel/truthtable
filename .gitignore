@@ -7,9 +7,12 @@
 *.fdb_latexmk
 *.fls
 *.log
+*.nav
 *.out
 *.pdf
 *.ptb
+*.snm
+*.toc
 *.vtc
 *Bug*.agda
 trash-*
