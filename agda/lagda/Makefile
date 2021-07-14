@@ -171,7 +171,7 @@ cr-sk_aux : cr-sk.tex latex/SK-no-bot.tex
 
 # initially, run latex once to create an .aux file
 # mark .aux file as fresh by creating a stamp _aux
-sk-nondet_aux : sk-nondet.tex template.tex latex/SK-nondet.tex
+sk-nondet_aux : sk-nondet.tex template.tex latex/SK-non-det.tex
 	-$(pdflatex) $<;
 	touch $@;
 

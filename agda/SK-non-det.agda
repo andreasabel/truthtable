@@ -5,7 +5,7 @@
 -- with non-determinism
 -- using Girard's reducibility candidates.
 
-module SK-nondet where -}
+module SK-non-det where -}
 
 -- Preliminaries
 ------------------------------------------------------------------------
