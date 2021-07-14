@@ -8,10 +8,9 @@
 {-# OPTIONS --rewriting #-}
 {-# OPTIONS --sized-types #-}
 
-open import Agda.Builtin.Equality
 open import Agda.Builtin.Size
-
-{-# BUILTIN REWRITE _≡_ #-}
+open import Agda.Builtin.Equality
+open import Agda.Builtin.Equality.Rewrite
 
 variable i j : Size
 
@@ -95,7 +94,7 @@ _++_ : Stack ∞ a b → Stack ∞ b c → Stack ∞ a c
 (u ∷ E)  ++ E′ = u ∷ (E ++ E′)
 
 postulate
-  ++-ε : (E ++ ε) ≡ E
+  ++-ε : ∀{E : Stack ∞ a b} → (E ++ ε) ≡ E
 
 {- Sized types trouble, see Abel/Vezzosi/Winterhalter, ICFP 2017
 ++-ε : {E : Stack ∞ a b} → _≡_ {A = Stack ∞ a b} (E ++ ε) E

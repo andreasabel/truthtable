@@ -26,7 +26,7 @@ latex=latex
 pdflatex=xelatex
 bibliography=medium.bib
 
-files=lipics-v2019.cls Makefile \
+files=lipics.cls Makefile \
   cc-by.pdf lipics-logo-bw.pdf orcid.pdf \
   SK-Bool-ortho.lagda.tex \
   latex/agda.sty \

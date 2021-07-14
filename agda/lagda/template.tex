@@ -50,6 +50,11 @@
 \newcommand{\heading}[1]{\section{#1}}
 \fi
 
+\ifdefined\subheading
+\else
+\newcommand{\subheading}[1]{\subsection{#1}}
+\fi
+
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1ex}
 
